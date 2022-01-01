@@ -50,4 +50,12 @@
 			<change>Code cleanups and refactoring</change>
 		</changelog>
 	</update>
+	<update version="3.2.0.1">
+		<files>
+			<file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+		</files>
+		<changelog>
+			<change>Added some checks to prevent extra ticks being accounted into time</change>
+		</changelog>
+	</update>
 </updates>
