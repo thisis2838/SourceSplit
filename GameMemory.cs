@@ -69,8 +69,6 @@ namespace LiveSplit.SourceSplit
         private IntPtr _custTimeCountPtr;
         private Detour _custTimeInjection;
 
-        private int _ticksOffset;
-
         public GameState _state;
 
         // TODO: match tickrate as closely as possible without going over
@@ -1032,17 +1030,18 @@ namespace LiveSplit.SourceSplit
             if (state.SignOnState.Current != state.SignOnState.Old)
                 Debug.WriteLine("SignOnState changed to " + state.SignOnState.Current);
 
-            if (state.ServerState.Current == ServerState.Dead)
-                this.SendMiscTimeEvent(_custTimeCountWatcher.Current - _custTimeCountWatcher.Old, MiscTimeType.ClientDisconnectTime);
 
             // if player is fully in game
             if (state.SignOnState.Current == SignOnState.Full && state.HostState.Current == HostState.Run)
             {
                 // note: seems to be slow sometimes. ~3ms
                 
-                if (state.ServerState.Current == ServerState.Paused)
-                    this.SendMiscTimeEvent(_custTimeCountWatcher.Current - _custTimeCountWatcher.Old, MiscTimeType.PauseTime);
-                else this.SendSessionTimeUpdateEvent(_custTimeCountWatcher.Current - _custTimeCountWatcher.Old);
+                if (state.TickCount > 0)
+                {
+                    if (state.ServerState.Current == ServerState.Paused)
+                        this.SendMiscTimeEvent(_custTimeCountWatcher.Current - _custTimeCountWatcher.Old, MiscTimeType.PauseTime);
+                    else this.SendSessionTimeUpdateEvent(_custTimeCountWatcher.Current - _custTimeCountWatcher.Old);
+                }
 
                 // first tick when player is fully in game
                 if (state.SignOnState.Current != state.SignOnState.Old)
@@ -1071,10 +1070,10 @@ namespace LiveSplit.SourceSplit
             {
                 if (state.HostState.Old == HostState.Run)
                 {
-                    _ticksOffset = 0;
-
                     // the map changed or a quicksave was loaded
                     Debug.WriteLine("session ended");
+
+                    state.TickBase = -1;
 
                     // the map changed or a save was loaded
                     this.SendSessionEndedEvent();
@@ -1140,6 +1139,10 @@ namespace LiveSplit.SourceSplit
                 if (state.GameSupport != null)
                     state.QueueOnNextSessionEnd = GameSupportResult.DoNothing;
             }
+
+
+            if (state.ServerState.Current == ServerState.Dead && state.HostState.Current == HostState.Run)
+                this.SendMiscTimeEvent(_custTimeCountWatcher.Current - _custTimeCountWatcher.Old, MiscTimeType.ClientDisconnectTime);
         }
 
         void HandleGameSupportResult(GameSupportResult result, GameState state)

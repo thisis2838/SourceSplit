@@ -467,7 +467,7 @@ namespace LiveSplit.SourceSplit
                         return;
                     break;
                 case MiscTimeType.ClientDisconnectTime:
-                    if (this.GameTimingMethod != GameTimingMethod.AllEngineTicks && this.GameTimingMethod != GameTimingMethod.EngineTicksWithPauses)
+                    if (this.GameTimingMethod != GameTimingMethod.AllEngineTicks)
                         return;
                     break;
                 case MiscTimeType.EndPause:
