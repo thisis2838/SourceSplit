@@ -131,12 +131,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
             else if (_ebEndCommand.BValue && state.CurrentMap.ToLower() == _ebEndMap)
             {
-                if (state.PlayerViewEntityIndex == _ebCamIndex && state.PrevPlayerViewEntityIndex == 1)
+                if (state.PlayerViewEntityIndex.Current == _ebCamIndex && state.PlayerViewEntityIndex.Old == 1)
                     return DefaultEnd("bms eb end");
             }
             else if ((_xenStartCommand.BValue || _xenSplitCommand.BValue) && state.CurrentMap.ToLower() == _xenStartMap)
             {
-                if (state.PlayerViewEntityIndex == 1 && state.PrevPlayerViewEntityIndex == _xenCamIndex)
+                if (state.PlayerViewEntityIndex.Current == 1 && state.PlayerViewEntityIndex.Old == _xenCamIndex)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("bms xen start");

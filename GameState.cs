@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using LiveSplit.ComponentUtil;
 using LiveSplit.SourceSplit.GameSpecific;
 using LiveSplit.SourceSplit.Extensions;
+using LiveSplit.SourceSplit.Utils;
 
 namespace LiveSplit.SourceSplit
 {
@@ -21,34 +22,24 @@ namespace LiveSplit.SourceSplit
         public Process GameProcess;
         public GameOffsets GameOffsets;
 
-        public HostState HostState;
-        public HostState PrevHostState;
-
-        public SignOnState SignOnState;
-        public SignOnState PrevSignOnState;
-
-        public ServerState ServerState;
-        public ServerState PrevServerState;
+        public ValueWatcher<HostState> HostState;
+        public ValueWatcher<SignOnState> SignOnState;
+        public ValueWatcher<ServerState> ServerState;
 
         public string CurrentMap;
         public string GameDir;
 
         public float IntervalPerTick;
-        public int RawTickCount;
+        public ValueWatcher<int> RawTickCount;
         public float FrameTime;
-        public int PrevRawTickCount;
         public int TickBase;
         public int TickCount;
         public float TickTime;
 
-        public FL PlayerFlags;
-        public FL PrevPlayerFlags;
-        public Vector3f PlayerPosition;
-        public Vector3f PrevPlayerPosition;
-        public int PlayerViewEntityIndex;
-        public int PrevPlayerViewEntityIndex;
-        public int PlayerParentEntityHandle;
-        public int PrevPlayerParentEntityHandle;
+        public ValueWatcher<FL> PlayerFlags;
+        public ValueWatcher<Vector3f> PlayerPosition;
+        public ValueWatcher<int> PlayerViewEntityIndex;
+        public ValueWatcher<int> PlayerParentEntityHandle;
 
         public CEntInfoV2 PlayerEntInfo;
         public GameSupport GameSupport;
@@ -63,6 +54,15 @@ namespace LiveSplit.SourceSplit
         {
             this.GameProcess = game;
             this.GameOffsets = offsets;
+
+            RawTickCount = new ValueWatcher<int>(0);
+            PlayerViewEntityIndex = new ValueWatcher<int>(0);
+            PlayerFlags = new ValueWatcher<FL>(new FL());
+            PlayerPosition = new ValueWatcher<Vector3f>(new Vector3f());
+            PlayerParentEntityHandle = new ValueWatcher<int>(0);
+            HostState = new ValueWatcher<HostState>(SourceSplit.HostState.NewGame);
+            SignOnState = new ValueWatcher<SignOnState>(SourceSplit.SignOnState.None);
+            ServerState = new ValueWatcher<ServerState>(SourceSplit.ServerState.Dead);
         }
 
         /// <summary>
@@ -359,17 +359,17 @@ namespace LiveSplit.SourceSplit
             if (epsilon == 0f)
             {
                 if (checkBefore)
-                    return RawTickCount * IntervalPerTick >= splitTime
-                        && PrevRawTickCount * IntervalPerTick < splitTime;
+                    return RawTickCount.Current * IntervalPerTick >= splitTime
+                        && RawTickCount.Old * IntervalPerTick < splitTime;
 
-                return RawTickCount * IntervalPerTick >= splitTime;
+                return RawTickCount.Current * IntervalPerTick >= splitTime;
             }
             else
             {
                 if (checkBefore)
-                    return Math.Abs(splitTime - RawTickCount * IntervalPerTick) <= epsilon &&
-                        Math.Abs(splitTime - PrevRawTickCount * IntervalPerTick) >= epsilon;
-                return Math.Abs(splitTime - RawTickCount * IntervalPerTick) <= epsilon;
+                    return Math.Abs(splitTime - RawTickCount.Current * IntervalPerTick) <= epsilon &&
+                        Math.Abs(splitTime - RawTickCount.Old * IntervalPerTick) >= epsilon;
+                return Math.Abs(splitTime - RawTickCount.Current * IntervalPerTick) <= epsilon;
             }
         }
 

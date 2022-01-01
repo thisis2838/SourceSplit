@@ -19,7 +19,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public override void OnGenericUpdate(GameState state)
         {
-            if (IsLastMap && state.HostState == HostState.GameShutdown)
+            if (IsLastMap && state.HostState.Current == HostState.GameShutdown)
                 OnUpdate(state);
         }
 
@@ -175,7 +175,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 return GameSupportResult.DoNothing;
 
             // todo: probably should use the helicopter's position?
-            if (IsLastMap && state.PlayerPosition.Distance(_endSector) <= 300f)
+            if (IsLastMap && state.PlayerPosition.Current.Distance(_endSector) <= 300f)
             {
                 float splitTime = state.FindOutputFireTime("game_end", 10);
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
@@ -207,7 +207,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             if (_onceFlag)
                 return GameSupportResult.DoNothing;
 
-            if (IsLastMap && state.PlayerViewEntityIndex != GameState.ENT_INDEX_PLAYER)
+            if (IsLastMap && state.PlayerViewEntityIndex.Current != GameState.ENT_INDEX_PLAYER)
             {
                 float splitTime = state.FindOutputFireTime("clientcommand", 8);
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
@@ -442,8 +442,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsLastMap && _endCameraIndex != -1)
             {
-                if (state.PrevPlayerViewEntityIndex == 1 &&
-                    state.PlayerViewEntityIndex == _endCameraIndex)
+                if (state.PlayerViewEntityIndex.Old == 1 &&
+                    state.PlayerViewEntityIndex.Current == _endCameraIndex)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("school_adventures end");

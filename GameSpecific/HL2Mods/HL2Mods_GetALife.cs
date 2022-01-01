@@ -44,7 +44,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsFirstMap)
             {
-                if (state.PlayerViewEntityIndex == 1 && state.PrevPlayerViewEntityIndex == _startCamIndex)
+                if (state.PlayerViewEntityIndex.Current == 1 && state.PlayerViewEntityIndex.Old == _startCamIndex)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("get a life start");
@@ -53,7 +53,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
             else if (this.IsLastMap)
             {
-                if (state.PrevPlayerViewEntityIndex == 1 && state.PlayerViewEntityIndex == _endCamIndex)
+                if (state.PlayerViewEntityIndex.Old == 1 && state.PlayerViewEntityIndex.Current == _endCamIndex)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("get a life end");

@@ -39,7 +39,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsFirstMap)
             {
-                if (state.PrevPlayerViewEntityIndex == _camIndex && state.PlayerViewEntityIndex == 1)
+                if (state.PlayerViewEntityIndex.Old == _camIndex && state.PlayerViewEntityIndex.Current == 1)
                 {
                     Debug.WriteLine("up start");
                     _onceFlag = true;
@@ -48,7 +48,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
             else if (this.IsLastMap)
             {
-                if (!state.PrevPlayerFlags.HasFlag(FL.FROZEN) && state.PlayerFlags.HasFlag(FL.FROZEN))
+                if (!state.PlayerFlags.Old.HasFlag(FL.FROZEN) && state.PlayerFlags.Current.HasFlag(FL.FROZEN))
                 {
                     Debug.WriteLine("up end");
                     _onceFlag = true;

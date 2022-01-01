@@ -47,7 +47,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsFirstMap)
             {
-                if (state.PlayerViewEntityIndex == 1 && state.PrevPlayerViewEntityIndex == _camIndex)
+                if (state.PlayerViewEntityIndex.Current == 1 && state.PlayerViewEntityIndex.Old == _camIndex)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("deeper down start");

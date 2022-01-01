@@ -38,8 +38,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
             // so lets fire onsessionstart then
             if (state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
-                if (!state.PlayerFlags.HasFlag(_dead) &&
-                    state.PrevPlayerFlags.HasFlag(_dead))
+                if (!state.PlayerFlags.Current.HasFlag(_dead) &&
+                    state.PlayerFlags.Old.HasFlag(_dead))
                 {
                     this.OnSessionStartFull(state);
                     Debug.WriteLine("synergy session start");

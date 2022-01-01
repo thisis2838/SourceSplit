@@ -72,7 +72,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
             else if (this.IsLastMap)
             {
-                if (state.PrevPlayerViewEntityIndex == 1 && state.PlayerViewEntityIndex == _finalCamIndex)
+                if (state.PlayerViewEntityIndex.Old == 1 && state.PlayerViewEntityIndex.Current == _finalCamIndex)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("hl2 survivor end");

@@ -91,12 +91,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
             if (_onceFlag)
                 return GameSupportResult.DoNothing;
 
-            if (state.CurrentMap.ToLower() == "a0c0p1" && state.PlayerPosition.DistanceXY(_startPos) <= 3f)
+            if (state.CurrentMap.ToLower() == "a0c0p1" && state.PlayerPosition.Current.DistanceXY(_startPos) <= 3f)
             {
                 bool ifIntroNotDeleted = File.Exists(state.GameProcess.ReadString(state.GameOffsets.GameDirPtr, 255) + "/media/a0b0c0s0.bik");
                 if (_tutResetFlag && 
                     (ifIntroNotDeleted && _isInCutscene.Current - _isInCutscene.Old == -1) ^ 
-                    (!ifIntroNotDeleted && !_resetFlag && state.TickCount <= 1 && state.RawTickCount <= 150))
+                    (!ifIntroNotDeleted && !_resetFlag && state.TickCount <= 1 && state.RawTickCount.Current <= 150))
                 {
                     Debug.WriteLine("hdtf start");
                     _onceFlag = true;

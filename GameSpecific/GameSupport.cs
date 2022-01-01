@@ -145,24 +145,24 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 return GameSupportResult.DoNothing;
 
             if (this.AutoStartType == AutoStart.Unfrozen
-                && !state.PlayerFlags.HasFlag(FL.FROZEN)
-                && state.PrevPlayerFlags.HasFlag(FL.FROZEN))
+                && !state.PlayerFlags.Current.HasFlag(FL.FROZEN)
+                && state.PlayerFlags.Old.HasFlag(FL.FROZEN))
             {
                 Debug.WriteLine("FL_FROZEN removed from player");
                 _onceFlag = true;
                 return GameSupportResult.PlayerGainedControl;
             }
             else if (this.AutoStartType == AutoStart.ViewEntityChanged
-                && state.PrevPlayerViewEntityIndex != GameState.ENT_INDEX_PLAYER
-                && state.PlayerViewEntityIndex == GameState.ENT_INDEX_PLAYER)
+                && state.PlayerViewEntityIndex.Old != GameState.ENT_INDEX_PLAYER
+                && state.PlayerViewEntityIndex.Current == GameState.ENT_INDEX_PLAYER)
             {
                 Debug.WriteLine("view entity changed to player");
                 _onceFlag = true;
                 return GameSupportResult.PlayerGainedControl;
             }
             else if (this.AutoStartType == AutoStart.ParentEntityChanged
-                && state.PrevPlayerParentEntityHandle != -1
-                && state.PlayerParentEntityHandle == -1)
+                && state.PlayerParentEntityHandle.Old != -1
+                && state.PlayerParentEntityHandle.Current == -1)
             {
                 Debug.WriteLine("player no longer parented");
                 _onceFlag = true;

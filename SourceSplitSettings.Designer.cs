@@ -44,6 +44,7 @@
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.lbMapWhitelist = new LiveSplit.SourceSplit.EditableListBox();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.chkHoldUntilPause = new System.Windows.Forms.CheckBox();
             this.tabCtrlMaster = new System.Windows.Forms.TabControl();
             this.tabPgAutoStartReset = new System.Windows.Forms.TabPage();
             this.tlpAutoStartEndReset = new System.Windows.Forms.TableLayoutPanel();
@@ -71,6 +72,7 @@
             this.tlpTiming = new System.Windows.Forms.TableLayoutPanel();
             this.lblTimingMethod = new System.Windows.Forms.Label();
             this.tabPgMisc = new System.Windows.Forms.TabPage();
+            this.gTimerBehavior = new System.Windows.Forms.GroupBox();
             this.gbMapTimes = new System.Windows.Forms.GroupBox();
             this.btnShowMapTimes = new System.Windows.Forms.Button();
             this.gbSecondTimer = new System.Windows.Forms.GroupBox();
@@ -96,6 +98,7 @@
             this.gbTiming.SuspendLayout();
             this.tlpTiming.SuspendLayout();
             this.tabPgMisc.SuspendLayout();
+            this.gTimerBehavior.SuspendLayout();
             this.gbMapTimes.SuspendLayout();
             this.gbSecondTimer.SuspendLayout();
             this.SuspendLayout();
@@ -114,7 +117,8 @@
             this.cmbTimingMethod.Items.AddRange(new object[] {
             "Automatic",
             "Engine Ticks",
-            "Engine Ticks with Pauses"});
+            "Engine Ticks with Pauses",
+            "All Engine Ticks"});
             this.cmbTimingMethod.Location = new System.Drawing.Point(59, 5);
             this.cmbTimingMethod.Name = "cmbTimingMethod";
             this.cmbTimingMethod.Size = new System.Drawing.Size(149, 21);
@@ -221,6 +225,18 @@
             this.dataGridViewTextBoxColumn1.HeaderText = "Column1";
             this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
             // 
+            // chkHoldUntilPause
+            // 
+            this.chkHoldUntilPause.AutoSize = true;
+            this.chkHoldUntilPause.Location = new System.Drawing.Point(6, 19);
+            this.chkHoldUntilPause.Name = "chkHoldUntilPause";
+            this.chkHoldUntilPause.Size = new System.Drawing.Size(184, 17);
+            this.chkHoldUntilPause.TabIndex = 27;
+            this.chkHoldUntilPause.Text = "Resume timer after initial unpause";
+            this.toolTip.SetToolTip(this.chkHoldUntilPause, "If the timer was started when the game is paused, pause the timer until the game " +
+        "unpauses.");
+            this.chkHoldUntilPause.UseVisualStyleBackColor = true;
+            // 
             // tabCtrlMaster
             // 
             this.tabCtrlMaster.Controls.Add(this.tabPgAutoStartReset);
@@ -252,7 +268,6 @@
             this.tlpAutoStartEndReset.Controls.Add(this.gbAutoStartEndReset, 0, 1);
             this.tlpAutoStartEndReset.Controls.Add(this.groupBox2, 1, 1);
             this.tlpAutoStartEndReset.Controls.Add(this.gbTiming, 0, 2);
-            this.tlpAutoStartEndReset.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlpAutoStartEndReset.Location = new System.Drawing.Point(3, 3);
             this.tlpAutoStartEndReset.Name = "tlpAutoStartEndReset";
             this.tlpAutoStartEndReset.RowCount = 4;
@@ -260,7 +275,7 @@
             this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 139F));
             this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 56F));
             this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 112F));
-            this.tlpAutoStartEndReset.Size = new System.Drawing.Size(447, 494);
+            this.tlpAutoStartEndReset.Size = new System.Drawing.Size(447, 437);
             this.tlpAutoStartEndReset.TabIndex = 14;
             // 
             // groupBox1
@@ -546,7 +561,6 @@
             // gbTiming
             // 
             this.gbTiming.Controls.Add(this.tlpTiming);
-            this.gbTiming.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gbTiming.Location = new System.Drawing.Point(3, 345);
             this.gbTiming.Name = "gbTiming";
             this.gbTiming.Size = new System.Drawing.Size(217, 50);
@@ -582,6 +596,7 @@
             // 
             // tabPgMisc
             // 
+            this.tabPgMisc.Controls.Add(this.gTimerBehavior);
             this.tabPgMisc.Controls.Add(this.gbMapTimes);
             this.tabPgMisc.Controls.Add(this.gbSecondTimer);
             this.tabPgMisc.Location = new System.Drawing.Point(4, 22);
@@ -591,6 +606,16 @@
             this.tabPgMisc.TabIndex = 1;
             this.tabPgMisc.Text = "Miscellaneous";
             this.tabPgMisc.UseVisualStyleBackColor = true;
+            // 
+            // gTimerBehavior
+            // 
+            this.gTimerBehavior.Controls.Add(this.chkHoldUntilPause);
+            this.gTimerBehavior.Location = new System.Drawing.Point(227, 63);
+            this.gTimerBehavior.Name = "gTimerBehavior";
+            this.gTimerBehavior.Size = new System.Drawing.Size(215, 42);
+            this.gTimerBehavior.TabIndex = 28;
+            this.gTimerBehavior.TabStop = false;
+            this.gTimerBehavior.Text = "Timer Behavior";
             // 
             // gbMapTimes
             // 
@@ -698,6 +723,8 @@
             this.tlpTiming.ResumeLayout(false);
             this.tlpTiming.PerformLayout();
             this.tabPgMisc.ResumeLayout(false);
+            this.gTimerBehavior.ResumeLayout(false);
+            this.gTimerBehavior.PerformLayout();
             this.gbMapTimes.ResumeLayout(false);
             this.gbSecondTimer.ResumeLayout(false);
             this.gbSecondTimer.PerformLayout();
@@ -746,5 +773,7 @@
         private System.Windows.Forms.CheckBox chkShowAlt;
         private System.Windows.Forms.CheckBox chkShowTickCount;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.GroupBox gTimerBehavior;
+        private System.Windows.Forms.CheckBox chkHoldUntilPause;
     }
 }

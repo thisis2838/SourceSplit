@@ -11,6 +11,7 @@ using System.Linq;
 using System.Xml;
 using System.Windows.Forms;
 using LiveSplit.SourceSplit.GameSpecific;
+using static LiveSplit.SourceSplit.GameMemory;
 
 namespace LiveSplit.SourceSplit
 {
@@ -98,13 +99,12 @@ namespace LiveSplit.SourceSplit
         private int _totalTicks;
         private int _sessionTicksOffset;
         private int _tickOffset;
-        private DateTime? _gamePauseTime;
-        private int _gamePauseTick;
         private float _cumulativeTime;
         private GameTimingMethod _gameRecommendedTimingMethod;
 
-
         private bool _waitingForDelay;
+
+        private bool _holdingFirstPause = true;
 
         private string _currentMap = String.Empty;
         private int _splitCount;
@@ -120,6 +120,8 @@ namespace LiveSplit.SourceSplit
                         return GameTimingMethod.EngineTicks;
                     case GameTimingMethodSetting.EngineTicksWithPauses:
                         return GameTimingMethod.EngineTicksWithPauses;
+                    case GameTimingMethodSetting.AllEngineTicks:
+                        return GameTimingMethod.AllEngineTicks;
                     default:
                         return _gameRecommendedTimingMethod;
                 }
@@ -130,10 +132,7 @@ namespace LiveSplit.SourceSplit
         {
             get
             {
-                int pauseTime = (_gamePauseTime != null && this.GameTimingMethod == GameTimingMethod.EngineTicksWithPauses) ?
-                    _gamePauseTick + FakeTicks(_gamePauseTime.Value, DateTime.Now) : _sessionTicks;
-
-                float time = _cumulativeTime + (_totalTicks + pauseTime - _sessionTicksOffset) * _intervalPerTick;
+                float time = _cumulativeTime + (_totalTicks + _sessionTicks - _sessionTicksOffset) * _intervalPerTick;
                 return TimeSpan.FromTicks((long)(time * 1000 * TimeSpan.TicksPerMillisecond));
             }
         }
@@ -177,7 +176,7 @@ namespace LiveSplit.SourceSplit
             _splitOperations.Clear();
 
             _intervalPerTick = 0.015f; // will update these when attached to game
-            _gameRecommendedTimingMethod = GameTimingMethod.EngineTicks;
+            _gameRecommendedTimingMethod = GameTimingMethod.EngineTicksWithPauses;
 
             _gameMemory = new GameMemory(this.Settings);
             _gameMemory.OnSetTickRate += gameMemory_OnSetTickRate;
@@ -190,7 +189,7 @@ namespace LiveSplit.SourceSplit
             _gameMemory.OnSessionStarted += gameMemory_OnSessionStarted;
             _gameMemory.OnSessionEnded += gameMemory_OnSessionEnded;
             _gameMemory.OnNewGameStarted += gameMemory_OnNewGameStarted;
-            _gameMemory.OnGamePaused += gameMemory_OnGamePaused;
+            _gameMemory.OnMiscTime += gameMemory_OnMiscTime;
             _gameMemory.StartReading();
         }
 
@@ -218,7 +217,6 @@ namespace LiveSplit.SourceSplit
 
         public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode)
         {
-
             // hack to prevent flicker, doesn't actually pause anything
             state.IsGameTimePaused = true;
 
@@ -299,6 +297,8 @@ namespace LiveSplit.SourceSplit
 
         void state_OnStart(object sender, EventArgs e)
         {
+            // assume we're holding pause
+            _holdingFirstPause = Settings.HoldUntilPause;
 
             _cumulativeTime = 0;
             _timer.InitializeGameTime();
@@ -307,7 +307,6 @@ namespace LiveSplit.SourceSplit
             MapTimesForm.Instance.Reset();
             _splitCount = 0;
             _totalMapTicks = 0;
-            _gamePauseTime = null;
 
             _gameMemory._state?.GameSupport?.OnTimerResetFull(true);
 
@@ -383,19 +382,14 @@ namespace LiveSplit.SourceSplit
         // called when player is fully in game
         void gameMemory_OnSessionTimeUpdate(object sender, SessionTicksUpdateEventArgs e)
         {
-            _sessionTicks = e.SessionTicks;
+            _holdingFirstPause = false;
+            _sessionTicks += e.TickDifference;
         }
 
         // player is no longer fully in the game
         void gameMemory_OnSessionEnded(object sender, EventArgs e)
         {
             Debug.WriteLine("session ended, total time was " + TimeSpan.FromSeconds((_sessionTicks - _sessionTicksOffset) * _intervalPerTick));
-
-            if (_gamePauseTime != null && this.GameTimingMethod == GameTimingMethod.EngineTicksWithPauses)
-            {
-                _sessionTicksOffset -= FakeTicks(_gamePauseTime.Value, DateTime.Now);
-                _gamePauseTime = null;
-            }
 
             // add up total time and reset session time
             _totalTicks += _sessionTicks - _sessionTicksOffset;
@@ -463,30 +457,25 @@ namespace LiveSplit.SourceSplit
             _timer.Reset();
         }
 
-        void gameMemory_OnGamePaused(object sender, GamePausedEventArgs e)
+        void gameMemory_OnMiscTime(object sender, MiscTimeEventArgs e)
         {
-            if (this.GameTimingMethod != GameTimingMethod.EngineTicksWithPauses)
-                return;
-
-            if (e.Paused)
+            switch (e.Type)
             {
-                _gamePauseTime = DateTime.Now;
-                _gamePauseTick = _sessionTicks;
+                case MiscTimeType.PauseTime:
+                    if ((this.GameTimingMethod != GameTimingMethod.AllEngineTicks && this.GameTimingMethod != GameTimingMethod.EngineTicksWithPauses)
+                        || _holdingFirstPause)
+                        return;
+                    break;
+                case MiscTimeType.ClientDisconnectTime:
+                    if (this.GameTimingMethod != GameTimingMethod.AllEngineTicks && this.GameTimingMethod != GameTimingMethod.EngineTicksWithPauses)
+                        return;
+                    break;
+                case MiscTimeType.EndPause:
+                    _holdingFirstPause = false;
+                    break;
             }
-            else
-            {
-                if (_gamePauseTime != null)
-                {
-                    Debug.WriteLine("pause done, adding " + TimeSpan.FromSeconds((DateTime.Now - _gamePauseTime.Value).TotalSeconds));
-                    _sessionTicksOffset -= FakeTicks(_gamePauseTime.Value, DateTime.Now);
-                }
-                _gamePauseTime = null;
-            }
-        }
 
-        int FakeTicks(DateTime start, DateTime end)
-        {
-            return (int)((end - start).TotalSeconds / _intervalPerTick);
+            _totalTicks += e.TickDifference;
         }
 
         void AutoSplit(string map)

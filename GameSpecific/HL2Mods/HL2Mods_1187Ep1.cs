@@ -91,7 +91,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsFirstMap)
             {
-                if (state.PrevPlayerViewEntityIndex == _startCamIndex && state.PlayerViewEntityIndex == 1)
+                if (state.PlayerViewEntityIndex.Old == _startCamIndex && state.PlayerViewEntityIndex.Current == 1)
                 {
                     Debug.WriteLine("1187ep1 start");
                     _onceFlag = true;

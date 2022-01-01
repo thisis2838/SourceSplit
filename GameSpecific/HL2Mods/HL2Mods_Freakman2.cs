@@ -61,7 +61,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             else if (this.IsLastMap && _camIndex != -1)
             {
-                if (state.PrevPlayerViewEntityIndex != _camIndex && state.PlayerViewEntityIndex == _camIndex)
+                if (state.PlayerViewEntityIndex.Old != _camIndex && state.PlayerViewEntityIndex.Current == _camIndex)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("freakman2 end");

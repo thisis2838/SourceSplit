@@ -47,7 +47,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsFirstMap)
             {
-                if (state.PlayerViewEntityIndex == 1 && state.PrevPlayerViewEntityIndex == _startCamIndex)
+                if (state.PlayerViewEntityIndex.Current == 1 && state.PlayerViewEntityIndex.Old == _startCamIndex)
                 {
                     Debug.WriteLine("prospekt start");
                     _onceFlag = true;
@@ -56,7 +56,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
             else if (IsLastMap)
             {
-                if (state.PlayerViewEntityIndex == _endCamIndex && state.PrevPlayerViewEntityIndex == 1)
+                if (state.PlayerViewEntityIndex.Current == _endCamIndex && state.PlayerViewEntityIndex.Old == 1)
                 {
                     Debug.WriteLine("prospekt end");
                     _onceFlag = false;

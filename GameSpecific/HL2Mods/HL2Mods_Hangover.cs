@@ -40,8 +40,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsFirstMap)
             {
-                if (state.PrevPlayerViewEntityIndex == _startCamIndex &&
-                    state. PlayerViewEntityIndex == 1)
+                if (state.PlayerViewEntityIndex.Old == _startCamIndex &&
+                    state.PlayerViewEntityIndex.Current == 1)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("hangover start");

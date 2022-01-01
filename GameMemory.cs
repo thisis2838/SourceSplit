@@ -9,6 +9,8 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using LiveSplit.ComponentUtil;
 using LiveSplit.SourceSplit.GameSpecific;
+using LiveSplit.SourceSplit.Extensions;
+using LiveSplit.SourceSplit.Utils;
 
 namespace LiveSplit.SourceSplit
 {
@@ -27,7 +29,7 @@ namespace LiveSplit.SourceSplit
         public event EventHandler<PlayerControlChangedEventArgs> ManualSplit;
         public event EventHandler<MapChangedEventArgs> OnMapChanged;
         public event EventHandler<SessionStartedEventArgs> OnSessionStarted;
-        public event EventHandler<GamePausedEventArgs> OnGamePaused;
+        public event EventHandler<MiscTimeEventArgs> OnMiscTime;
         public event EventHandler OnSessionEnded;
         public event EventHandler OnNewGameStarted;
 
@@ -38,6 +40,7 @@ namespace LiveSplit.SourceSplit
         private SigScanTarget _curTimeTarget;
         private SigScanTarget _signOnStateTarget1;
         private SigScanTarget _signOnStateTarget2;
+        private SigScanTarget _signOnStateTarget3;
         private SigScanTarget _curMapTarget;
         private SigScanTarget _globalEntityListTarget;
         private SigScanTarget _gameDirTarget;
@@ -62,6 +65,12 @@ namespace LiveSplit.SourceSplit
 
         private SourceSplitSettings _settings;
 
+        private ValueWatcher<int> _custTimeCountWatcher;
+        private IntPtr _custTimeCountPtr;
+        private Detour _custTimeInjection;
+
+        private int _ticksOffset;
+
         public GameState _state;
 
         // TODO: match tickrate as closely as possible without going over
@@ -73,6 +82,7 @@ namespace LiveSplit.SourceSplit
         {
             _settings = settings;
 
+            #region SIGNATURES
             // detect game offsets in a game/version-independent way by scanning for code signatures
 
             // TODO: refine hl2 2014 signatures once an update after the may 29th one is released
@@ -253,6 +263,15 @@ namespace LiveSplit.SourceSplit
                 "C3",                      // retn
                 "83 3D ?? ?? ?? ?? 02",    // cmp     CBaseClientState__m_nSignonState, 2
                 "B8 ?? ?? ?? ??");         // mov     eax, offset MultiByteStr
+            // orange box and older (and bms retail)
+            // \x80\x3d....\x00\x74\x06\xb8....\xc3\x83\x3d(....)\x02\xb8
+            _signOnStateTarget1.AddSignature(17,
+                "80 3D ?? ?? ?? ?? 00",    // cmp     byte_698EE114, 0
+                "74 06",                   // jz      short loc_6936C8FF
+                "B8 ?? ?? ?? ??",          // mov     eax, offset aDedicatedServe ; "Dedicated Server"
+                "C3",                      // retn
+                "83 3D ?? ?? ?? ?? 02",    // cmp     CBaseClientState__m_nSignonState, 2
+                "B8 ?? ?? ?? ??");         // mov     eax, offset MultiByteStr
 
             // source 2003 leak
             // \xA1\x2A\x2A\x2A\x2A\x85\xC0\x75\x2A\xB8\x2A\x2A\x2A\x2A
@@ -261,6 +280,24 @@ namespace LiveSplit.SourceSplit
                 "85 C0",                   // TEST    EAX,EAX
                 "75 ??",                   // JNZ     0x2001492f
                 "B8 ?? ?? ?? ??");         // MOV     EAX,0x20193f74
+
+
+            _signOnStateTarget3 = new SigScanTarget("Dedicated Server\0".ConvertToHex());
+            _signOnStateTarget3.OnFound = (proc, scanner, ptr) =>
+            {
+                string ptrByteString = ptr.GetByteString();
+
+                SigScanTarget newTarg = new SigScanTarget($"B8 {ptrByteString}");
+                IntPtr insc = scanner.Scan(newTarg);
+                if (insc == IntPtr.Zero)
+                    return insc;
+
+                SignatureScanner scanner2 = new SignatureScanner(proc, insc, 40);
+                newTarg = new SigScanTarget(2, "83 3D ?? ?? ?? ?? 02");
+                newTarg.OnFound = (p, s, pt) => 
+                    p.ReadPointer(pt);
+                return scanner2.Scan(newTarg);
+            };
 
             // CBaseClientState::m_nSignOnState
             _signOnStateTarget2 = new SigScanTarget();
@@ -403,14 +440,12 @@ namespace LiveSplit.SourceSplit
                "50",                        // PUSH EAX
                "E8 ?? ?? ?? ??",            // CALL FUN_2211c300
                "D9 46 ??");                 // FLD  DWORD PTR [ESI + 0xC]
+            #endregion
         }
-
-#if DEBUG
         ~GameMemory()
         {
             Debug.WriteLine("GameMemory finalizer");
         }
-#endif
         public void StartReading()
         {
             if (_thread != null && _thread.Status == TaskStatus.Running)
@@ -427,6 +462,8 @@ namespace LiveSplit.SourceSplit
         {
             if (_cancelSource == null || _thread == null || _thread.Status != TaskStatus.Running)
                 return;
+
+            _custTimeInjection?.Restore();
 
             _cancelSource.Cancel();
             _thread.Wait();
@@ -511,15 +548,16 @@ namespace LiveSplit.SourceSplit
             if (engine == null || server == null)
                 return false;
 
-            // required engine stuff
-            var scanner = new SignatureScanner(p, engine.BaseAddress, engine.ModuleMemorySize);
-
             bool scanForPtr(ref IntPtr ptr, SigScanTarget target, SignatureScanner scanner, string ptrName, string sigName = " ")
             {
                 bool found = (ptr = scanner.Scan(target)) != IntPtr.Zero;
                 Debug.WriteLine($"{ptrName} = {(found ? $"0x{ptr.ToString("X")}" : "NOT FOUND")} through sig {sigName}");
                 return found;
             }
+
+            #region ENGINE
+            // required engine stuff
+            var scanner = new SignatureScanner(p, engine.BaseAddress, engine.ModuleMemorySize);
 
             if ((!scanForPtr(ref offsets.ServerStatePtr, _serverStateTarget, scanner, "CBaseServer::(server_state_t)m_State", "1")
                 && !scanForPtr(ref offsets.ServerStatePtr, _serverStateTarget2, scanner, "CBaseServer::(server_state_t)m_State", "2"))
@@ -530,16 +568,93 @@ namespace LiveSplit.SourceSplit
                 || !scanForPtr(ref offsets.CurMapPtr, _curMapTarget, scanner, "current map"))
                 return false;
 
-            if (!scanForPtr(ref offsets.SignOnStatePtr, _signOnStateTarget1, scanner, "CBaseClientState::m_nSignonState", "1")
+            if (!scanForPtr(ref offsets.SignOnStatePtr, _signOnStateTarget3, scanner, "CBaseClientState::m_nSignonState", "3")
+                && !scanForPtr(ref offsets.SignOnStatePtr, _signOnStateTarget1, scanner, "CBaseClientState::m_nSignonState", "1")
                 && !scanForPtr(ref offsets.SignOnStatePtr, _signOnStateTarget2, scanner, "CBaseClientState::m_nSignonState", "2"))
                 return false;
+
+            #region HOST_RUNFRAME TICK COUNT DETOUR
+            // find the beginning of _host_runframe
+            // find string pointer and reference
+            SigScanTarget _hrfStringTarg = new SigScanTarget("_Host_RunFrame (top):  _heapchk() != _HEAPOK\n".ConvertToHex() + "00");
+            IntPtr _hrfStringPtr = IntPtr.Zero;
+            if (!scanForPtr(ref _hrfStringPtr, _hrfStringTarg, scanner, "host_runframe string pointer")
+                || !scanForPtr(ref _hrfStringPtr, new SigScanTarget("68" + _hrfStringPtr.GetByteString()), scanner, "host_runframe string reference")
+                // then find the target jl of the update loop
+                || !scanForPtr(ref _hrfStringPtr, 
+                    new SigScanTarget("0F 8C ?? ?? ?? FF"), 
+                    new SignatureScanner(p, _hrfStringPtr, 0x700), 
+                    "host_runframe target jump"))
+                return false;
+
+            // we can't detour the jl directly due to weird performance issues so back track until we
+            // found our target cmp instruction
+
+            // find out where the jl goes to
+            IntPtr loopTo = _hrfStringPtr + p.ReadValue<int>(_hrfStringPtr + 0x2) + 0x6;
+            // find cmp instruction
+            int i = 0;
+            // should never be more than 15 bytes away...
+            for (i = 0; i < 15; i++)
+            {
+                byte curByte = p.ReadValue<byte>(_hrfStringPtr - i);
+                // we are cmp'ing 2 registeres normally, so use 0x39 and 0x3B
+                if (new byte[] { 0x39, 0x3B }.Contains(curByte))
+                {
+                    byte prev = p.ReadValue<byte>(_hrfStringPtr - i - 1);
+                    // ignore this byte if this is part of a mov
+                    if ((prev <= 0x8E && prev >= 0x89))
+                        continue;
+
+                    _hrfStringPtr -= i;
+                    Debug.WriteLine($"host_runframe target cmp at 0x{_hrfStringPtr.ToString("X")}");
+                    goto success;
+                }
+            }
+            return false;
+
+            success:
+            // allocate memory for our detour
+            IntPtr workSpace = p.AllocateMemory(0x100);
+            // bytes of the ptr to our custom tick count var
+            byte[] timePtrBytes = BitConverter.GetBytes(workSpace.ToInt32());
+            _custTimeInjection = new Detour(
+                p,
+                _hrfStringPtr,
+                workSpace + 0x8,
+                6 + i,
+                new byte[]
+                {
+                    // inc [tick count val]
+                    0xFF, 0x05, timePtrBytes[0], timePtrBytes[1], timePtrBytes[2], timePtrBytes[3],
+                },
+                true);
+            // because the detour just simply copies bytes over, we'll have to rewrite the jl instruction
+            // to correct the offset back to the start of the loop
+            // bytes of the ptr from the detoured jl to the start of the loop
+            byte[] loopToBytes = BitConverter.GetBytes((int)loopTo - (int)(workSpace + 0x8 + 0x6 + i + 0x6));
+            p.WriteBytes(workSpace + 0x8 + 6 + i, new byte[]
+                {
+                    0x0F, 0x8C, loopToBytes[0], loopToBytes[1], loopToBytes[2], loopToBytes[3],
+                });
+            // final memory layout should look like this:
+            // workspace + 0x0          [tick count val]
+            // workspace + 0x8          inc [tick count val]
+            // workspace + 0xE          (cmp and along with any other bytes in between that and the jl)
+            // workspace + 0xE + i      jl [loop start]
+            // workspace + 0xE + i + 6  jmp [loop end]
+            _custTimeCountPtr = workSpace;
+            _custTimeCountWatcher = new ValueWatcher<int>(0);
+            #endregion
 
             // get the game dir now to evaluate game-specific stuff
             GetGameDir(p, offsets);
 
             if (_isInfra)
                 _infraIsLoading = new MemoryWatcher<byte>(new DeepPointer(scanner.Scan(_infraIsLoadingTarget), 0x0));
+            #endregion
 
+            #region SERVER
             // required server stuff
             var serverScanner = new SignatureScanner(p, server.BaseAddress, server.ModuleMemorySize);
 
@@ -552,7 +667,9 @@ namespace LiveSplit.SourceSplit
             {
                 Debug.WriteLine("Event Queue ptr not found!");
             }
+            #endregion
 
+            #region CLIENT
             // optional client fade list
             ProcessModuleWow64Safe client = p.ModulesWow64Safe().FirstOrDefault(x => x.ModuleName.ToLower() == "client.dll");
             if (client != null)
@@ -583,7 +700,9 @@ namespace LiveSplit.SourceSplit
 
                 offsets.FadeListPtr = tmpfade;
             }
+            #endregion
 
+            #region OFFSETS
             // entity offsets
             if ( !GetBaseEntityMemberOffset("m_fFlags", p, serverScanner, out offsets.BaseEntityFlagsOffset)
                 || !GetBaseEntityMemberOffset("m_vecAbsOrigin", p, serverScanner, out offsets.BaseEntityAbsOriginOffset)
@@ -612,6 +731,7 @@ namespace LiveSplit.SourceSplit
             Debug.WriteLine("CBaseEntity::m_pParent offset = 0x" + offsets.BaseEntityParentHandleOffset.ToString("X"));
             Debug.WriteLine("CBasePlayer::m_hViewEntity offset = 0x" + offsets.BasePlayerViewEntity.ToString("X"));
             Debug.WriteLine("CEventQueue::m_Events ptr = 0x" + offsets.EventQueuePtr.ToString("X"));
+            #endregion
 
 #if DEBUG
             Debug.WriteLine("TryGetGameProcess took: " + sw.Elapsed);
@@ -627,13 +747,12 @@ namespace LiveSplit.SourceSplit
             offset = -1;
 
             IntPtr stringPtr = scanner.Scan(new SigScanTarget(0, Encoding.ASCII.GetBytes(member)));
+
             if (stringPtr == IntPtr.Zero)
                 return false;
 
-            var b = BitConverter.GetBytes(stringPtr.ToInt32());
-
             var target = new SigScanTarget(10,
-                $"C7 05 ?? ?? ?? ?? {b[0]:X02} {b[1]:X02} {b[2]:X02} {b[3]:X02}"); // mov     dword_15E2BF1C, offset aM_fflags ; "m_fFlags"
+                $"C7 05 ?? ?? ?? ?? {stringPtr.GetByteString()}"); // mov     dword_15E2BF1C, offset aM_fflags ; "m_fFlags"
             target.OnFound = (proc, s, ptr) => {
                 // this instruction is almost always directly after above one, but there are a few cases where it isn't
                 // so we have to scan down and find it
@@ -647,7 +766,7 @@ namespace LiveSplit.SourceSplit
                 // seen in Black Mesa Source (legacy version)
                 var target2 = new SigScanTarget(1,
                  "68 ?? ?? ?? ??",                                  // push    256
-                $"68 {b[0]:X02} {b[1]:X02} {b[2]:X02} {b[3]:X02}"); // push    offset aM_fflags ; "m_fFlags"
+                $"68 {stringPtr.GetByteString()}"); // push    offset aM_fflags ; "m_fFlags"
                 addr = scanner.Scan(target2);
 
                 if (addr == IntPtr.Zero)
@@ -715,7 +834,7 @@ namespace LiveSplit.SourceSplit
             forceExit = false;
 
             // if the game crashed, make sure session ends
-            if (state.HostState == HostState.Run)
+            if (state.HostState.Current == HostState.Run)
                 this.SendSessionEndedEvent();
         }
 
@@ -761,7 +880,7 @@ namespace LiveSplit.SourceSplit
                 return (HostState)hostState;
         }
 
-        SignOnState GetSignOnState(Process game, GameOffsets offsets)
+        private SignOnState GetSignOnState(Process game, GameOffsets offsets)
         {
             game.ReadValue(offsets.SignOnStatePtr, out int signOnState);
 
@@ -798,7 +917,7 @@ namespace LiveSplit.SourceSplit
             else return (SignOnState)signOnState;
         }
 
-        ServerState GetServerState(Process game, GameOffsets offsets)
+        private ServerState GetServerState(Process game, GameOffsets offsets)
         {
             game.ReadValue(offsets.ServerStatePtr, out int serverState);
 
@@ -820,32 +939,28 @@ namespace LiveSplit.SourceSplit
             GameOffsets offsets = state.GameOffsets;
 
             // update all the stuff that doesn't depend on the signon state
-            state.PrevRawTickCount = state.RawTickCount;
-            game.ReadValue(offsets.TickCountPtr, out state.RawTickCount);
+            state.RawTickCount.Current = game.ReadValue<int>(offsets.TickCountPtr);
             game.ReadValue(offsets.CurTimePtr + 0x4, out state.FrameTime);
             game.ReadValue(offsets.IntervalPerTickPtr, out state.IntervalPerTick);
 
-            state.PrevSignOnState = state.SignOnState;
-            state.SignOnState = GetSignOnState(game, offsets);
+            _custTimeCountWatcher.Current = state.GameProcess.ReadValue<int>(_custTimeCountPtr);
 
-            state.PrevHostState = state.HostState;
-            state.HostState = GetHostState(game, offsets);
-
-            state.PrevServerState = state.ServerState;
-            state.ServerState = GetServerState(game, offsets);
+            state.SignOnState.Current = GetSignOnState(game, offsets);
+            state.HostState.Current = GetHostState(game, offsets);
+            state.ServerState.Current = GetServerState(game, offsets);
 
             bool firstTick = false;
 
             // update the stuff that's only valid during signon state full
-            if (state.SignOnState == SignOnState.Full)
+            if (state.SignOnState.Current == SignOnState.Full)
             {
                 // if signon state just became full (where demos start timing from)
-                if (state.SignOnState != state.PrevSignOnState)
+                if (state.SignOnState.Current != state.SignOnState.Old)
                 {
                     firstTick = true;
 
                     // start rebasing from this tick
-                    state.TickBase = state.RawTickCount;
+                    state.TickBase = state.RawTickCount.Current;
                     Debug.WriteLine("rebasing ticks from " + state.TickBase);
 
                     // player was just spawned, get it's ptr
@@ -854,14 +969,16 @@ namespace LiveSplit.SourceSplit
                     // update map name
                     state.GameProcess.ReadString(state.GameOffsets.CurMapPtr, ReadStringType.ASCII, 64, out state.CurrentMap);
                 }
-                if ((IsSource2003 || _isInfra) && state.RawTickCount - state.TickBase < 0)
+                if (state.RawTickCount.Current - state.TickBase < 0)
                 {
-                    Debug.WriteLine("based ticks is wrong by " + (state.RawTickCount - state.TickBase) + " rebasing from " + state.TickBase);
-                    state.TickBase = state.RawTickCount;
+                    Debug.WriteLine("based ticks is wrong by " + (state.RawTickCount.Current - state.TickBase) + " rebasing from " + state.TickBase);
+                    state.TickBase = state.RawTickCount.Current;
                 }
 
                 // update time and rebase it against the first signon state full tick
-                state.TickCount = state.RawTickCount - state.TickBase;
+                if (state.RawTickCount.Current < state.RawTickCount.Old)
+                    Debug.WriteLine($"tick count undershot by {state.RawTickCount.Current - state.RawTickCount.Old}");
+                state.TickCount = state.RawTickCount.Current - state.TickBase;
                 state.TickTime = state.TickCount * state.IntervalPerTick;
                 TimedTraceListener.Instance.TickCount = state.TickCount;
 
@@ -870,48 +987,38 @@ namespace LiveSplit.SourceSplit
                 {
                     // flags
                     if (state.GameSupport.RequiredProperties.HasFlag(PlayerProperties.Flags))
-                    {
-                        state.PrevPlayerFlags = state.PlayerFlags;
-                        game.ReadValue(state.PlayerEntInfo.EntityPtr + offsets.BaseEntityFlagsOffset, out state.PlayerFlags);
-                    }
+                        state.PlayerFlags.Current = game.ReadValue<FL>(state.PlayerEntInfo.EntityPtr + offsets.BaseEntityFlagsOffset);
 
                     // position
                     if (state.GameSupport.RequiredProperties.HasFlag(PlayerProperties.Position))
-                    {
-                        state.PrevPlayerPosition = state.PlayerPosition;
-                        game.ReadValue(state.PlayerEntInfo.EntityPtr + offsets.BaseEntityAbsOriginOffset, out state.PlayerPosition);
-                    }
+                        state.PlayerPosition.Current = game.ReadValue<Vector3f>(state.PlayerEntInfo.EntityPtr + offsets.BaseEntityAbsOriginOffset);
 
                     // view entity
                     if (state.GameSupport.RequiredProperties.HasFlag(PlayerProperties.ViewEntity))
                     {
                         const int ENT_ENTRY_MASK = 0x7FF;
 
-                        state.PrevPlayerViewEntityIndex = state.PlayerViewEntityIndex;
                         int viewEntityHandle; // EHANDLE
                         game.ReadValue(state.PlayerEntInfo.EntityPtr + offsets.BasePlayerViewEntity, out viewEntityHandle);
-                        state.PlayerViewEntityIndex = viewEntityHandle == -1
+                        state.PlayerViewEntityIndex.Current = viewEntityHandle == -1
                             ? GameState.ENT_INDEX_PLAYER
                             : viewEntityHandle & ENT_ENTRY_MASK;
                     }
 
                     // parent entity
                     if (state.GameSupport.RequiredProperties.HasFlag(PlayerProperties.ParentEntity))
-                    {
-                        state.PrevPlayerParentEntityHandle = state.PlayerParentEntityHandle; // EHANDLE
-                        game.ReadValue(state.PlayerEntInfo.EntityPtr + offsets.BaseEntityParentHandleOffset, out state.PlayerParentEntityHandle);
-                    }
+                        state.PlayerParentEntityHandle.Current = game.ReadValue<int>(state.PlayerEntInfo.EntityPtr + offsets.BaseEntityParentHandleOffset);
 
                     // if it's the first tick, don't use stuff from the previous map
                     if (firstTick)
                     {
-                        state.PrevPlayerFlags = state.PlayerFlags;
-                        state.PrevPlayerPosition = state.PlayerPosition;
-                        state.PrevPlayerViewEntityIndex = state.PlayerViewEntityIndex;
-                        state.PrevPlayerParentEntityHandle = state.PlayerParentEntityHandle;
+                        state.PlayerFlags.Current = state.PlayerFlags.Old;
+                        state.PlayerPosition.Current = state.PlayerPosition.Old;
+                        state.PlayerViewEntityIndex.Current = state.PlayerViewEntityIndex.Old;
+                        state.PlayerParentEntityHandle.Current = state.PlayerParentEntityHandle.Old;
                     }
                 }
-            } // if (state.SignOnState == SignOnState.Full)
+            } // if (state.SignOnState.Current == SignOnState.Full)
         }
 
         void CheckGameState(GameState state)
@@ -922,17 +1029,23 @@ namespace LiveSplit.SourceSplit
                 this.SendSetTickRateEvent(state.IntervalPerTick);
             }
 
-            if (state.SignOnState != state.PrevSignOnState)
-                Debug.WriteLine("SignOnState changed to " + state.SignOnState);
+            if (state.SignOnState.Current != state.SignOnState.Old)
+                Debug.WriteLine("SignOnState changed to " + state.SignOnState.Current);
+
+            if (state.ServerState.Current == ServerState.Dead)
+                this.SendMiscTimeEvent(_custTimeCountWatcher.Current - _custTimeCountWatcher.Old, MiscTimeType.ClientDisconnectTime);
 
             // if player is fully in game
-            if (state.SignOnState == SignOnState.Full && state.HostState == HostState.Run)
+            if (state.SignOnState.Current == SignOnState.Full && state.HostState.Current == HostState.Run)
             {
                 // note: seems to be slow sometimes. ~3ms
-                this.SendSessionTimeUpdateEvent(state.TickCount);
+                
+                if (state.ServerState.Current == ServerState.Paused)
+                    this.SendMiscTimeEvent(_custTimeCountWatcher.Current - _custTimeCountWatcher.Old, MiscTimeType.PauseTime);
+                else this.SendSessionTimeUpdateEvent(_custTimeCountWatcher.Current - _custTimeCountWatcher.Old);
 
                 // first tick when player is fully in game
-                if (state.SignOnState != state.PrevSignOnState)
+                if (state.SignOnState.Current != state.SignOnState.Old)
                 {
                     Debug.WriteLine("session started");
                     this.SendSessionStartedEvent(state.CurrentMap);
@@ -940,10 +1053,10 @@ namespace LiveSplit.SourceSplit
                     state.GameSupport?.OnSessionStartFull(state);
                 }
 
-                if (state.ServerState == ServerState.Paused && state.PrevServerState == ServerState.Active)
-                    this.SendGamePausedEvent(true);
-                else if (state.ServerState == ServerState.Active && state.PrevServerState == ServerState.Paused)
-                    this.SendGamePausedEvent(false);
+                if (state.ServerState.ChangedTo(ServerState.Paused))
+                    this.SendMiscTimeEvent(0, MiscTimeType.StartPause);
+                if (state.ServerState.ChangedFrom(ServerState.Paused))
+                    this.SendMiscTimeEvent(0, MiscTimeType.EndPause);
 
                 if (state.GameSupport != null)
                     this.HandleGameSupportResult(state.GameSupport.OnUpdateFull(state), state);
@@ -954,17 +1067,19 @@ namespace LiveSplit.SourceSplit
 #endif
             }
 
-            if (state.HostState != state.PrevHostState)
+            if (state.HostState.Current != state.HostState.Old)
             {
-                if (state.PrevHostState == HostState.Run)
+                if (state.HostState.Old == HostState.Run)
                 {
+                    _ticksOffset = 0;
+
                     // the map changed or a quicksave was loaded
                     Debug.WriteLine("session ended");
 
                     // the map changed or a save was loaded
                     this.SendSessionEndedEvent();
 
-                    if (state.GameSupport != null && state.HostState == HostState.GameShutdown)
+                    if (state.GameSupport != null && state.HostState.Current == HostState.GameShutdown)
                     {
                         if (state.QueueOnNextSessionEnd == GameSupportResult.PlayerLostControl)
                             this.HandleGameSupportResult(GameSupportResult.PlayerLostControl, state);
@@ -983,12 +1098,12 @@ namespace LiveSplit.SourceSplit
                     state.GameSupport?.OnSessionEndFull(state);
                 }
 
-                Debug.WriteLine("host state changed to " + state.HostState);
+                Debug.WriteLine("host state changed to " + state.HostState.Current);
 
                 // HostState::m_levelName is changed much earlier than state.CurrentMap (CBaseServer::m_szMapName)
                 // reading HostStateLevelNamePtr is only valid during these states (not LoadGame!)
-                if (state.HostState == HostState.ChangeLevelSP || state.HostState == HostState.ChangeLevelMP
-                    || state.HostState == HostState.NewGame)
+                if (state.HostState.Current == HostState.ChangeLevelSP || state.HostState.Current == HostState.ChangeLevelMP
+                    || state.HostState.Current == HostState.NewGame)
                 {
                     string levelName;
                     state.GameProcess.ReadString(state.GameOffsets.HostStateLevelNamePtr, ReadStringType.ASCII, 256 - 1, out levelName);
@@ -997,7 +1112,7 @@ namespace LiveSplit.SourceSplit
                     // only for the beginner's guide, the "restart the level" option does a changelevel back to the currentmap rather than
                     // simply doing "restart"
                     // if the runner uses this option to reset at the first map then restart the timer
-                    if (state.HostState == HostState.NewGame || state.GameDir.ToLower() == "beginnersguide")
+                    if (state.HostState.Current == HostState.NewGame || state.GameDir.ToLower() == "beginnersguide")
                     {
                         if (state.GameSupport != null)
                         {
@@ -1046,7 +1161,18 @@ namespace LiveSplit.SourceSplit
             }
         }
 
+        #region UI THREAD FUNCTIONS
         // these functions are ugly but it means we don't have to worry about implicitly captured closures
+        public class MapChangedEventArgs : EventArgs
+        {
+            public string Map { get; private set; }
+            public string PrevMap { get; private set; }
+            public MapChangedEventArgs(string map, string prevMap)
+            {
+                this.Map = map;
+                this.PrevMap = prevMap;
+            }
+        }
         public void SendMapChangedEvent(string mapName, string prevMapName)
         {
             _uiThread.Post(d => {
@@ -1054,14 +1180,30 @@ namespace LiveSplit.SourceSplit
             }, null);
         }
 
-        public void SendSessionTimeUpdateEvent(int sessionTicks)
+        public class SessionTicksUpdateEventArgs : EventArgs
+        {
+            public int TickDifference { get; private set; }
+            public SessionTicksUpdateEventArgs(int tickDifference)
+            {
+                this.TickDifference = tickDifference;
+            }
+        }
+        public void SendSessionTimeUpdateEvent(int tickDifference)
         {
             // note: sometimes this takes a few ms
             _uiThread.Post(d => {
-                this.OnSessionTimeUpdate?.Invoke(this, new SessionTicksUpdateEventArgs(sessionTicks));
+                this.OnSessionTimeUpdate?.Invoke(this, new SessionTicksUpdateEventArgs(tickDifference));
             }, null);
         }
 
+        public class PlayerControlChangedEventArgs : EventArgs
+        {
+            public int TicksOffset { get; private set; }
+            public PlayerControlChangedEventArgs(int ticksOffset)
+            {
+                this.TicksOffset = ticksOffset;
+            }
+        }
         public void SendGainedControlEvent(int ticksOffset)
         {
             _uiThread.Post(d => {
@@ -1083,6 +1225,14 @@ namespace LiveSplit.SourceSplit
             }, null);
         }
 
+        public class SessionStartedEventArgs : EventArgs
+        {
+            public string Map { get; private set; }
+            public SessionStartedEventArgs(string map)
+            {
+                this.Map = map;
+            }
+        }
         public void SendSessionStartedEvent(string map)
         {
             _uiThread.Post(d => {
@@ -1104,39 +1254,73 @@ namespace LiveSplit.SourceSplit
             }, null);
         }
 
-        public void SendGamePausedEvent(bool paused)
+        public class MiscTimeEventArgs : EventArgs
+        {
+            public int TickDifference { get; private set; }
+            public MiscTimeType Type { get; private set; }
+            public MiscTimeEventArgs(int tickDiff, MiscTimeType type)
+            {
+                this.TickDifference = tickDiff;
+                this.Type = type;
+            }
+        }
+        public enum MiscTimeType
+        {
+            StartPause,
+            EndPause,
+            PauseTime,
+            ClientDisconnectTime
+        }
+        public void SendMiscTimeEvent(int tickDiff, MiscTimeType type)
         {
             _uiThread.Post(d => {
-                this.OnGamePaused?.Invoke(this, new GamePausedEventArgs(paused));
+                this.OnMiscTime?.Invoke(this, new MiscTimeEventArgs(tickDiff, type));
             }, null);
         }
-
+        public class SetTickRateEventArgs : EventArgs
+        {
+            public float IntervalPerTick { get; private set; }
+            public SetTickRateEventArgs(float intervalPerTick)
+            {
+                this.IntervalPerTick = intervalPerTick;
+            }
+        }
         public void SendSetTickRateEvent(float intervalPerTick)
         {
             _uiThread.Post(d => {
                 this.OnSetTickRate?.Invoke(this, new SetTickRateEventArgs(intervalPerTick));
             }, null);
         }
+        
 
+        public class SetTimingMethodEventArgs : EventArgs
+        {
+            public GameTimingMethod GameTimingMethod { get; private set; }
+            public SetTimingMethodEventArgs(GameTimingMethod gameTimingMethod)
+            {
+                this.GameTimingMethod = gameTimingMethod;
+            }
+        }
         public void SendSetTimingMethodEvent(GameTimingMethod gameTimingMethod)
         {
             _uiThread.Post(d => {
                 this.OnSetTimingMethod?.Invoke(this, new SetTimingMethodEventArgs(gameTimingMethod));
             }, null);
         }
+        #endregion
 
 #if DEBUG
         void DebugPlayerState(GameState state)
         {
-            if (state.PlayerFlags != state.PrevPlayerFlags)
+            if (state.PlayerFlags.Changed)
             {
                 string addedList = String.Empty;
                 string removedList = String.Empty;
                 foreach (FL flag in Enum.GetValues(typeof(FL)))
                 {
-                    if (state.PlayerFlags.HasFlag(flag) && !state.PrevPlayerFlags.HasFlag(flag))
+                    if (state.PlayerFlags.Current.HasFlag(flag) && !state.PlayerFlags.Old.HasFlag(flag))
                         addedList += Enum.GetName(typeof(FL), flag) + " ";
-                    else if (!state.PlayerFlags.HasFlag(flag) && state.PrevPlayerFlags.HasFlag(flag))
+                    else if (!state.PlayerFlags.Current.HasFlag(flag) && state.PlayerFlags.Old.HasFlag(flag))
                         removedList += Enum.GetName(typeof(FL), flag) + " ";
                 }
                 if (addedList.Length > 0)
@@ -1145,95 +1329,31 @@ namespace LiveSplit.SourceSplit
                     Debug.WriteLine("player flags removed: " + removedList);
             }
 
-            if (state.PlayerViewEntityIndex != state.PrevPlayerViewEntityIndex)
+            if (state.PlayerViewEntityIndex.Current != state.PlayerViewEntityIndex.Old)
             {
-                Debug.WriteLine("player view entity changed: " + state.PlayerViewEntityIndex);
+                Debug.WriteLine("player view entity changed: " + state.PlayerViewEntityIndex.Current);
             }
 
-            if (state.PlayerParentEntityHandle != state.PrevPlayerParentEntityHandle)
+            if (state.PlayerParentEntityHandle.Current != state.PlayerParentEntityHandle.Old)
             {
-                Debug.WriteLine("player parent entity changed: " + state.PlayerParentEntityHandle.ToString("X"));
+                Debug.WriteLine("player parent entity changed: " + state.PlayerParentEntityHandle.Current.ToString("X"));
             }
 
 #if false
-            if (!state.PlayerPosition.BitEquals(state.PrevPlayerPosition))
+            if (!state.PlayerPosition.Current.BitEquals(state.PlayerPosition.Old))
             {
-                Debug.WriteLine("player pos changed: " + state.PlayerParentEntityHandle);
+                Debug.WriteLine("player pos changed: " + state.PlayerParentEntityHandle.Current);
             }
 #endif
         }
 #endif
-    }
-
-    class MapChangedEventArgs : EventArgs
-    {
-        public string Map { get; private set; }
-        public string PrevMap { get; private set; }
-        public MapChangedEventArgs(string map, string prevMap)
-        {
-            this.Map = map;
-            this.PrevMap = prevMap;
-        }
-    }
-
-    class PlayerControlChangedEventArgs : EventArgs
-    {
-        public int TicksOffset { get; private set; }
-        public PlayerControlChangedEventArgs(int ticksOffset)
-        {
-            this.TicksOffset = ticksOffset;
-        }
-    }
-
-    class SessionTicksUpdateEventArgs : EventArgs
-    {
-        public int SessionTicks { get; private set; }
-        public SessionTicksUpdateEventArgs(int sessionTicks)
-        {
-            this.SessionTicks = sessionTicks;
-        }
-    }
-
-    class SessionStartedEventArgs : EventArgs
-    {
-        public string Map { get; private set; }
-        public SessionStartedEventArgs(string map)
-        {
-            this.Map = map;
-        }
-    }
-
-    class GamePausedEventArgs : EventArgs
-    {
-        public bool Paused { get; private set; }
-        public GamePausedEventArgs(bool paused)
-        {
-            this.Paused = paused;
-        }
-    }
-
-    class SetTickRateEventArgs : EventArgs
-    {
-        public float IntervalPerTick { get; private set; }
-        public SetTickRateEventArgs(float intervalPerTick)
-        {
-            this.IntervalPerTick = intervalPerTick;
-        }
-    }
-
-    class SetTimingMethodEventArgs : EventArgs
-    {
-        public GameTimingMethod GameTimingMethod { get; private set; }
-        public SetTimingMethodEventArgs(GameTimingMethod gameTimingMethod)
-        {
-            this.GameTimingMethod = gameTimingMethod;
-        }
     }
 
     public enum GameTimingMethod
     {
         EngineTicks,
         EngineTicksWithPauses,
+        AllEngineTicks
         //RealTimeWithoutLoads
     }
 

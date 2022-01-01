@@ -55,6 +55,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\Detour.cs" />
     <Compile Include="Utils\CustomCommand.cs" />
     <Compile Include="Extensions\NumericsExtensions.cs" />
     <Compile Include="Extensions\SignatureScannerExtensions.cs" />
@@ -150,6 +151,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\TryMany.cs" />
     <Compile Include="Utils\Util.cs" />
+    <Compile Include="Utils\ValueWatcher.cs" />
     <Compile Include="Utils\WinAPI.cs" />
   </ItemGroup>
   <ItemGroup>

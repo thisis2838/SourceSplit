@@ -50,8 +50,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 var newMote = state.GetEntInfoByIndex(_dustmoteIndex);
                 var newBrush = state.GetEntInfoByIndex(_blockBrushIndex);
 
-                if (state.PlayerPosition.DistanceXY(new Vector3f(7784.5f, 7284f, -15107f)) >= 2
-                    && state.PrevPlayerPosition.DistanceXY(new Vector3f(7784.5f, 7284f, -15107f)) < 2
+                if (state.PlayerPosition.Current.DistanceXY(new Vector3f(7784.5f, 7284f, -15107f)) >= 2
+                    && state.PlayerPosition.Old.DistanceXY(new Vector3f(7784.5f, 7284f, -15107f)) < 2
                     && newBrush.EntityPtr == IntPtr.Zero && !_resetFlag)
                 {
                     Debug.WriteLine("exp fuel start");

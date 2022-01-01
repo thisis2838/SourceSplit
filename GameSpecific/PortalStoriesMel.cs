@@ -29,7 +29,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 return GameSupportResult.DoNothing;
 
             // "OnPressed" "end_teleport Teleport 0 -1"
-            if (state.PlayerPosition.DistanceXY(_endPos) <= 1.0)
+            if (state.PlayerPosition.Current.DistanceXY(_endPos) <= 1.0)
             {
                 _onceFlag = true;
                 return GameSupportResult.PlayerLostControl;

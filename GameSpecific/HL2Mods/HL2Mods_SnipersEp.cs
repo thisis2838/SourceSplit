@@ -54,7 +54,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsFirstMap)
             {
-                if (state.PrevPlayerPosition.BitEqualsXY(_startPos) && !state.PlayerPosition.BitEqualsXY(_startPos) && !_resetFlag)
+                if (state.PlayerPosition.Old.BitEqualsXY(_startPos) && !state.PlayerPosition.Current.BitEqualsXY(_startPos) && !_resetFlag)
                 {
                     _resetFlag = true;
                     return GameSupportResult.PlayerGainedControl;

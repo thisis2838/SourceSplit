@@ -56,7 +56,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsFirstMap)
             {
-                if (state.PrevPlayerViewEntityIndex == _camIndex && state.PlayerViewEntityIndex == 1)
+                if (state.PlayerViewEntityIndex.Old == _camIndex && state.PlayerViewEntityIndex.Current == 1)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("kill the monk start");

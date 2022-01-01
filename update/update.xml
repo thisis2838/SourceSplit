@@ -39,4 +39,15 @@
 			<change>Minor fixes and changes to settings UI</change>
 		</changelog>
 	</update>
+	<update version="3.2.0">
+		<files>
+			<file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+		</files>
+		<changelog>
+			<change>Overhaul to timing methods to increase timing accuracies and fix issues related to pause spamming</change>
+			<change>Fixed double splitting in HL2 Survivor</change>
+			<change>Added an option to disable pausing timer when starting from game pause</change>
+			<change>Code cleanups and refactoring</change>
+		</changelog>
+	</update>
 </updates>

@@ -76,8 +76,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
             {
                 // "OnTrigger4" "cvehicle.hangar,EnterVehicle,,0,1"
 
-                if (state.PlayerParentEntityHandle != -1
-                    && state.PrevPlayerParentEntityHandle == -1)
+                if (state.PlayerParentEntityHandle.Current != -1
+                    && state.PlayerParentEntityHandle.Old == -1)
                 {
                     Debug.WriteLine("ep2 end");
                     _onceFlag = true;

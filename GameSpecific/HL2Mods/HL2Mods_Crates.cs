@@ -44,7 +44,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             if (this.IsFirstMap)
             {
                 _counterSkin.Update(state.GameProcess);
-                if (_counterSkin.Current == 10 && state.PlayerViewEntityIndex == _camIndex && state.PrevPlayerViewEntityIndex == 1)
+                if (_counterSkin.Current == 10 && state.PlayerViewEntityIndex.Current == _camIndex && state.PlayerViewEntityIndex.Old == 1)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("toomanycrates end");

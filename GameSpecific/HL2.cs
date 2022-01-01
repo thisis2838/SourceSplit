@@ -50,7 +50,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 // "OnTrigger" "point_teleport_destination,Teleport,,0.1,-1"
 
                 // first tick player is moveable and on the train
-                if (state.PlayerPosition.DistanceXY(_startPos) <= 1.0)
+                if (state.PlayerPosition.Current.DistanceXY(_startPos) <= 1.0)
                 {
                     Debug.WriteLine("hl2 start");
                     _onceFlag = true;

@@ -23,7 +23,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public override void OnGenericUpdate(GameState state)
         {
-            if (state.HostState == HostState.GameShutdown)
+            if (state.HostState.Current == HostState.GameShutdown)
                 this.OnUpdate(state);
         }
 

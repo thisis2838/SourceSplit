@@ -40,7 +40,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (_startCamIndex != -1)
             {
-                if (state.PlayerViewEntityIndex == 1 && state.PrevPlayerViewEntityIndex == _startCamIndex)
+                if (state.PlayerViewEntityIndex.Current == 1 && state.PlayerViewEntityIndex.Old == _startCamIndex)
                 {
                     Debug.WriteLine("da baby start");
                     return GameSupportResult.PlayerGainedControl;
@@ -49,7 +49,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (_endingCamIndex != -1)
             {
-                if (state.PlayerViewEntityIndex == _endingCamIndex && state.PrevPlayerViewEntityIndex == 1)
+                if (state.PlayerViewEntityIndex.Current == _endingCamIndex && state.PlayerViewEntityIndex.Old == 1)
                 {
                     Debug.WriteLine("da baby end");
                     _onceFlag = true;

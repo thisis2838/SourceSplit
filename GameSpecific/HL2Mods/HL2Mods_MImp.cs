@@ -56,7 +56,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
             else if (this.IsLastMap && _camIndex != -1)
             {
-                if (state.PlayerViewEntityIndex == _camIndex && state.PrevPlayerViewEntityIndex != _camIndex)
+                if (state.PlayerViewEntityIndex.Current == _camIndex && state.PlayerViewEntityIndex.Old != _camIndex)
                 {
                     Debug.WriteLine("mimp end");
                     _onceFlag = true;

@@ -46,7 +46,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             if (this.IsFirstMap)
             {
                 // first tick player out of shower
-                if (state.PlayerPosition.Distance(_startPos) < 1.0f)
+                if (state.PlayerPosition.Current.Distance(_startPos) < 1.0f)
                 {
                     Debug.WriteLine("aperture tag start");
                     _onceFlag = true;

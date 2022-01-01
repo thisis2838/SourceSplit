@@ -156,7 +156,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         private bool EvaluateChangedViewIndex(GameState state, int prev, int now)
         {
-            return state.PrevPlayerViewEntityIndex == prev && state.PlayerViewEntityIndex == now;
+            return state.PlayerViewEntityIndex.Old == prev && state.PlayerViewEntityIndex.Current == now;
         }
 
 
@@ -240,7 +240,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public override void OnGenericUpdate(GameState state)
         {
-            if (state.CurrentMap.ToString() == "map" && state.HostState == HostState.GameShutdown)
+            if (state.CurrentMap.ToString() == "map" && state.HostState.Current == HostState.GameShutdown)
                 this.OnUpdate(state);
         }
 
@@ -351,10 +351,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
                         // start
                         if (!_resetFlagMod)
                         {
-                            bool hasPlayerJustLeftStartPoint    = !state.PlayerPosition.BitEqualsXY(_modStartPos) && state.PrevPlayerPosition.BitEqualsXY(_modStartPos);
-                            bool hasPlayerMovedView             = state.PlayerPosition.BitEqualsXY(_modStartPos)
+                            bool hasPlayerJustLeftStartPoint    = !state.PlayerPosition.Current.BitEqualsXY(_modStartPos) && state.PlayerPosition.Old.BitEqualsXY(_modStartPos);
+                            bool hasPlayerMovedView             = state.PlayerPosition.Current.BitEqualsXY(_modStartPos)
                                                                 && EvaluateChangedViewAngle(_playerViewAng.Old, _playerViewAng.Current, _modStartAng);
-                            bool isViewEntityCorrect            = state.PlayerViewEntityIndex == 1;
+                            bool isViewEntityCorrect            = state.PlayerViewEntityIndex.Current == 1;
 
                             if ((hasPlayerJustLeftStartPoint || hasPlayerMovedView) && isViewEntityCorrect)
                             {
@@ -391,8 +391,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                         // apartment ending
                         if (EvaluateChangedViewIndex(state, 1, _modEndingGenericCamIndex) &&
-                            state.PlayerPosition.DistanceXY(_modEndingApartmentSectorOrigin) <= 281f &&
-                            state.PlayerPosition.Z <= -544f)
+                            state.PlayerPosition.Current.DistanceXY(_modEndingApartmentSectorOrigin) <= 281f &&
+                            state.PlayerPosition.Current.Z <= -544f)
                         {
                             return DefaultEnd("mod apartment");
                         }
@@ -414,10 +414,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
                             if (Math.Abs(_playerViewAng.Old.X - _playerViewAng.Current.X) < _angleEpsilon && _playerViewAng.Current.Y == _demoStartAng.Y)
                                 _demoStartAng.X = _playerViewAng.Current.X;
 
-                            bool hasPlayerJustLeftStartPoint    = state.PrevPlayerPosition.BitEqualsXY(_demoStartPos) && !state.PlayerPosition.BitEqualsXY(_demoStartPos);
-                            bool isPlayerViewEntityCorrect      = state.PlayerViewEntityIndex == 1;
+                            bool hasPlayerJustLeftStartPoint    = state.PlayerPosition.Old.BitEqualsXY(_demoStartPos) && !state.PlayerPosition.Current.BitEqualsXY(_demoStartPos);
+                            bool isPlayerViewEntityCorrect      = state.PlayerViewEntityIndex.Current == 1;
                             bool hasPlayerMovedView             = EvaluateChangedViewAngle(_playerViewAng.Old.Abs(), _playerViewAng.Current.Abs(), _demoStartAng);
-                            bool isViewAngleChangedEarly        = state.PrevPlayerPosition.BitEqualsXY(_demoStartPos)
+                            bool isViewAngleChangedEarly        = state.PlayerPosition.Old.BitEqualsXY(_demoStartPos)
                                                                 && EvaluateChangedViewAngle(_playerViewAng.Old.Abs(), _playerViewAng.Current.Abs(), _demoStartAng);
 
                             if ((hasPlayerJustLeftStartPoint || hasPlayerMovedView || isViewAngleChangedEarly) && isPlayerViewEntityCorrect)
@@ -445,13 +445,13 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                             // a check to prevent the game starting the game again right after you reset on the first map
                             // now this only happens if you're 10 units near the start point
-                            if (state.PlayerPosition.Distance(_startPos) <= 10f)
+                            if (state.PlayerPosition.Current.Distance(_startPos) <= 10f)
                             {
-                                bool wasPlayerInStartPoint      = state.PrevPlayerPosition.BitEqualsXY(_startPos);
-                                bool isPlayerOutsideStartPoint  = !state.PlayerPosition.BitEqualsXY(_startPos);
+                                bool wasPlayerInStartPoint      = state.PlayerPosition.Old.BitEqualsXY(_startPos);
+                                bool isPlayerOutsideStartPoint  = !state.PlayerPosition.Current.BitEqualsXY(_startPos);
                                 bool hasDoorAngleChanged        = _startDoorAng.Old.BitEquals(_doorStartAng) && !_startDoorAng.Current.BitEquals(_doorStartAng); // for reluctant ending
                                 bool hasPlayerViewAngleChanged  = !isPlayerOutsideStartPoint && EvaluateChangedViewAngle(_playerViewAng.Old, _playerViewAng.Current, _startAng);
-                                bool isPlayerTeleported         = state.PrevPlayerPosition.Distance(_spawnPos) >= 5f;
+                                bool isPlayerTeleported         = state.PlayerPosition.Old.Distance(_spawnPos) >= 5f;
 
                                 if ((wasPlayerInStartPoint && (isPlayerOutsideStartPoint || hasDoorAngleChanged)) || hasPlayerViewAngleChanged && isPlayerTeleported)
                                 {
@@ -462,7 +462,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                             }
                         }
 
-                        if (state.PlayerPosition.DistanceXY(_endingInsaneSectorOrigin) <= 1353) // insane ending
+                        if (state.PlayerPosition.Current.DistanceXY(_endingInsaneSectorOrigin) <= 1353) // insane ending
                         {
                             if (EvaluateChangedViewIndex(state, _endingInsaneCamIndex, _endingMap1CamIndex))
                             {
@@ -471,7 +471,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                         }
                         else if (EvaluateChangedViewIndex(state, 1, _endingMap1CamIndex) &&
-                            state.PrevPlayerPosition.Distance(_spawnPos) >= 5f)
+                            state.PlayerPosition.Old.Distance(_spawnPos) >= 5f)
                         {
                             return DefaultEnd("map1 blackout", 4);
                         }
@@ -507,8 +507,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                         }
 
                         // whiteboard ending
-                        if (state.PlayerPosition.Distance(_endingWhiteboardDoorOrigin) <= 800 &&
-                            state.PlayerPosition.X >= 1993 && state.PrevPlayerPosition.X < 1993)
+                        if (state.PlayerPosition.Current.Distance(_endingWhiteboardDoorOrigin) <= 800 &&
+                            state.PlayerPosition.Current.X >= 1993 && state.PlayerPosition.Old.X < 1993)
                         {
                             return DefaultEnd("whiteboard");
                         }
@@ -518,7 +518,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                 case "map2": //countdown, disco ending
                     {
-                        if (state.PlayerViewEntityIndex == _endingCountCamIndex)
+                        if (state.PlayerViewEntityIndex.Current == _endingCountCamIndex)
                         {
                             // some really weird floating point inprecision happening here for some reason...
                             return DefaultFadeEnd(state, -5222.399902f, "countdown");
@@ -542,8 +542,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                 case "freedom": //freedom ending
                     {
-                        if (state.PlayerParentEntityHandle != -1
-                            && state.PrevPlayerParentEntityHandle == -1)
+                        if (state.PlayerParentEntityHandle.Current != -1
+                            && state.PlayerParentEntityHandle.Old == -1)
                         {
                             return DefaultEnd("freedom", 2);
                         }
@@ -596,8 +596,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     }
                 case "zending": // space, zending ending
                     {
-                        if (!_noSpaceEnd.BValue && state.PrevPlayerPosition.X <= -7000 &&
-                            state.PlayerPosition.X >= -400)
+                        if (!_noSpaceEnd.BValue && state.PlayerPosition.Old.X <= -7000 &&
+                            state.PlayerPosition.Current.X >= -400)
                         {
                             Debug.WriteLine("space ending");
                             return GameSupportResult.PlayerLostControl;

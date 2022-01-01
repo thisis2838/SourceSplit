@@ -42,8 +42,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsFirstMap)
             {
-                if (state.PrevPlayerViewEntityIndex != GameState.ENT_INDEX_PLAYER
-                    && state.PlayerViewEntityIndex == GameState.ENT_INDEX_PLAYER)
+                if (state.PlayerViewEntityIndex.Old != GameState.ENT_INDEX_PLAYER
+                    && state.PlayerViewEntityIndex.Current == GameState.ENT_INDEX_PLAYER)
                 {
                     Debug.WriteLine("downfall start");
                     _onceFlag = true;

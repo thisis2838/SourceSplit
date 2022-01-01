@@ -59,7 +59,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 }
 
                 // map started without vault save
-                else if (state.PlayerPosition.DistanceXY(_startPos) < 1.0f)
+                else if (state.PlayerPosition.Current.DistanceXY(_startPos) < 1.0f)
                 {
                     Debug.WriteLine("tfv start");
                     _onceFlag = true;

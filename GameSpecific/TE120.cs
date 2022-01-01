@@ -61,8 +61,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsFirstMap)
             {
-                if (state.PrevPlayerViewEntityIndex == this._camIndex
-                    && state.PlayerViewEntityIndex == GameState.ENT_INDEX_PLAYER)
+                if (state.PlayerViewEntityIndex.Old == this._camIndex
+                    && state.PlayerViewEntityIndex.Current == GameState.ENT_INDEX_PLAYER)
                 {
                     Debug.WriteLine("te120 start");
                     _onceFlag = true;

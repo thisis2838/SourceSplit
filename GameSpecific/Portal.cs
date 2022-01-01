@@ -119,7 +119,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsFirstMap)
             {
-                bool isInside = state.PlayerPosition.InsideBox(-636, -452, -412, -228, 383, 158);
+                bool isInside = state.PlayerPosition.Current.InsideBox(-636, -452, -412, -228, 383, 158);
 
                 if (_newStart.BValue)
                 {
@@ -152,8 +152,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 }
 
 
-                if (isInside && state.PrevPlayerViewEntityIndex != state.PlayerViewEntityIndex
-                    && state.PlayerViewEntityIndex == 1)
+                if (isInside && state.PlayerViewEntityIndex.Old != state.PlayerViewEntityIndex.Current
+                    && state.PlayerViewEntityIndex.Current == 1)
                 {
                     this.StartOffsetTicks = 1;
                     _onceFlag = true;

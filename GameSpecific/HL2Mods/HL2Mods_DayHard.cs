@@ -46,8 +46,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsFirstMap && _camIndex != -1)
             {
-                if (state.PlayerViewEntityIndex == 1 &&
-                    state.PrevPlayerViewEntityIndex == _camIndex)
+                if (state.PlayerViewEntityIndex.Current == 1 &&
+                    state.PlayerViewEntityIndex.Old == _camIndex)
                 {
                     Debug.WriteLine("DayHard start");
                     _onceFlag = true;
