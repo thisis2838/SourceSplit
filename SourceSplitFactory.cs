@@ -5,6 +5,7 @@ using LiveSplit.SourceSplit;
 using LiveSplit.UI.Components;
 using System;
 using LiveSplit.Model;
+using System.Linq;
 
 [assembly: ComponentFactory(typeof(SourceSplitFactory))]
 
@@ -25,17 +26,51 @@ namespace LiveSplit.SourceSplit
             bool createAsLayoutComponent = (caller == "LoadLayoutComponent" || caller == "AddComponent");
 
             // if component is already loaded somewhere else
+            // layout editor takes precedent because its just better & i can't figure out how to unload
+            // components from layout editor >:(
             if (_instance != null && !_instance.Disposed)
             {
-                MessageBox.Show(
-                    "SourceSplit is already loaded in the " +
-                        (_instance.IsLayoutComponent ? "Layout Editor" : "Splits Editor") + "!",
-                    "SourceSplit Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Exclamation);
+                void unloadSplitsInstance(bool fromLayout)
+                {
+                    string msg = (fromLayout) ?
+                        "Deactivated SourceSplit from Splits Editor!" :
+                        "Cannot activate SourceSplit when it is already loaded in the Layout Editor!";
 
-                throw new Exception("Component already loaded.");
+                    string source = fromLayout ?
+                        "Layout Editor" :
+                        "Splits Editor";
+
+                    MessageBox.Show(msg, $"SourceSplit Warning | {source}", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    Debug.WriteLine("unload splits instance");
+                    state.Run.AutoSplitter.Component?.Dispose();
+                    state.Run.AutoSplitter.Deactivate();
+                    state.Settings.ActiveAutoSplitters.Remove(state.Run.GameName);
+                }
+
+                if (createAsLayoutComponent)
+                {
+                    if (!_instance.IsLayoutComponent)
+                        unloadSplitsInstance(true);
+                    else
+                        throw new Exception($"Component already loaded");
+                } 
+                else
+                {
+                    if (_instance.IsLayoutComponent)
+                    {
+                        unloadSplitsInstance(false);
+                        return null;
+                    }
+                    else
+                        _instance.Dispose();
+                }
             }
+
+/*
+            // if component is already loaded somewhere else
+            if (_instance != null && !_instance.Disposed)
+                throw new Exception($">:( )\n(Component already loaded in the {(_instance.IsLayoutComponent ? "Layout Editor" : "Splits Editor")}");
+*/
 
             return (_instance = new SourceSplitComponent(state, createAsLayoutComponent));
         }

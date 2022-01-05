@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.Utils
 {
+    // simple value watcher keeping track of a pair of values.
     class ValueWatcher<T> where T : struct
     {
         private T _current;
-        private string _name = "";
         public bool Changed = false;
         public T Current 
         {
@@ -23,9 +23,8 @@ namespace LiveSplit.SourceSplit.Utils
             }
         }
         public T Old { get; protected set; }
-        public ValueWatcher(T t, string name = "")
+        public ValueWatcher(T t)
         {
-            _name = name;
             Current = t;
             Old = t;
         }

@@ -26,9 +26,9 @@ namespace LiveSplit.SourceSplit
             Component.InformationValue = Enabled ? text : "";
         }
 
-        public void SetText(TimeSpan? time)
+        public void SetText(TimeSpan? time, int precision = 6)
         {
-            Component.InformationValue = Enabled ? time?.ToString(@"hh\:mm\:ss\.ffffff") ?? "" : "";
+            Component.InformationValue = Enabled ? time?.ToString(@$"hh\:mm\:ss\.{new string('f', precision)}") ?? "" : "";
         }
 
         public void SetName(string name)

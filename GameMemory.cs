@@ -1010,10 +1010,10 @@ namespace LiveSplit.SourceSplit
                     // if it's the first tick, don't use stuff from the previous map
                     if (firstTick)
                     {
-                        state.PlayerFlags.Current = state.PlayerFlags.Old;
-                        state.PlayerPosition.Current = state.PlayerPosition.Old;
-                        state.PlayerViewEntityIndex.Current = state.PlayerViewEntityIndex.Old;
-                        state.PlayerParentEntityHandle.Current = state.PlayerParentEntityHandle.Old;
+                        state.PlayerFlags.Current = state.PlayerFlags.Current;
+                        state.PlayerPosition.Current = state.PlayerPosition.Current;
+                        state.PlayerViewEntityIndex.Current = state.PlayerViewEntityIndex.Current;
+                        state.PlayerParentEntityHandle.Current = state.PlayerParentEntityHandle.Current;
                     }
                 }
             } // if (state.SignOnState.Current == SignOnState.Full)

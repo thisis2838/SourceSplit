@@ -1,5 +1,8 @@
-﻿using System;
+﻿using LiveSplit.ComponentUtil;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -145,6 +148,109 @@ namespace LiveSplit.SourceSplit
             public IntPtr lpBaseOfDll;
             public uint SizeOfImage;
             public IntPtr EntryPoint;
+        }
+
+        [DllImport("dbghelp.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SymInitialize([In] IntPtr hProcess, [In, Optional] string UserSearchPath, [In] bool fInvadeProcess);
+
+        [DllImport("dbghelp.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.U8)]
+        public static extern ulong SymLoadModuleEx([In] IntPtr hProcess, [In] IntPtr hFile, [In] string ImageName, [In] string ModuleName, [In, MarshalAs(UnmanagedType.U8)] ulong BaseOfDll, [In] uint DllSize, [In] IntPtr Data, [In] uint Flags);
+
+        [DllImport("dbghelp.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SymEnumSymbols([In] IntPtr hProcess, [In] ulong BaseOfDll, [In, Optional] string Mask, [In] PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback, [In, Optional] IntPtr UserContext);
+
+        public delegate bool PSYM_ENUMERATESYMBOLS_CALLBACK([In] ref SYMBOL_INFO pSymInfo, [In] uint SymbolSize, [In, Optional] IntPtr UserContext);
+
+        [DllImport("dbghelp.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SymCleanup([In] IntPtr hProcess);
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        public struct SYMBOL_INFO
+        {
+            // The size of the structure, in bytes.
+            public uint SizeOfStruct;
+
+            // A unique value that identifies the type data that describes the symbol.
+            public uint TypeIndex;
+
+            // This member is reserved for system use.
+            public ulong Reserved_0;
+
+            // This member is reserved for system use.
+            public ulong Reserved_1;
+
+            // The unique value for the symbol.
+            public uint Index;
+
+            // The symbol size, in bytes.
+            public uint Size;
+
+            // The base address of the module that contains the symbol.
+            public ulong ModBase;
+
+            public uint Flags;
+
+            // The value of a constant.
+            public ulong Value;
+
+            // The virtual address of the start of the symbol.
+            public ulong Address;
+
+            // The register.
+            public uint Register;
+
+            // The DIA scope.
+            public uint Scope;
+
+            // The PDB classification.
+            public uint Tag;
+
+            // The length of the name, in characters, not including the null-terminating character.
+            public uint NameLen;
+
+            // The size of the Name buffer, in characters.
+            public uint MaxNameLen;
+
+            // The name of the symbol.
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 1024)]
+            public string Name;
+        }
+
+        public static SYMBOL_INFO[] AllSymbols(this Process process, ProcessModuleWow64Safe module, string symbol = "*")
+        {
+            var procHandle = process.Handle;
+
+            if (!WinAPI.SymInitialize(procHandle, Path.GetDirectoryName(module.FileName), false))
+                throw new Exception("Failed to initialize symbols.");
+
+            var symbols = new List<SYMBOL_INFO>();
+
+            try
+            {
+                if (WinAPI.SymLoadModuleEx(procHandle, IntPtr.Zero, module.ModuleName, null, (ulong)(module.BaseAddress), (uint)(module.ModuleMemorySize), IntPtr.Zero, 0) == 0)
+                    throw new Exception("Failed to load module's symbols.");
+
+                WinAPI.PSYM_ENUMERATESYMBOLS_CALLBACK callback = new(enumSyms);
+
+                if (!WinAPI.SymEnumSymbols(procHandle, (ulong)(module.BaseAddress), symbol, callback, IntPtr.Zero))
+                    throw new Exception("Failed to enumerate over module's symbols.");
+            }
+            finally
+            {
+                WinAPI.SymCleanup(procHandle);
+            }
+
+            return symbols.ToArray();
+
+            bool enumSyms(ref SYMBOL_INFO pSymInfo, uint SymbolSizem, IntPtr UserContext)
+            {
+                symbols.Add(pSymInfo);
+                return true;
+            }
         }
     }
 }

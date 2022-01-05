@@ -2,6 +2,7 @@
 using LiveSplit.SourceSplit.Extensions;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -121,7 +122,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private MemoryWatcher<Vector3f> _modEndingMuseumPodPos;
         private Vector3f _modEndingApartmentSectorOrigin = new Vector3f(-3524f, 1368f, -620f);
 
-        private CustomCommand _noSpaceEnd = new CustomCommand("nospaceend", "Disable splitting on Space Ending");
+        private CustomCommand _noSpaceEnd = new CustomCommand("nospaceend", "0", "Disable splitting on Space Ending");
         private CustomCommandHandler _ccHandler;
 
         public TheStanleyParable()
@@ -202,6 +203,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         {
             _ccHandler.Init(state);
 
+
             server = state.GetModule("server.dll");
             client = state.GetModule("client.dll");
             engine = state.GetModule("engine.dll");
@@ -242,6 +244,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
         {
             if (state.CurrentMap.ToString() == "map" && state.HostState.Current == HostState.GameShutdown)
                 this.OnUpdate(state);
+
+            _ccHandler.Update(state);
         }
 
         public override void OnSessionStart(GameState state)
@@ -332,8 +336,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         public override GameSupportResult OnUpdate(GameState state)
         {
             _endingsWatcher.UpdateAll(state.GameProcess);
-
-            _ccHandler.Update(state);
 
             if (_onceFlag)
                 return GameSupportResult.DoNothing;

@@ -56,6 +56,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\Detour.cs" />
+    <Compile Include="GameSpecific\HL2Mods\HL2Mods_SouthernmostCombine.cs" />
     <Compile Include="Utils\CustomCommand.cs" />
     <Compile Include="Extensions\NumericsExtensions.cs" />
     <Compile Include="Extensions\SignatureScannerExtensions.cs" />
@@ -166,6 +167,10 @@
     <None Include="license.txt" />
     <None Include="README.md" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="update\update.xml" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>if exist "$(ProjectDir)\update\Components\$(TargetFileName)\$(TargetPath)" del "$(ProjectDir)\update\$(TargetFileName)\$(TargetPath)"

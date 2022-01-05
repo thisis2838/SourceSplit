@@ -255,7 +255,7 @@ namespace LiveSplit.SourceSplit
                     if (Settings.ShowAltTime)
                         method = (TimingMethod)(((int)method + 1) % 2);
 
-                    this.AltTimingComponent.SetText(state.CurrentTime[method]);
+                    this.AltTimingComponent.SetText(state.CurrentTime[method], Settings.GameTimeDecimalPlaces);
                     this.AltTimingComponent.SetName(method == TimingMethod.RealTime ? "Real Time" : "Game Time");
 
                     _cache["TimeValue"] = this.AltTimingComponent.Component.ValueLabel.Text;

@@ -99,7 +99,8 @@ namespace LiveSplit.SourceSplit
             byte[] bytes = state.GameProcess.ReadBytes(ptr, 100);
             for (int i = 0; i < 100; i++)
             {
-                if (bytes[i] == 0xA1 || bytes[i] == 0xB9)
+                byte e = bytes[i];
+                if (e == 0xA1 || (bytes[i] >= 0xB8 && bytes[i] <= 0xBF))
                 {
                     uint val = state.GameProcess.ReadValue<uint>(ptr + i + 1);
                     if (scanner.IsWithin(val))
@@ -113,7 +114,7 @@ namespace LiveSplit.SourceSplit
 
             GetExecPtr(state);
             Update(state);
-            SendConsoleMsg("\nSourceSplit Custom Commands are present, enter \"ss_list\" to list them, or \"ss_h\" for help!\n");
+            SendConsoleMsg("\nSourceSplit Custom Commands are present, enter \"ss_list\" to list them, or \"ss_h\" for help!\n\n");
 
             return;
 
@@ -125,6 +126,7 @@ namespace LiveSplit.SourceSplit
 
         private void GetExecPtr(GameState state)
         {
+            /*
             ProcessModuleWow64Safe engine = state.GetModule("engine.dll");
             var scanner = new SignatureScanner(state.GameProcess, engine.BaseAddress, engine.ModuleMemorySize);
 
@@ -136,6 +138,12 @@ namespace LiveSplit.SourceSplit
             };
 
             _cmdExecPtr = scanner.ReadCall(scanner.Scan(target) + 0x5);
+            */
+
+            // use export table
+            var tier0 = state.GetModule("tier0.dll");
+            var tier0Symbols = WinAPI.AllSymbols(state.GameProcess, tier0);
+            _cmdExecPtr = (IntPtr)tier0Symbols.Where(x => x.Name == "ConMsg").FirstOrDefault().Address;
         }
 
         // allow disabling and enabling of features through monitoring specific console input
@@ -197,7 +205,7 @@ namespace LiveSplit.SourceSplit
                 {
                     if (cleanedCmd.Length > cmd.Name.Length && cmd.Update(cleanedCmd))
                         return true;
-                    if (cleanedCmd == cmd.Name && !string.IsNullOrEmpty(cmd.Description))
+                    if (cleanedCmd == cmd.Name)
                     {
                         SendConsoleMsg(cmd.ToString());
                         return true;
@@ -213,6 +221,8 @@ namespace LiveSplit.SourceSplit
             if (_cmdExecPtr == IntPtr.Zero)
                 return;
 
+            _remoteOps.CallFunctionString(input, _cmdExecPtr);
+            /*
             List<string> commands = input.Split('\n').ToList();
             if (commands.Count() == 0)
                 commands.Add(input);
@@ -223,6 +233,7 @@ namespace LiveSplit.SourceSplit
                 _remoteOps.CallFunctionString(cmd, _cmdExecPtr);
                 //_cmdExecBuffer.Add(cmd);
             }
+            */
         }
 
         private void ListAllCommands()
@@ -230,6 +241,7 @@ namespace LiveSplit.SourceSplit
             SendConsoleMsg("\nSourceSplit commands:\n");
             foreach (var cmd in Commands)
                 SendConsoleMsg(cmd.ToString());
+            SendConsoleMsg("\n");
         }
 
         private void PrintHelp()
@@ -240,9 +252,8 @@ namespace LiveSplit.SourceSplit
             string name = Commands.Count() > 0 ? Commands[0].Name : "function";
             SendConsoleMsg(
                 "For example: " + $"{name} 0 to disable {name}, {name} 1 to enable\n" +
-                $"- You should hear a Windows Warning Sound and a see Console message when a function is toggled.\n"
+                $"- You should hear a Windows Warning Sound and a see Console message when a function is toggled.\n\n"
                 /*$"WARNING: If you are executing multiple commands, please put a wait in between. This is due to limitations with detection.\n"*/);
-
         }
     }
 }

@@ -89,7 +89,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         protected bool IsFirstMap { get; private set; }
         protected bool IsLastMap { get; private set; }
-
+        internal bool _mapsLowercase = false;
 
         private bool _onceFlag;
 
@@ -116,8 +116,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
         {
             _onceFlag = false;
 
-            this.IsFirstMap = FirstMap.Contains(state.CurrentMap);
-            this.IsLastMap = LastMap.Contains(state.CurrentMap);
+            string map = _mapsLowercase ? state.CurrentMap.ToLower() : state.CurrentMap;
+
+            this.IsFirstMap = FirstMap.Contains(map);
+            this.IsLastMap = LastMap.Contains(map);
         }
 
         // called when player no longer fully in the game (map changed, load started)
@@ -397,6 +399,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     return new HL2Mods_DangerousWorld();
                 case "se1":
                     return new SiNEpisodes();
+                case "southernmost":
+                case "southernmostcombine":
+                    return new HL2Mods_SouthernmostCombine();
             }
 
             return null;

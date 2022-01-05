@@ -25,7 +25,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         private CustomCommand _newStart = new CustomCommand("newstart", "0", "Start the timer upon portal open");
         private CustomCommand _elevSplit = new CustomCommand("elevsplit", "0", "Split when the elevator starts moving (limited)");
-        private CustomCommand _deathSplit = new CustomCommand("death%", "0", "Death% ending");
+        private CustomCommand _deathSplit = new CustomCommand("deathsplit", "0", "Death category extension ending");
         private CustomCommandHandler _ccHandler;
 
         public Portal()
@@ -105,20 +105,21 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 finally { _elevSplitTime = splitTime; }
             }
 
-            if (_deathSplit.BValue)
-            {
-                if (_playerHP.Old > 0 && _playerHP.Current <= 0)
-                {
-                    Debug.WriteLine("Death% end");
-                    return GameSupportResult.ManualSplit;
-                }
-            }
 
             if (_onceFlag)
                 return GameSupportResult.DoNothing;
 
             if (IsFirstMap)
             {
+                if (_deathSplit.BValue)
+                {
+                    if (_playerHP.Old > 0 && _playerHP.Current <= 0)
+                    {
+                        Debug.WriteLine("Death% end");
+                        return GameSupportResult.ManualSplit;
+                    }
+                }
+
                 bool isInside = state.PlayerPosition.Current.InsideBox(-636, -452, -412, -228, 383, 158);
 
                 if (_newStart.BValue)

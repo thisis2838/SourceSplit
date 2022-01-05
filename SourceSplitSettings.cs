@@ -31,10 +31,12 @@ namespace LiveSplit.SourceSplit
         public AutoSplitType AutoSplitType { get; private set; }
         public bool ShowGameTime { get; set; }
         public bool ShowAltTime { get; set; }
+        public int GameTimeDecimalPlaces { get; set; }
         public bool ShowTickCount { get; set; }
         public bool AutoStartEndResetEnabled { get; set; }
         public bool HoldUntilPause { get; set; }
         public string StartMap { get; set; }
+
 
         public string[] MapWhitelist => GetListboxValues(this.lbMapWhitelist);
         public string[] MapBlacklist => GetListboxValues(this.lbMapBlacklist);
@@ -90,6 +92,7 @@ namespace LiveSplit.SourceSplit
         private const bool DEFAULT_AUTOSPLIT_ENABLED = true;
         private const bool DEFAULT_AUTOSTARTENDRESET_ENABLED = true;
         private const bool DEFAULT_SHOWALTTIME = true;
+        private const int DEFAULT_GAMETIMEDECIMALPLACES = 6;
         private const AutoSplitType DEFAULT_AUTOSPLITYPE = AutoSplitType.Interval;
         private const GameTimingMethodSetting DEFAULT_GAME_TIMING_METHOD = GameTimingMethodSetting.Automatic;
 
@@ -101,6 +104,7 @@ namespace LiveSplit.SourceSplit
             this.dmnSplitInterval.DataBindings.Add("Value", this, nameof(this.SplitInterval), false, DataSourceUpdateMode.OnPropertyChanged);
             this.chkShowGameTime.DataBindings.Add("Checked", this, nameof(this.ShowGameTime), false, DataSourceUpdateMode.OnPropertyChanged);
             this.chkShowAlt.DataBindings.Add("Checked", this, nameof(this.ShowAltTime), false, DataSourceUpdateMode.OnPropertyChanged);
+            this.nudDecimalPlaces.DataBindings.Add("Value", this, nameof(this.GameTimeDecimalPlaces), false, DataSourceUpdateMode.OnPropertyChanged);
             this.chkAutoStartEndReset.DataBindings.Add("Checked", this, nameof(this.AutoStartEndResetEnabled), false, DataSourceUpdateMode.OnPropertyChanged);
             this.boxStartMap.DataBindings.Add("Text", this, nameof(this.StartMap), false, DataSourceUpdateMode.OnPropertyChanged);
             this.chkShowTickCount.DataBindings.Add("Checked", this, nameof(this.ShowTickCount), false, DataSourceUpdateMode.OnPropertyChanged);
@@ -109,12 +113,14 @@ namespace LiveSplit.SourceSplit
             this.rdoWhitelist.CheckedChanged += rdoAutoSplitType_CheckedChanged;
             this.rdoInterval.CheckedChanged += rdoAutoSplitType_CheckedChanged;
             this.chkAutoSplitEnabled.CheckedChanged += UpdateDisabledControls;
+            this.chkShowGameTime.CheckedChanged += UpdateDisabledControls;
 
             // defaults
             lbGameProcessesSetDefault();
             this.SplitInterval = DEFAULT_SPLITINTERVAL;
             this.AutoSplitType = DEFAULT_AUTOSPLITYPE;
             this.ShowGameTime = DEFAULT_SHOWGAMETIME;
+            this.GameTimeDecimalPlaces = DEFAULT_GAMETIMEDECIMALPLACES;
             this.AutoSplitEnabled = DEFAULT_AUTOSPLIT_ENABLED;
             this.AutoStartEndResetEnabled = DEFAULT_AUTOSTARTENDRESET_ENABLED;
             this.HoldUntilPause = true;
@@ -141,6 +147,7 @@ namespace LiveSplit.SourceSplit
             this.lbGameProcesses.Rows.Add("hdtf.exe");
             this.lbGameProcesses.Rows.Add("beginnersguide.exe");
             this.lbGameProcesses.Rows.Add("synergy.exe");
+            this.lbGameProcesses.Rows.Add("sinepisodes.exe");
         }
 
         protected override void OnParentChanged(EventArgs e)
@@ -175,6 +182,10 @@ namespace LiveSplit.SourceSplit
             settingsNode.AppendChild(ToElement(doc, nameof(this.AutoSplitType), this.AutoSplitType));
 
             settingsNode.AppendChild(ToElement(doc, nameof(this.ShowGameTime), this.ShowGameTime));
+
+            settingsNode.AppendChild(ToElement(doc, nameof(this.ShowAltTime), this.ShowAltTime));
+
+            settingsNode.AppendChild(ToElement(doc, nameof(this.GameTimeDecimalPlaces), this.GameTimeDecimalPlaces));
 
             settingsNode.AppendChild(ToElement(doc, nameof(this.GameTimingMethod), this.GameTimingMethod));
 
@@ -212,6 +223,7 @@ namespace LiveSplit.SourceSplit
             SplitInterval = GetSetting(settings, SplitInterval, nameof(SplitInterval), DEFAULT_SPLITINTERVAL);
             ShowGameTime = GetSetting(settings, ShowGameTime, nameof(ShowGameTime), DEFAULT_SHOWGAMETIME);
             ShowAltTime = GetSetting(settings, ShowAltTime, nameof(ShowAltTime), DEFAULT_SHOWALTTIME);
+            GameTimeDecimalPlaces = GetSetting(settings, GameTimeDecimalPlaces, nameof(GameTimeDecimalPlaces), DEFAULT_GAMETIMEDECIMALPLACES);
             GameTimingMethod = GetSetting(settings, GameTimingMethod, nameof(GameTimingMethod), DEFAULT_GAME_TIMING_METHOD);
             AutoSplitType = GetSetting(settings, AutoSplitType, nameof(AutoSplitType), DEFAULT_AUTOSPLITYPE);
             StartMap = GetSetting(settings, StartMap, nameof(StartMap), "");
@@ -270,7 +282,7 @@ namespace LiveSplit.SourceSplit
             this.lbMapBlacklist.Enabled = 
                 (this.AutoSplitType == AutoSplitType.Interval && chkAutoSplitEnabled.Checked);
 
-            chkShowAlt.Enabled = chkShowGameTime.Checked;
+            nudDecimalPlaces.Enabled = chkShowAlt.Enabled = chkShowGameTime.Checked;
         }
 
         static XmlElement ToElement<T>(XmlDocument document, string name, T value)
@@ -309,9 +321,35 @@ namespace LiveSplit.SourceSplit
             lbGameProcessesSetDefault();
         }
 
-        private void chkShowGameTime_CheckedChanged(object sender, EventArgs e)
+        private void cmbTimingMethod_SelectedIndexChanged(object sender, EventArgs e)
         {
-            chkShowAlt.Enabled = chkShowGameTime.Checked;
+            string text = "(none)";
+
+            switch (GameTimingMethod)
+            {
+                case GameTimingMethodSetting.Automatic:
+                    text = 
+                        "Let SourceSplit decide the best\r\n" +
+                        "Timing Method for the game/mod";
+                    break;
+                case GameTimingMethodSetting.EngineTicks:
+                    text =
+                        "Count ticks when physics is simulated.\r\n" +
+                        "I.E when game is active and not paused";
+                    break;
+                case GameTimingMethodSetting.EngineTicksWithPauses:
+                    text = 
+                        "Count ticks when the game is active,\r\n" +
+                        "no matter if physics is simulated or not";
+                    break;
+                case GameTimingMethodSetting.AllEngineTicks:
+                    text = 
+                        "Count engine host state update loops,\r\n" +
+                        "I.E all ticks when the game isn't loading";
+                    break;
+            }
+
+            labTimingMethodDesc.Text = text;
         }
     }
 }
