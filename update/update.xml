@@ -98,4 +98,12 @@
       <change>Fixed some UI element sizing.</change>
     </changelog>
   </update>
+  <update version="3.2.2.2">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Fixed Save Deleting splitting when Splitting on Generic Map Split is enabled.</change>
+    </changelog>
+  </update>
 </updates>

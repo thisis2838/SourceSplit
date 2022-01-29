@@ -1183,7 +1183,10 @@ namespace LiveSplit.SourceSplit
                     // if the runner uses this option to reset at the first map then restart the timer
                     if (state.HostState.Current == HostState.NewGame || state.GameDir.ToLower() == "beginnersguide")
                     {
-                        this.SendMapChangedEvent(levelName, state.CurrentMap, true);
+                        if (levelName != state.CurrentMap 
+                            && !string.IsNullOrWhiteSpace(levelName)
+                            && !string.IsNullOrWhiteSpace(state.CurrentMap))
+                            this.SendMapChangedEvent(levelName, state.CurrentMap, true);
 
                         if (state.GameSupport != null)
                         {
