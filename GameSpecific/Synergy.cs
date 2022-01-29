@@ -32,6 +32,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public override void OnGenericUpdate(GameState state)
         {
+            _cmdHandler.Update(state);
+
             // HACKHACK: when the player dies and respawn, the map is also lightly reloaded,
             // potentially causing all the entity indicies to change
             // players when killed also have these flags applied to them and removed when respawning

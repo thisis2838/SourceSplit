@@ -133,6 +133,9 @@ namespace LiveSplit.SourceSplit
         public static extern uint WaitForSingleObject(IntPtr handle, uint time);
 
         [DllImport("kernel32.dll")]
+        public static extern uint GetExitCodeThread([In] IntPtr handle, out uint lpExitCode);
+
+        [DllImport("kernel32.dll")]
         public static extern bool TerminateThread(IntPtr handle, uint code);
 
         // privileges

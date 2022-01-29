@@ -63,6 +63,7 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.btnGameProcessesDefault = new System.Windows.Forms.Button();
             this.gbTiming = new System.Windows.Forms.GroupBox();
+            this.labTimingMethodDesc = new System.Windows.Forms.Label();
             this.tlpTiming = new System.Windows.Forms.TableLayoutPanel();
             this.lblTimingMethod = new System.Windows.Forms.Label();
             this.tabPgMisc = new System.Windows.Forms.TabPage();
@@ -76,7 +77,9 @@
             this.chkShowGameTime = new System.Windows.Forms.CheckBox();
             this.chkShowAlt = new System.Windows.Forms.CheckBox();
             this.chkShowTickCount = new System.Windows.Forms.CheckBox();
-            this.labTimingMethodDesc = new System.Windows.Forms.Label();
+            this.gSplitOn = new System.Windows.Forms.GroupBox();
+            this.chkSplitLevelTrans = new System.Windows.Forms.CheckBox();
+            this.chkSplitGenericMap = new System.Windows.Forms.CheckBox();
             this.lbMapBlacklist = new LiveSplit.SourceSplit.EditableListBox();
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.lbMapWhitelist = new LiveSplit.SourceSplit.EditableListBox();
@@ -102,6 +105,7 @@
             this.gbMapTimes.SuspendLayout();
             this.gbAdditionalTimer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudDecimalPlaces)).BeginInit();
+            this.gSplitOn.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lbMapBlacklist)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lbMapWhitelist)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lbGameProcesses)).BeginInit();
@@ -176,8 +180,8 @@
             this.tlpAutoStartEndReset.Location = new System.Drawing.Point(3, 3);
             this.tlpAutoStartEndReset.Name = "tlpAutoStartEndReset";
             this.tlpAutoStartEndReset.RowCount = 4;
-            this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 203F));
-            this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 139F));
+            this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 232F));
+            this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 110F));
             this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 90F));
             this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 78F));
             this.tlpAutoStartEndReset.Size = new System.Drawing.Size(447, 437);
@@ -186,11 +190,13 @@
             // groupBox1
             // 
             this.tlpAutoStartEndReset.SetColumnSpan(this.groupBox1, 2);
+            this.groupBox1.Controls.Add(this.gSplitOn);
             this.groupBox1.Controls.Add(this.tableLayoutPanel3);
+            this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(441, 197);
+            this.groupBox1.Size = new System.Drawing.Size(441, 226);
             this.groupBox1.TabIndex = 10;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Auto Split";
@@ -204,15 +210,13 @@
             this.tableLayoutPanel3.Controls.Add(this.chkAutoSplitEnabled, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.tableLayoutPanel4, 1, 0);
             this.tableLayoutPanel3.Controls.Add(this.groupBox3, 0, 1);
-            this.tableLayoutPanel3.Controls.Add(this.label1, 0, 2);
-            this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel3.Location = new System.Drawing.Point(3, 16);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
-            this.tableLayoutPanel3.RowCount = 3;
+            this.tableLayoutPanel3.RowCount = 2;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(435, 178);
+            this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(435, 139);
             this.tableLayoutPanel3.TabIndex = 20;
             // 
             // groupBox4
@@ -221,7 +225,7 @@
             this.groupBox4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox4.Location = new System.Drawing.Point(220, 33);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(212, 102);
+            this.groupBox4.Size = new System.Drawing.Size(212, 103);
             this.groupBox4.TabIndex = 16;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Map Blacklist";
@@ -320,20 +324,19 @@
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox3.Location = new System.Drawing.Point(3, 33);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(211, 102);
+            this.groupBox3.Size = new System.Drawing.Size(211, 103);
             this.groupBox3.TabIndex = 15;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Map Whitelist";
             // 
             // label1
             // 
-            this.label1.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.label1.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.label1.Location = new System.Drawing.Point(3, 145);
+            this.label1.Location = new System.Drawing.Point(6, 158);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(191, 26);
+            this.label1.Size = new System.Drawing.Size(341, 13);
             this.label1.TabIndex = 21;
             this.label1.Text = "(these lists will be checked against the previous map in a level change)";
             // 
@@ -341,9 +344,9 @@
             // 
             this.gbAutoStartEndReset.Controls.Add(this.tableLayoutPanel2);
             this.gbAutoStartEndReset.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gbAutoStartEndReset.Location = new System.Drawing.Point(3, 206);
+            this.gbAutoStartEndReset.Location = new System.Drawing.Point(3, 235);
             this.gbAutoStartEndReset.Name = "gbAutoStartEndReset";
-            this.gbAutoStartEndReset.Size = new System.Drawing.Size(217, 133);
+            this.gbAutoStartEndReset.Size = new System.Drawing.Size(217, 104);
             this.gbAutoStartEndReset.TabIndex = 13;
             this.gbAutoStartEndReset.TabStop = false;
             this.gbAutoStartEndReset.Text = "Auto Start / End / Reset";
@@ -362,7 +365,7 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 21F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(211, 114);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(211, 85);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // chkAutoStartEndReset
@@ -397,9 +400,9 @@
             this.groupBox2.Controls.Add(this.btnGameProcessesDefault);
             this.groupBox2.Controls.Add(this.lbGameProcesses);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox2.Location = new System.Drawing.Point(226, 206);
+            this.groupBox2.Location = new System.Drawing.Point(226, 235);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(218, 133);
+            this.groupBox2.Size = new System.Drawing.Size(218, 104);
             this.groupBox2.TabIndex = 11;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Game Process List";
@@ -424,6 +427,16 @@
             this.gbTiming.TabIndex = 21;
             this.gbTiming.TabStop = false;
             this.gbTiming.Text = "Game Time";
+            // 
+            // labTimingMethodDesc
+            // 
+            this.labTimingMethodDesc.AutoSize = true;
+            this.labTimingMethodDesc.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F);
+            this.labTimingMethodDesc.Location = new System.Drawing.Point(6, 50);
+            this.labTimingMethodDesc.Name = "labTimingMethodDesc";
+            this.labTimingMethodDesc.Size = new System.Drawing.Size(37, 13);
+            this.labTimingMethodDesc.TabIndex = 2;
+            this.labTimingMethodDesc.Text = "(none)";
             // 
             // tlpTiming
             // 
@@ -581,15 +594,39 @@
             this.chkShowTickCount.Text = "Show Game Time Tick Count";
             this.chkShowTickCount.UseVisualStyleBackColor = true;
             // 
-            // labTimingMethodDesc
+            // gSplitOn
             // 
-            this.labTimingMethodDesc.AutoSize = true;
-            this.labTimingMethodDesc.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F);
-            this.labTimingMethodDesc.Location = new System.Drawing.Point(6, 50);
-            this.labTimingMethodDesc.Name = "labTimingMethodDesc";
-            this.labTimingMethodDesc.Size = new System.Drawing.Size(37, 13);
-            this.labTimingMethodDesc.TabIndex = 2;
-            this.labTimingMethodDesc.Text = "(none)";
+            this.gSplitOn.Controls.Add(this.chkSplitGenericMap);
+            this.gSplitOn.Controls.Add(this.chkSplitLevelTrans);
+            this.gSplitOn.Location = new System.Drawing.Point(6, 175);
+            this.gSplitOn.Name = "gSplitOn";
+            this.gSplitOn.Size = new System.Drawing.Size(426, 45);
+            this.gSplitOn.TabIndex = 22;
+            this.gSplitOn.TabStop = false;
+            this.gSplitOn.Text = "Split On";
+            // 
+            // chkSplitLevelTrans
+            // 
+            this.chkSplitLevelTrans.AutoSize = true;
+            this.chkSplitLevelTrans.Checked = true;
+            this.chkSplitLevelTrans.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkSplitLevelTrans.Location = new System.Drawing.Point(10, 20);
+            this.chkSplitLevelTrans.Name = "chkSplitLevelTrans";
+            this.chkSplitLevelTrans.Size = new System.Drawing.Size(97, 17);
+            this.chkSplitLevelTrans.TabIndex = 0;
+            this.chkSplitLevelTrans.Text = "Map transitions";
+            this.chkSplitLevelTrans.UseVisualStyleBackColor = true;
+            // 
+            // chkSplitGenericMap
+            // 
+            this.chkSplitGenericMap.AutoSize = true;
+            this.chkSplitGenericMap.Location = new System.Drawing.Point(217, 20);
+            this.chkSplitGenericMap.Name = "chkSplitGenericMap";
+            this.chkSplitGenericMap.Size = new System.Drawing.Size(91, 17);
+            this.chkSplitGenericMap.TabIndex = 1;
+            this.chkSplitGenericMap.Text = "First map load";
+            this.toolTip.SetToolTip(this.chkSplitGenericMap, "(for example, when using the map command)");
+            this.chkSplitGenericMap.UseVisualStyleBackColor = true;
             // 
             // lbMapBlacklist
             // 
@@ -632,7 +669,7 @@
             this.lbMapBlacklist.RowHeadersVisible = false;
             this.lbMapBlacklist.RowTemplate.Height = 14;
             this.lbMapBlacklist.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.lbMapBlacklist.Size = new System.Drawing.Size(206, 83);
+            this.lbMapBlacklist.Size = new System.Drawing.Size(206, 84);
             this.lbMapBlacklist.TabIndex = 15;
             this.toolTip.SetToolTip(this.lbMapBlacklist, "Don\'t split if the player was on one of these maps before a level change.");
             // 
@@ -682,7 +719,7 @@
             this.lbMapWhitelist.RowHeadersVisible = false;
             this.lbMapWhitelist.RowTemplate.Height = 14;
             this.lbMapWhitelist.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.lbMapWhitelist.Size = new System.Drawing.Size(205, 83);
+            this.lbMapWhitelist.Size = new System.Drawing.Size(205, 84);
             this.lbMapWhitelist.TabIndex = 16;
             this.toolTip.SetToolTip(this.lbMapWhitelist, "Only split if the player was on one of these maps before a level change.");
             // 
@@ -753,6 +790,7 @@
             this.tabPgAutoStartReset.ResumeLayout(false);
             this.tlpAutoStartEndReset.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
@@ -775,6 +813,8 @@
             this.gbAdditionalTimer.ResumeLayout(false);
             this.gbAdditionalTimer.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudDecimalPlaces)).EndInit();
+            this.gSplitOn.ResumeLayout(false);
+            this.gSplitOn.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lbMapBlacklist)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lbMapWhitelist)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lbGameProcesses)).EndInit();
@@ -828,5 +868,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.NumericUpDown nudDecimalPlaces;
         private System.Windows.Forms.Label labTimingMethodDesc;
+        private System.Windows.Forms.GroupBox gSplitOn;
+        private System.Windows.Forms.CheckBox chkSplitGenericMap;
+        private System.Windows.Forms.CheckBox chkSplitLevelTrans;
     }
 }

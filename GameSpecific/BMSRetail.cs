@@ -28,12 +28,18 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         // xen start & run end
         private const string _xenStartMap = "bm_c4a1a";
-        private CustomCommand _xenStartCommand = new CustomCommand("xenstart", "0", "Start upon gaining control in xen");
-        private CustomCommand _xenSplitCommand = new CustomCommand("xensplit", "0", "Split upon gaining control in xen");
+        private CustomCommand _xenStartCommand = new CustomCommand(
+            "xenstart", 
+            "1",
+            "Start upon gaining control in Xen\n- 0 disables this function\n- 1 starts the timer at 2493 ticks\n- 2 starts the timer with no offset.");
+        private CustomCommand _xenSplitCommand = new CustomCommand("xensplit", "0", "Split upon gaining control in Xen");
         private CustomCommand _nihiSplitCommand = new CustomCommand("nihisplit", "0", "Split per phases of Nihilanth's fight");
         private MemoryWatcher<int> _nihiHP;
         private MemoryWatcher<int> _nihiPhaseCounter;
         private int _xenCamIndex;
+        private IntPtr _getGlobalNameFuncPtr = IntPtr.Zero;
+        private RemoteOpsHandler _roHandler;
+        private const int _xenStartTick = 2493; // 38.953125s
 
         private CustomCommandHandler _cmdHandler;
 
@@ -60,6 +66,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
 
             var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
+            _getGlobalNameFuncPtr = scanner.Scan(new SigScanTarget("55 8B EC 51 FF 75 ?? 8D 45 ??"));
+            _roHandler = new RemoteOpsHandler(state.GameProcess);
 
             if (GameMemory.GetBaseEntityMemberOffset("m_iHealth", state.GameProcess, scanner, out _baseEntityHealthOffset))
                 Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
@@ -104,9 +112,15 @@ namespace LiveSplit.SourceSplit.GameSpecific
             return GameSupportResult.PlayerLostControl;
         }
 
+        public override void OnGenericUpdate(GameState state)
+        {
+            base.OnGenericUpdate(state);
+            _cmdHandler.Update(state);
+        }
+
         public override GameSupportResult OnUpdate(GameState state)
         {
-            _cmdHandler.Update(state);
+            StartOffsetTicks = EndOffsetTicks = 0;
 
             if (_onceFlag)
                 return GameSupportResult.DoNothing;
@@ -140,7 +154,20 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _onceFlag = true;
                     Debug.WriteLine("bms xen start");
-                    return _xenStartCommand.BValue ? GameSupportResult.PlayerGainedControl : GameSupportResult.PlayerLostControl;
+
+                    GameSupportResult result = GameSupportResult.DoNothing;
+
+                    if (_xenStartCommand.BValue && _getGlobalNameFuncPtr != IntPtr.Zero)
+                    {
+                        if (_roHandler.CallFunctionString("LC2XEN", _getGlobalNameFuncPtr) == uint.MaxValue)
+                        {
+                            if (_xenStartCommand.IValue == 1)
+                                StartOffsetTicks = -_xenStartTick;
+                            result = GameSupportResult.PlayerGainedControl;
+                        }
+                    }
+
+                    return _xenSplitCommand.BValue ? GameSupportResult.ManualSplit : result;
                 }
             }
 

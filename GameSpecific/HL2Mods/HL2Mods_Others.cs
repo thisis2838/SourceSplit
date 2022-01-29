@@ -4,7 +4,7 @@
 
 // mods included: think tank, gnome, hl2 backwards mod, hl2 reject, trapville, rtslville, 
 // hl abridged, episode one, combination ville, phaseville, companion piece, school adventures, the citizen 1
-// hells mines, dark intervention, upmine struggle, offshore
+// hells mines, dark intervention, upmine struggle, offshore, very hard mod
 
 using LiveSplit.ComponentUtil;
 using System.Diagnostics;
@@ -549,14 +549,21 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsFirstMap)
             {
-                float splitTime = state.FindOutputFireTime("command", 3);
-                _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
-                if (state.CompareToInternalTimer(_splitTime, 0f, false, true))
+                float splitTime = state.FindOutputFireTime("no_vo", 5);
+                try
                 {
-                    Debug.WriteLine("upmine struggle end");
-                    _onceFlag = true;
-                    state.QueueOnNextSessionEnd = GameSupportResult.PlayerLostControl;
+                    if (_splitTime == 0 && splitTime != 0)
+                    {
+                        Debug.WriteLine("upmine struggle end");
+                        _onceFlag = true;
+                        return GameSupportResult.PlayerLostControl;
+                    }
                 }
+                finally
+                {
+                    _splitTime = splitTime;
+                }
+
             }
             return GameSupportResult.DoNothing;
         }
@@ -590,6 +597,45 @@ namespace LiveSplit.SourceSplit.GameSpecific
             if (this.IsLastMap)
             {
                 float splitTime = state.FindOutputFireTime("launchQuit", 5);
+                _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
+                if (state.CompareToInternalTimer(_splitTime, 0f, false, true))
+                {
+                    _onceFlag = true;
+                    state.QueueOnNextSessionEnd = GameSupportResult.PlayerLostControl;
+                }
+            }
+            return GameSupportResult.DoNothing;
+        }
+    }
+
+    class HL2Mods_VeryHardMod : HL2Mods_Misc
+    {
+        // how to match with demos:
+        // start: on map load
+        // ending: on game disconnect after final output has been fired.
+
+        public HL2Mods_VeryHardMod()
+        {
+            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
+            this.AddFirstMap("vhm_chapter");
+            this.AddLastMap("vhm_chapter");
+            this.StartOnFirstLoadMaps.AddRange(this.FirstMap);
+        }
+
+        public override void OnSessionStart(GameState state)
+        {
+            base.OnSessionStart(state);
+            _onceFlag = false;
+        }
+
+        public override GameSupportResult OnUpdate(GameState state)
+        {
+            if (_onceFlag)
+                return GameSupportResult.DoNothing;
+
+            if (this.IsLastMap)
+            {
+                float splitTime = state.FindOutputFireTime("end_game", 5);
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, 0f, false, true))
                 {

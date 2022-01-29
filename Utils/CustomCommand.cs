@@ -64,7 +64,20 @@ namespace LiveSplit.SourceSplit
 
         public override string ToString()
         {
-            return $"{Name} s[{Value}] b[{BValue}] i[{IValue}] f[{FValue}]\n{(!string.IsNullOrEmpty(Description) ? (" - " + Description) : "")}\n";
+            string vals = $"{Name} s[{Value}] b[{BValue}] i[{IValue}] f[{FValue}]";
+            string desc = "";
+            if (!string.IsNullOrEmpty(Description))
+            {
+                var lines = Description.Split('\n');
+                for (int i = 0; i < lines.Count(); i++)
+                {
+                    if (i == 0)
+                        desc += " - " + lines[i] + "\n";
+                    else
+                        desc += "   " + lines[i] + "\n";
+                }
+            }
+            return $"{vals}\n{desc}\n";
         }
     }
 
@@ -154,36 +167,44 @@ namespace LiveSplit.SourceSplit
 
             byte[] newBuffer = state.GameProcess.ReadBytes(_cmdBufferPtr, _bufferSize);
 
-            if (!newBuffer.SequenceEqual(_cmdBuffer))
+            try
             {
-                int tmp = 0;
-                for (int i = 0; i < _bufferSize; i++)
+                if (!newBuffer.SequenceEqual(_cmdBuffer))
                 {
-                    // null byte, we've hit the end of a command
-                    if (newBuffer[i] == 0x00)
+                    int tmp = 0;
+                    for (int i = 0; i < _bufferSize - 1; i++)
                     {
-                        int count = i - tmp + 1;
-                        string cmd = Encoding.Default.GetString(newBuffer.Skip(tmp).Take(count).ToArray());
+                        // null byte, we've hit the end of a command
+                        if (newBuffer[i] == 0x00)
+                        {
+                            int count = i - tmp + 1;
+                            string cmd = Encoding.Default.GetString(newBuffer.Skip(tmp).Take(count).ToArray());
 
-                        byte[] prevBytes = state.GameProcess.ReadBytes(_cmdBufferPtr + tmp, count);
+                            byte[] prevBytes = state.GameProcess.ReadBytes(_cmdBufferPtr + tmp, count);
 
-                        if (ProcessCommand(cmd))
-                            // don't modify the buffer if this section has changed
-                            if (prevBytes.SequenceEqual(state.GameProcess.ReadBytes(_cmdBufferPtr + tmp, count)))
-                                // remove the command from the buffer, replacing it with null bytes so we don't encounter
-                                // it in the next update loop
-                                state.GameProcess.WriteBytes(_cmdBufferPtr + tmp, new byte[count]);
+                            if (ProcessCommand(cmd))
+                                // don't modify the buffer if this section has changed
+                                if (prevBytes.SequenceEqual(state.GameProcess.ReadBytes(_cmdBufferPtr + tmp, count)))
+                                    // remove the command from the buffer, replacing it with null bytes so we don't encounter
+                                    // it in the next update loop
+                                    state.GameProcess.WriteBytes(_cmdBufferPtr + tmp, new byte[count]);
 
-                        tmp = i;
+                            tmp = i;
 
-                        // 2nd null byte, we've hit the effective end of the buffer
-                        if (newBuffer[i + 1] == 0x00)
-                            break;
+                            // 2nd null byte, we've hit the effective end of the buffer
+                            if (newBuffer[i + 1] == 0x00)
+                                break;
+                        }
                     }
-                }
 
-                state.GameProcess.ReadBytes(_cmdBufferPtr, _bufferSize).CopyTo(_cmdBuffer, 0);
+                    state.GameProcess.ReadBytes(_cmdBufferPtr, _bufferSize).CopyTo(_cmdBuffer, 0);
+                }
             }
+            catch (ArgumentNullException ex)
+            {
+                Trace.WriteLine(ex);
+            }
+
         }
 
         private bool ProcessCommand(string input)
@@ -204,7 +225,10 @@ namespace LiveSplit.SourceSplit
                 if (cleanedCmd.Contains(cmd.Name))
                 {
                     if (cleanedCmd.Length > cmd.Name.Length && cmd.Update(cleanedCmd))
+                    {
+                        SendConsoleMsg($"{cmd.Name} set to \"{cmd.Value}\"!\n");
                         return true;
+                    }
                     if (cleanedCmd == cmd.Name)
                     {
                         SendConsoleMsg(cmd.ToString());
@@ -248,7 +272,7 @@ namespace LiveSplit.SourceSplit
         {
             SendConsoleMsg(
                 "\nSourceSplit Custom Commands help:\n" +
-                "- Type <command> <1/0> to enable / disable functions!");
+                "- Type <command> <1/0> to enable / disable functions!\n");
             string name = Commands.Count() > 0 ? Commands[0].Name : "function";
             SendConsoleMsg(
                 "For example: " + $"{name} 0 to disable {name}, {name} 1 to enable\n" +

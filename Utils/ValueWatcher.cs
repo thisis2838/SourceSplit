@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace LiveSplit.SourceSplit.Utils
 {
     // simple value watcher keeping track of a pair of values.
-    class ValueWatcher<T> where T : struct
+    class ValueWatcher<T>
     {
         private T _current;
         public bool Changed = false;

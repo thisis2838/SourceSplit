@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -27,6 +28,8 @@ namespace LiveSplit.SourceSplit
     public partial class SourceSplitSettings : UserControl
     {
         public bool AutoSplitEnabled { get; set; }
+        public bool AutoSplitOnLevelTrans { get; set; }
+        public bool AutoSplitOnGenericMap { get; set; }
         public int SplitInterval { get; set; }
         public AutoSplitType AutoSplitType { get; private set; }
         public bool ShowGameTime { get; set; }
@@ -90,6 +93,7 @@ namespace LiveSplit.SourceSplit
         private const int DEFAULT_SPLITINTERVAL = 1;
         private const bool DEFAULT_SHOWGAMETIME = true;
         private const bool DEFAULT_AUTOSPLIT_ENABLED = true;
+        private const bool DEFAULT_AUTOSPLIT_ON_GENERIC_MAP = false;
         private const bool DEFAULT_AUTOSTARTENDRESET_ENABLED = true;
         private const bool DEFAULT_SHOWALTTIME = true;
         private const int DEFAULT_GAMETIMEDECIMALPLACES = 6;
@@ -101,6 +105,8 @@ namespace LiveSplit.SourceSplit
             this.InitializeComponent();
             
             this.chkAutoSplitEnabled.DataBindings.Add("Checked", this, nameof(this.AutoSplitEnabled), false, DataSourceUpdateMode.OnPropertyChanged);
+            this.chkSplitGenericMap.DataBindings.Add("Checked", this, nameof(this.AutoSplitOnGenericMap), false, DataSourceUpdateMode.OnPropertyChanged);
+            this.chkSplitLevelTrans.DataBindings.Add("Checked", this, nameof(this.AutoSplitOnLevelTrans), false, DataSourceUpdateMode.OnPropertyChanged);
             this.dmnSplitInterval.DataBindings.Add("Value", this, nameof(this.SplitInterval), false, DataSourceUpdateMode.OnPropertyChanged);
             this.chkShowGameTime.DataBindings.Add("Checked", this, nameof(this.ShowGameTime), false, DataSourceUpdateMode.OnPropertyChanged);
             this.chkShowAlt.DataBindings.Add("Checked", this, nameof(this.ShowAltTime), false, DataSourceUpdateMode.OnPropertyChanged);
@@ -129,8 +135,16 @@ namespace LiveSplit.SourceSplit
 
             this.UpdateDisabledControls(this, EventArgs.Empty);
 
-            // an exception that i can't debug happens when the selected index lands on anywhere else and a checkbox is ticked
-            this.Load += (e, f) => tabCtrlMaster.SelectedIndex = 0;
+            // HACKHACK: due to all the data bindings shenanigans, we need to load all the tab pages when opening the settings
+            // so just give in...
+            this.Load += (e, f) => 
+            { 
+                for (int i = tabCtrlMaster.TabPages.Count - 1; i >= 0; i--)
+                {
+                    tabCtrlMaster.SelectedIndex = i;
+                    Thread.Sleep(1);
+                }
+            };
         }
 
         private void lbGameProcessesSetDefault()
@@ -167,6 +181,10 @@ namespace LiveSplit.SourceSplit
             settingsNode.AppendChild(ToElement(doc, "Version", Assembly.GetExecutingAssembly().GetName().Version.ToString(3)));
 
             settingsNode.AppendChild(ToElement(doc, nameof(this.AutoSplitEnabled), this.AutoSplitEnabled));
+
+            settingsNode.AppendChild(ToElement(doc, nameof(this.AutoSplitOnGenericMap), this.AutoSplitOnGenericMap));
+
+            settingsNode.AppendChild(ToElement(doc, nameof(this.AutoSplitOnLevelTrans), this.AutoSplitOnLevelTrans));
 
             settingsNode.AppendChild(ToElement(doc, nameof(this.SplitInterval), this.SplitInterval));
 
@@ -219,6 +237,8 @@ namespace LiveSplit.SourceSplit
         public void SetSettings(XmlNode settings)
         {
             AutoSplitEnabled = GetSetting(settings, AutoSplitEnabled, nameof(AutoSplitEnabled), DEFAULT_AUTOSPLIT_ENABLED);
+            AutoSplitOnLevelTrans = GetSetting(settings, AutoSplitOnLevelTrans, nameof(AutoSplitOnLevelTrans), DEFAULT_AUTOSPLIT_ENABLED);
+            AutoSplitOnGenericMap = GetSetting(settings, AutoSplitOnGenericMap, nameof(AutoSplitOnGenericMap), DEFAULT_AUTOSPLIT_ON_GENERIC_MAP);
             AutoStartEndResetEnabled = GetSetting(settings, AutoStartEndResetEnabled, nameof(AutoStartEndResetEnabled), DEFAULT_AUTOSTARTENDRESET_ENABLED);
             SplitInterval = GetSetting(settings, SplitInterval, nameof(SplitInterval), DEFAULT_SPLITINTERVAL);
             ShowGameTime = GetSetting(settings, ShowGameTime, nameof(ShowGameTime), DEFAULT_SHOWGAMETIME);

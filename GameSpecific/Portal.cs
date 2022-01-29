@@ -78,9 +78,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _onceFlag = false;
         }
 
+        public override void OnGenericUpdate(GameState state)
+        {
+            base.OnGenericUpdate(state);
+            _ccHandler.Update(state);
+        }
+
         public override GameSupportResult OnUpdate(GameState state)
         {
-            _ccHandler.Update(state);
             _playerHP.Update(state.GameProcess);
 
             if (_elevSplit.BValue)

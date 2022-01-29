@@ -45,6 +45,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Speech" />
     <Reference Include="System.Windows.Forms" />
@@ -55,8 +56,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions\Detour.cs" />
+    <Compile Include="Utils\Detour.cs" />
     <Compile Include="GameSpecific\HL2Mods\HL2Mods_SouthernmostCombine.cs" />
+    <Compile Include="Utils\AppData.cs" />
     <Compile Include="Utils\CustomCommand.cs" />
     <Compile Include="Extensions\NumericsExtensions.cs" />
     <Compile Include="Extensions\SignatureScannerExtensions.cs" />
@@ -129,6 +131,12 @@
     <Compile Include="GameSpecific\PortalStoriesMel.cs" />
     <Compile Include="GameSpecific\TheStanleyParable.cs" />
     <Compile Include="GameState.cs" />
+    <Compile Include="Utils\ErrorDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Utils\ErrorDialog.Designer.cs">
+      <DependentUpon>ErrorDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Utils\InternalComponent.cs" />
     <Compile Include="MapTimesForm.cs">
       <SubType>Form</SubType>
@@ -161,6 +169,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SourceSplitSettings.resx">
       <DependentUpon>SourceSplitSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Utils\ErrorDialog.resx">
+      <DependentUpon>ErrorDialog.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

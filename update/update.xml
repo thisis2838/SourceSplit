@@ -73,4 +73,19 @@
       <change>Fixed the default value for TSP's No Space Ending Custom Command.</change>
     </changelog>
   </update>
+  <update version="3.2.2">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Added support for Very Hard Mod</change>
+      <change>Added an option to split upon intitial map loads</change>
+      <change>Fixed a bug where the splitter stops working if Livesplit crashes or closed unexpectedly when the game is running</change>
+      <change>Fixed a bug where typing into the Start Map textbox may cause an Exception to be tripped</change>
+      <change>Fixed a bug related to start time offset being added twice</change>
+      <change>Changed Black Mesa's xensplit in accordance with game rules</change>
+      <change>Modified Auto-End for Upmine Struggle</change>
+      <change>Unhandled or unexpected Exceptions will now be reported through a Warning popup</change>
+    </changelog>
+  </update>
 </updates>

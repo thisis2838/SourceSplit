@@ -11,6 +11,10 @@ using LiveSplit.ComponentUtil;
 using LiveSplit.SourceSplit.GameSpecific;
 using LiveSplit.SourceSplit.Extensions;
 using LiveSplit.SourceSplit.Utils;
+using System.Collections.Generic;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Reflection;
+using System.ComponentModel;
 
 namespace LiveSplit.SourceSplit
 {
@@ -68,6 +72,14 @@ namespace LiveSplit.SourceSplit
         private ValueWatcher<int> _custTimeCountWatcher;
         private IntPtr _custTimeCountPtr;
         private Detour _custTimeInjection;
+        private void ResetTimeInjection(Process game)
+        {
+            if (game != null)
+            {
+                _custTimeInjection?.Restore(game);
+                AppData.DeleteData("Detours", "host_runframe");
+            }
+        }
 
         public GameState _state;
 
@@ -461,12 +473,18 @@ namespace LiveSplit.SourceSplit
             if (_cancelSource == null || _thread == null || _thread.Status != TaskStatus.Running)
                 return;
 
-            _custTimeInjection?.Restore();
-
             _cancelSource.Cancel();
             _thread.Wait();
         }
 
+        /*
+        private string[] _nonNotifyExceptions = new string[]
+        {
+            "only part of",
+            "access denied",
+            "handle is invalid",
+        };
+        */
         void MemoryReadThread(CancellationTokenSource cts)
         {
             // force windows timer resolution to 1ms. it probably already is though, from the game.
@@ -474,13 +492,13 @@ namespace LiveSplit.SourceSplit
             // we do a lot of timing critical stuff so this may help out
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.AboveNormal;
 
+            Process game = null;
             while (true)
             {
                 try
                 {
-                    Debug.WriteLine("Waiting for process");
+                    ResetTimeInjection(game);
 
-                    Process game;
                     GameOffsets offsets;
                     while (!this.TryGetGameProcess(out game, out offsets))
                     {
@@ -495,15 +513,25 @@ namespace LiveSplit.SourceSplit
                     if (cts.IsCancellationRequested)
                         goto ret;
                 }
+                catch (Win32Exception win32ex)
+                {
+                    Trace.WriteLine(win32ex.ToString());
+                    Thread.Sleep(1000);
+                }
                 catch (Exception ex) // probably a Win32Exception on access denied to a process
                 {
                     Trace.WriteLine(ex.ToString());
+
+                    var errorWindow = new ErrorDialog($"Main:\n{ex}\n\nInner:\n{ex.InnerException?.ToString()}");
+                    errorWindow.ShowDialog();
                     Thread.Sleep(1000);
+
+                    ResetTimeInjection(game);
                 }
             }
 
-        ret:
-
+            ret:
+            ResetTimeInjection(game);
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.Normal;
             timeEndPeriod(1);
         }
@@ -572,6 +600,33 @@ namespace LiveSplit.SourceSplit
                 return false;
 
             #region HOST_RUNFRAME TICK COUNT DETOUR
+
+            const int timeCountPtrOff = 0x8;
+
+            string serialzedFilePath = AppData.GetDataPath("Detours", "host_runframe");
+            _custTimeCountWatcher = new ValueWatcher<int>(0);
+            if (File.Exists(serialzedFilePath))
+            {
+                Stream dStream = File.Open(serialzedFilePath, FileMode.Open);
+                try
+                {
+                    BinaryFormatter dBinary = new BinaryFormatter();
+                    dBinary.Binder = new SerialBinder();
+                    Detour dDetour = (Detour)dBinary.Deserialize(dStream);
+                    bool good = dDetour.VerifyIntegrity(p);
+                    if (good)
+                    {
+                        _custTimeInjection = dDetour;
+                        _custTimeCountPtr = _custTimeInjection.Destination - timeCountPtrOff;
+                        goto skipTimeHooks;
+                    }
+                }
+                finally
+                {
+                    dStream.Close();
+                }
+            }
+            
             // find the beginning of _host_runframe
             // find string pointer and reference
             SigScanTarget _hrfStringTarg = new SigScanTarget("_Host_RunFrame (top):  _heapchk() != _HEAPOK\n".ConvertToHex() + "00");
@@ -579,9 +634,9 @@ namespace LiveSplit.SourceSplit
             if (!scanForPtr(ref _hrfStringPtr, _hrfStringTarg, scanner, "host_runframe string pointer")
                 || !scanForPtr(ref _hrfStringPtr, new SigScanTarget("68" + _hrfStringPtr.GetByteString()), scanner, "host_runframe string reference")
                 // then find the target jl of the update loop
-                || !scanForPtr(ref _hrfStringPtr, 
-                    new SigScanTarget("0F 8C ?? ?? ?? FF"), 
-                    new SignatureScanner(p, _hrfStringPtr, 0x700), 
+                || !scanForPtr(ref _hrfStringPtr,
+                    new SigScanTarget("0F 8C ?? ?? ?? FF"),
+                    new SignatureScanner(p, _hrfStringPtr, 0x700),
                     "host_runframe target jump"))
                 return false;
 
@@ -615,16 +670,16 @@ namespace LiveSplit.SourceSplit
             // allocate memory for our detour
             IntPtr workSpace = p.AllocateMemory(0x100);
             // bytes of the ptr to our custom tick count var
-            byte[] timePtrBytes = BitConverter.GetBytes(workSpace.ToInt32());
+            byte[] timePtrBytes = BitConverter.GetBytes(workSpace.ToInt64());
             _custTimeInjection = new Detour(
                 p,
                 _hrfStringPtr,
-                workSpace + 0x8,
+                workSpace + timeCountPtrOff,
                 6 + i,
                 new byte[]
                 {
-                    // inc [tick count val]
-                    0xFF, 0x05, timePtrBytes[0], timePtrBytes[1], timePtrBytes[2], timePtrBytes[3],
+                // inc [tick count val]
+                0xFF, 0x05, timePtrBytes[0], timePtrBytes[1], timePtrBytes[2], timePtrBytes[3],
                 },
                 true);
             // because the detour just simply copies bytes over, we'll have to rewrite the jl instruction
@@ -633,7 +688,7 @@ namespace LiveSplit.SourceSplit
             byte[] loopToBytes = BitConverter.GetBytes((int)loopTo - (int)(workSpace + 0x8 + 0x6 + i + 0x6));
             p.WriteBytes(workSpace + 0x8 + 6 + i, new byte[]
                 {
-                    0x0F, 0x8C, loopToBytes[0], loopToBytes[1], loopToBytes[2], loopToBytes[3],
+                0x0F, 0x8C, loopToBytes[0], loopToBytes[1], loopToBytes[2], loopToBytes[3],
                 });
             // final memory layout should look like this:
             // workspace + 0x0          [tick count val]
@@ -642,7 +697,25 @@ namespace LiveSplit.SourceSplit
             // workspace + 0xE + i      jl [loop start]
             // workspace + 0xE + i + 6  jmp [loop end]
             _custTimeCountPtr = workSpace;
-            _custTimeCountWatcher = new ValueWatcher<int>(0);
+
+            // serialize data and store it off in case livesplit crashes and we can't restore the original bytes
+            {
+                Stream s = File.Create(serialzedFilePath);
+                try
+                {
+                    BinaryFormatter bf = new BinaryFormatter();
+                    bf.Binder = new SerialBinder();
+                    bf.Serialize(s, _custTimeInjection);
+                }
+                finally
+                {
+                    s.Close();
+                }
+
+            }
+
+            skipTimeHooks:
+
             #endregion
 
             // get the game dir now to evaluate game-specific stuff
@@ -848,7 +921,7 @@ namespace LiveSplit.SourceSplit
             else state.GameDir = new DirectoryInfo(GetGameDir(state.GameProcess, state.GameOffsets)).Name.ToLower();
             Debug.WriteLine("gameDir = " + state.GameDir);
 
-            state.CurrentMap = String.Empty;
+            state.CurrentMap = (String.Empty);
 
             // inspect memory layout to determine CEntInfo's version
             const int SERIAL_MASK = 0x7FFF;
@@ -965,7 +1038,7 @@ namespace LiveSplit.SourceSplit
                     state.PlayerEntInfo = state.GetEntInfoByIndex(GameState.ENT_INDEX_PLAYER);
 
                     // update map name
-                    state.GameProcess.ReadString(state.GameOffsets.CurMapPtr, ReadStringType.ASCII, 64, out state.CurrentMap);
+                    state.CurrentMap = state.GameProcess.ReadString(state.GameOffsets.CurMapPtr, ReadStringType.ASCII, 64);
                 }
                 if (state.RawTickCount.Current - state.TickBase < 0)
                 {
@@ -1068,6 +1141,8 @@ namespace LiveSplit.SourceSplit
 
             if (state.HostState.Current != state.HostState.Old)
             {
+                state.GameProcess.ReadString(state.GameOffsets.HostStateLevelNamePtr, ReadStringType.ASCII, 256 - 1, out string levelName);
+
                 if (state.HostState.Old == HostState.Run)
                 {
                     // the map changed or a quicksave was loaded
@@ -1087,11 +1162,7 @@ namespace LiveSplit.SourceSplit
                         // however the map and disconnect commands queue host state changes and host disconnect is always called first
                         // always leaving a window of time between map name changing and host state changing to newgame
                         else if (state.QueueOnNextSessionEnd == GameSupportResult.ManualSplit)
-                        {
-                            string levelName;
-                            state.GameProcess.ReadString(state.GameOffsets.HostStateLevelNamePtr, ReadStringType.ASCII, 256 - 1, out levelName);
                             this.SendMapChangedEvent(levelName, state.CurrentMap);
-                        }
                     }
                         
                     state.GameSupport?.OnSessionEndFull(state);
@@ -1099,13 +1170,12 @@ namespace LiveSplit.SourceSplit
 
                 Debug.WriteLine("host state changed to " + state.HostState.Current);
 
-                // HostState::m_levelName is changed much earlier than state.CurrentMap (CBaseServer::m_szMapName)
+                // HostState::m_levelName is changed much earlier than state.CurrentMap.Current (CBaseServer::m_szMapName)
                 // reading HostStateLevelNamePtr is only valid during these states (not LoadGame!)
-                if (state.HostState.Current == HostState.ChangeLevelSP || state.HostState.Current == HostState.ChangeLevelMP
+                if (state.HostState.Current == HostState.ChangeLevelSP 
+                    || state.HostState.Current == HostState.ChangeLevelMP
                     || state.HostState.Current == HostState.NewGame)
                 {
-                    string levelName;
-                    state.GameProcess.ReadString(state.GameOffsets.HostStateLevelNamePtr, ReadStringType.ASCII, 256 - 1, out levelName);
                     Debug.WriteLine("host state m_levelName changed to " + levelName);
 
                     // only for the beginner's guide, the "restart the level" option does a changelevel back to the currentmap rather than
@@ -1113,6 +1183,8 @@ namespace LiveSplit.SourceSplit
                     // if the runner uses this option to reset at the first map then restart the timer
                     if (state.HostState.Current == HostState.NewGame || state.GameDir.ToLower() == "beginnersguide")
                     {
+                        this.SendMapChangedEvent(levelName, state.CurrentMap, true);
+
                         if (state.GameSupport != null)
                         {
                             if (state.GameSupport.FirstMap.Contains(levelName))
@@ -1131,7 +1203,7 @@ namespace LiveSplit.SourceSplit
                     }
                     else // changelevel sp/mp
                     {
-                        // state.CurrentMap should still be the previous map
+                        // state.CurrentMap.Current should still be the previous map
                         this.SendMapChangedEvent(levelName, state.CurrentMap);
                     }
                 }
@@ -1170,16 +1242,18 @@ namespace LiveSplit.SourceSplit
         {
             public string Map { get; private set; }
             public string PrevMap { get; private set; }
-            public MapChangedEventArgs(string map, string prevMap)
+            public bool IsGeneric { get; private set; }
+            public MapChangedEventArgs(string map, string prevMap, bool isGeneric = false)
             {
                 this.Map = map;
                 this.PrevMap = prevMap;
+                IsGeneric = isGeneric;
             }
         }
-        public void SendMapChangedEvent(string mapName, string prevMapName)
+        public void SendMapChangedEvent(string mapName, string prevMapName, bool isGeneric = false)
         {
             _uiThread.Post(d => {
-                this.OnMapChanged?.Invoke(this, new MapChangedEventArgs(mapName, prevMapName));
+                this.OnMapChanged?.Invoke(this, new MapChangedEventArgs(mapName, prevMapName, isGeneric));
             }, null);
         }
 

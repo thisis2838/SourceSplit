@@ -402,6 +402,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 case "southernmost":
                 case "southernmostcombine":
                     return new HL2Mods_SouthernmostCombine();
+                case "veryhardmod":
+                    return new HL2Mods_VeryHardMod();
             }
 
             return null;

@@ -369,7 +369,7 @@ namespace LiveSplit.SourceSplit
             // different game versions, causing the existing ticks to produce the wrong time
             // so store this time and reset the total tick count
             Debug.WriteLine("tickrate " + e.IntervalPerTick);
-            _cumulativeTime += (float)(GameTime.TotalSeconds) - _cumulativeTime;
+            _cumulativeTime += (float)(_totalTicks * _intervalPerTick) - _cumulativeTime;
             _totalTicks = 0;
             _intervalPerTick = e.IntervalPerTick;
         }
@@ -402,6 +402,10 @@ namespace LiveSplit.SourceSplit
         void gameMemory_OnMapChanged(object sender, MapChangedEventArgs e)
         {
             Debug.WriteLine("gameMemory_OnMapChanged " + e.Map + " " + e.PrevMap);
+
+            if (!(Settings.AutoSplitOnLevelTrans && !e.IsGeneric))
+                if (!(Settings.AutoSplitOnGenericMap && e.IsGeneric))
+                    return;
 
             // this is in case they load a save that was made before current map
             // fuck time travel
