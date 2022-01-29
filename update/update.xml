@@ -88,4 +88,14 @@
       <change>Unhandled or unexpected Exceptions will now be reported through a Warning popup</change>
     </changelog>
   </update>
+  <update version="3.2.2.1">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Added an option to have Real Time be affected by built-in Auto-start time offset</change>
+      <change>Added an option to disable splitting on special events.</change>
+      <change>Fixed some UI element sizing.</change>
+    </changelog>
+  </update>
 </updates>

@@ -12,6 +12,7 @@ using System.Xml;
 using System.Windows.Forms;
 using LiveSplit.SourceSplit.GameSpecific;
 using static LiveSplit.SourceSplit.GameMemory;
+using System.Reflection;
 
 namespace LiveSplit.SourceSplit
 {
@@ -310,7 +311,6 @@ namespace LiveSplit.SourceSplit
 
             _gameMemory._state?.GameSupport?.OnTimerResetFull(true);
 
-
             // hack to make sure Portal players aren't using manual offset. we handle offset automatically now.
             // remove this eventually
             if (_timer.CurrentState.TimePausedAt.Seconds == 53 && _timer.CurrentState.TimePausedAt.Milliseconds == 10)
@@ -325,6 +325,7 @@ namespace LiveSplit.SourceSplit
                 _waitingForDelay = true;
 
         }
+
 
         void state_OnReset(object sender, TimerPhase t)
         {
@@ -429,6 +430,10 @@ namespace LiveSplit.SourceSplit
 
             _timer.Reset(); // make sure to reset for games that start from a quicksave (Aperture Tag)
             _timer.Start();
+
+            if (Settings.RTAStartOffset)
+                _timer.CurrentState.AdjustedStartTime -= TimeSpan.FromSeconds(Math.Abs(e.TicksOffset) * _intervalPerTick);
+            
             _sessionTicksOffset += e.TicksOffset;
             _tickOffset = e.TicksOffset;
         }
@@ -444,7 +449,7 @@ namespace LiveSplit.SourceSplit
 
         void gameMemory_ManualSplit(object sender, PlayerControlChangedEventArgs e)
         {
-            if (!this.Settings.AutoStartEndResetEnabled)
+            if (!this.Settings.AutoStartEndResetEnabled || !this.Settings.AutoSplitOnSpecial)
                 return;
 
             _tickOffset = e.TicksOffset;

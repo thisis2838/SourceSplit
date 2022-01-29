@@ -25,6 +25,7 @@ namespace LiveSplit.SourceSplit
             string caller = new StackFrame(1).GetMethod().Name;
             bool createAsLayoutComponent = (caller == "LoadLayoutComponent" || caller == "AddComponent");
 
+
             // if component is already loaded somewhere else
             // layout editor takes precedent because its just better & i can't figure out how to unload
             // components from layout editor >:(

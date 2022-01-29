@@ -29,22 +29,25 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.cmbTimingMethod = new System.Windows.Forms.ComboBox();
             this.chkHoldUntilPause = new System.Windows.Forms.CheckBox();
+            this.chkSplitGenericMap = new System.Windows.Forms.CheckBox();
             this.tabCtrlMaster = new System.Windows.Forms.TabControl();
             this.tabPgAutoStartReset = new System.Windows.Forms.TabPage();
             this.tlpAutoStartEndReset = new System.Windows.Forms.TableLayoutPanel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.gSplitOn = new System.Windows.Forms.GroupBox();
+            this.chkSplitLevelTrans = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.chkAutoSplitEnabled = new System.Windows.Forms.CheckBox();
@@ -77,9 +80,9 @@
             this.chkShowGameTime = new System.Windows.Forms.CheckBox();
             this.chkShowAlt = new System.Windows.Forms.CheckBox();
             this.chkShowTickCount = new System.Windows.Forms.CheckBox();
-            this.gSplitOn = new System.Windows.Forms.GroupBox();
-            this.chkSplitLevelTrans = new System.Windows.Forms.CheckBox();
-            this.chkSplitGenericMap = new System.Windows.Forms.CheckBox();
+            this.chkSplitSpecial = new System.Windows.Forms.CheckBox();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.chkRTAStartOffset = new System.Windows.Forms.CheckBox();
             this.lbMapBlacklist = new LiveSplit.SourceSplit.EditableListBox();
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.lbMapWhitelist = new LiveSplit.SourceSplit.EditableListBox();
@@ -90,6 +93,7 @@
             this.tabPgAutoStartReset.SuspendLayout();
             this.tlpAutoStartEndReset.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.gSplitOn.SuspendLayout();
             this.tableLayoutPanel3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.tableLayoutPanel4.SuspendLayout();
@@ -105,7 +109,7 @@
             this.gbMapTimes.SuspendLayout();
             this.gbAdditionalTimer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudDecimalPlaces)).BeginInit();
-            this.gSplitOn.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lbMapBlacklist)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lbMapWhitelist)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lbGameProcesses)).BeginInit();
@@ -146,6 +150,18 @@
         "unpauses.");
             this.chkHoldUntilPause.UseVisualStyleBackColor = true;
             // 
+            // chkSplitGenericMap
+            // 
+            this.chkSplitGenericMap.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.chkSplitGenericMap.AutoSize = true;
+            this.chkSplitGenericMap.Location = new System.Drawing.Point(142, 4);
+            this.chkSplitGenericMap.Name = "chkSplitGenericMap";
+            this.chkSplitGenericMap.Size = new System.Drawing.Size(91, 17);
+            this.chkSplitGenericMap.TabIndex = 1;
+            this.chkSplitGenericMap.Text = "First map load";
+            this.toolTip.SetToolTip(this.chkSplitGenericMap, "(for example, when using the map command)");
+            this.chkSplitGenericMap.UseVisualStyleBackColor = true;
+            // 
             // tabCtrlMaster
             // 
             this.tabCtrlMaster.Controls.Add(this.tabPgAutoStartReset);
@@ -181,10 +197,10 @@
             this.tlpAutoStartEndReset.Name = "tlpAutoStartEndReset";
             this.tlpAutoStartEndReset.RowCount = 4;
             this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 232F));
-            this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 110F));
-            this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 90F));
-            this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 78F));
-            this.tlpAutoStartEndReset.Size = new System.Drawing.Size(447, 437);
+            this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 138F));
+            this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 95F));
+            this.tlpAutoStartEndReset.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 45F));
+            this.tlpAutoStartEndReset.Size = new System.Drawing.Size(447, 470);
             this.tlpAutoStartEndReset.TabIndex = 14;
             // 
             // groupBox1
@@ -200,6 +216,29 @@
             this.groupBox1.TabIndex = 10;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Auto Split";
+            // 
+            // gSplitOn
+            // 
+            this.gSplitOn.Controls.Add(this.tableLayoutPanel1);
+            this.gSplitOn.Location = new System.Drawing.Point(6, 175);
+            this.gSplitOn.Name = "gSplitOn";
+            this.gSplitOn.Size = new System.Drawing.Size(426, 45);
+            this.gSplitOn.TabIndex = 22;
+            this.gSplitOn.TabStop = false;
+            this.gSplitOn.Text = "Split On";
+            // 
+            // chkSplitLevelTrans
+            // 
+            this.chkSplitLevelTrans.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.chkSplitLevelTrans.AutoSize = true;
+            this.chkSplitLevelTrans.Checked = true;
+            this.chkSplitLevelTrans.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkSplitLevelTrans.Location = new System.Drawing.Point(3, 4);
+            this.chkSplitLevelTrans.Name = "chkSplitLevelTrans";
+            this.chkSplitLevelTrans.Size = new System.Drawing.Size(97, 17);
+            this.chkSplitLevelTrans.TabIndex = 0;
+            this.chkSplitLevelTrans.Text = "Map transitions";
+            this.chkSplitLevelTrans.UseVisualStyleBackColor = true;
             // 
             // tableLayoutPanel3
             // 
@@ -346,7 +385,7 @@
             this.gbAutoStartEndReset.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gbAutoStartEndReset.Location = new System.Drawing.Point(3, 235);
             this.gbAutoStartEndReset.Name = "gbAutoStartEndReset";
-            this.gbAutoStartEndReset.Size = new System.Drawing.Size(217, 104);
+            this.gbAutoStartEndReset.Size = new System.Drawing.Size(217, 132);
             this.gbAutoStartEndReset.TabIndex = 13;
             this.gbAutoStartEndReset.TabStop = false;
             this.gbAutoStartEndReset.Text = "Auto Start / End / Reset";
@@ -365,7 +404,7 @@
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 21F));
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(211, 85);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(211, 113);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // chkAutoStartEndReset
@@ -402,7 +441,7 @@
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox2.Location = new System.Drawing.Point(226, 235);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(218, 104);
+            this.groupBox2.Size = new System.Drawing.Size(218, 132);
             this.groupBox2.TabIndex = 11;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Game Process List";
@@ -421,7 +460,7 @@
             // 
             this.gbTiming.Controls.Add(this.labTimingMethodDesc);
             this.gbTiming.Controls.Add(this.tlpTiming);
-            this.gbTiming.Location = new System.Drawing.Point(3, 345);
+            this.gbTiming.Location = new System.Drawing.Point(3, 373);
             this.gbTiming.Name = "gbTiming";
             this.gbTiming.Size = new System.Drawing.Size(217, 84);
             this.gbTiming.TabIndex = 21;
@@ -478,10 +517,11 @@
             // 
             // gTimerBehavior
             // 
+            this.gTimerBehavior.Controls.Add(this.chkRTAStartOffset);
             this.gTimerBehavior.Controls.Add(this.chkHoldUntilPause);
             this.gTimerBehavior.Location = new System.Drawing.Point(227, 63);
             this.gTimerBehavior.Name = "gTimerBehavior";
-            this.gTimerBehavior.Size = new System.Drawing.Size(215, 42);
+            this.gTimerBehavior.Size = new System.Drawing.Size(215, 84);
             this.gTimerBehavior.TabIndex = 28;
             this.gTimerBehavior.TabStop = false;
             this.gTimerBehavior.Text = "Timer Behavior";
@@ -594,39 +634,49 @@
             this.chkShowTickCount.Text = "Show Game Time Tick Count";
             this.chkShowTickCount.UseVisualStyleBackColor = true;
             // 
-            // gSplitOn
+            // chkSplitSpecial
             // 
-            this.gSplitOn.Controls.Add(this.chkSplitGenericMap);
-            this.gSplitOn.Controls.Add(this.chkSplitLevelTrans);
-            this.gSplitOn.Location = new System.Drawing.Point(6, 175);
-            this.gSplitOn.Name = "gSplitOn";
-            this.gSplitOn.Size = new System.Drawing.Size(426, 45);
-            this.gSplitOn.TabIndex = 22;
-            this.gSplitOn.TabStop = false;
-            this.gSplitOn.Text = "Split On";
+            this.chkSplitSpecial.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.chkSplitSpecial.AutoSize = true;
+            this.chkSplitSpecial.Checked = true;
+            this.chkSplitSpecial.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkSplitSpecial.Location = new System.Drawing.Point(281, 4);
+            this.chkSplitSpecial.Name = "chkSplitSpecial";
+            this.chkSplitSpecial.Size = new System.Drawing.Size(96, 17);
+            this.chkSplitSpecial.TabIndex = 2;
+            this.chkSplitSpecial.Text = "Special events";
+            this.toolTip.SetToolTip(this.chkSplitSpecial, "Split on designated game/mod-specific events such as custom endings or gameplay e" +
+        "vents");
+            this.chkSplitSpecial.UseVisualStyleBackColor = true;
             // 
-            // chkSplitLevelTrans
+            // tableLayoutPanel1
             // 
-            this.chkSplitLevelTrans.AutoSize = true;
-            this.chkSplitLevelTrans.Checked = true;
-            this.chkSplitLevelTrans.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkSplitLevelTrans.Location = new System.Drawing.Point(10, 20);
-            this.chkSplitLevelTrans.Name = "chkSplitLevelTrans";
-            this.chkSplitLevelTrans.Size = new System.Drawing.Size(97, 17);
-            this.chkSplitLevelTrans.TabIndex = 0;
-            this.chkSplitLevelTrans.Text = "Map transitions";
-            this.chkSplitLevelTrans.UseVisualStyleBackColor = true;
+            this.tableLayoutPanel1.ColumnCount = 3;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel1.Controls.Add(this.chkSplitLevelTrans, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.chkSplitSpecial, 2, 0);
+            this.tableLayoutPanel1.Controls.Add(this.chkSplitGenericMap, 1, 0);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 16);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 1;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(420, 26);
+            this.tableLayoutPanel1.TabIndex = 3;
             // 
-            // chkSplitGenericMap
+            // chkRTAStartOffset
             // 
-            this.chkSplitGenericMap.AutoSize = true;
-            this.chkSplitGenericMap.Location = new System.Drawing.Point(217, 20);
-            this.chkSplitGenericMap.Name = "chkSplitGenericMap";
-            this.chkSplitGenericMap.Size = new System.Drawing.Size(91, 17);
-            this.chkSplitGenericMap.TabIndex = 1;
-            this.chkSplitGenericMap.Text = "First map load";
-            this.toolTip.SetToolTip(this.chkSplitGenericMap, "(for example, when using the map command)");
-            this.chkSplitGenericMap.UseVisualStyleBackColor = true;
+            this.chkRTAStartOffset.AutoSize = true;
+            this.chkRTAStartOffset.Location = new System.Drawing.Point(6, 42);
+            this.chkRTAStartOffset.Name = "chkRTAStartOffset";
+            this.chkRTAStartOffset.Size = new System.Drawing.Size(211, 30);
+            this.chkRTAStartOffset.TabIndex = 28;
+            this.chkRTAStartOffset.Text = "Auto-Start RTA and IGT with the same \r\ntime offset";
+            this.toolTip.SetToolTip(this.chkRTAStartOffset, "If there is a built-in offset for Auto-Start, such offset will be applied onto Re" +
+        "al Time on an Auto-Start");
+            this.chkRTAStartOffset.UseVisualStyleBackColor = true;
             // 
             // lbMapBlacklist
             // 
@@ -635,37 +685,37 @@
             this.lbMapBlacklist.BackgroundColor = System.Drawing.SystemColors.Window;
             this.lbMapBlacklist.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.lbMapBlacklist.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.None;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.lbMapBlacklist.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle13.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle13.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle13.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle13.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle13.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.lbMapBlacklist.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle13;
             this.lbMapBlacklist.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.lbMapBlacklist.ColumnHeadersVisible = false;
             this.lbMapBlacklist.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Column1});
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.lbMapBlacklist.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle14.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle14.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle14.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle14.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle14.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle14.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.lbMapBlacklist.DefaultCellStyle = dataGridViewCellStyle14;
             this.lbMapBlacklist.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lbMapBlacklist.Location = new System.Drawing.Point(3, 16);
             this.lbMapBlacklist.Name = "lbMapBlacklist";
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.lbMapBlacklist.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle15.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle15.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle15.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle15.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle15.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle15.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.lbMapBlacklist.RowHeadersDefaultCellStyle = dataGridViewCellStyle15;
             this.lbMapBlacklist.RowHeadersVisible = false;
             this.lbMapBlacklist.RowTemplate.Height = 14;
             this.lbMapBlacklist.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
@@ -685,37 +735,37 @@
             this.lbMapWhitelist.BackgroundColor = System.Drawing.SystemColors.Window;
             this.lbMapWhitelist.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.lbMapWhitelist.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.None;
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.lbMapWhitelist.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle16.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle16.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle16.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle16.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle16.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle16.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.lbMapWhitelist.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle16;
             this.lbMapWhitelist.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.lbMapWhitelist.ColumnHeadersVisible = false;
             this.lbMapWhitelist.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn1});
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.lbMapWhitelist.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle17.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle17.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle17.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle17.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle17.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle17.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle17.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.lbMapWhitelist.DefaultCellStyle = dataGridViewCellStyle17;
             this.lbMapWhitelist.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lbMapWhitelist.Location = new System.Drawing.Point(3, 16);
             this.lbMapWhitelist.Name = "lbMapWhitelist";
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.lbMapWhitelist.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle18.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle18.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle18.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle18.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle18.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle18.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle18.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.lbMapWhitelist.RowHeadersDefaultCellStyle = dataGridViewCellStyle18;
             this.lbMapWhitelist.RowHeadersVisible = false;
             this.lbMapWhitelist.RowTemplate.Height = 14;
             this.lbMapWhitelist.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
@@ -737,36 +787,36 @@
             this.lbGameProcesses.BackgroundColor = System.Drawing.SystemColors.Window;
             this.lbGameProcesses.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.lbGameProcesses.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.None;
-            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.lbGameProcesses.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle10.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle10.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle10.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle10.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle10.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.lbGameProcesses.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle10;
             this.lbGameProcesses.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.lbGameProcesses.ColumnHeadersVisible = false;
             this.lbGameProcesses.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn2});
-            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle8.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle8.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.lbGameProcesses.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle11.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle11.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle11.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle11.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.lbGameProcesses.DefaultCellStyle = dataGridViewCellStyle11;
             this.lbGameProcesses.Location = new System.Drawing.Point(3, 16);
             this.lbGameProcesses.Name = "lbGameProcesses";
-            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle9.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle9.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle9.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle9.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.lbGameProcesses.RowHeadersDefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle12.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle12.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle12.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle12.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle12.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle12.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.lbGameProcesses.RowHeadersDefaultCellStyle = dataGridViewCellStyle12;
             this.lbGameProcesses.RowHeadersVisible = false;
             this.lbGameProcesses.RowTemplate.Height = 14;
             this.lbGameProcesses.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
@@ -791,6 +841,7 @@
             this.tlpAutoStartEndReset.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.gSplitOn.ResumeLayout(false);
             this.tableLayoutPanel3.ResumeLayout(false);
             this.tableLayoutPanel3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
@@ -813,8 +864,8 @@
             this.gbAdditionalTimer.ResumeLayout(false);
             this.gbAdditionalTimer.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudDecimalPlaces)).EndInit();
-            this.gSplitOn.ResumeLayout(false);
-            this.gSplitOn.PerformLayout();
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lbMapBlacklist)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lbMapWhitelist)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lbGameProcesses)).EndInit();
@@ -871,5 +922,8 @@
         private System.Windows.Forms.GroupBox gSplitOn;
         private System.Windows.Forms.CheckBox chkSplitGenericMap;
         private System.Windows.Forms.CheckBox chkSplitLevelTrans;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.CheckBox chkSplitSpecial;
+        private System.Windows.Forms.CheckBox chkRTAStartOffset;
     }
 }
