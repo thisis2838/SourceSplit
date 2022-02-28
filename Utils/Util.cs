@@ -82,7 +82,11 @@ namespace LiveSplit.SourceSplit
 
         public override void WriteLine(string message)
         {
-            base.WriteLine("SourceSplit: " + this.UpdateCount + " " + this.TickCount + " " + message);
+            message = "SourceSplit: " + this.UpdateCount + " " + this.TickCount + " " + message;
+            base.WriteLine(message);
+#if DEBUG
+            File.AppendAllText("sourcesplit_log.txt", message + "\r\n");
+#endif
         }
     }
 }

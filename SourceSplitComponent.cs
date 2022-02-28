@@ -13,6 +13,7 @@ using System.Windows.Forms;
 using LiveSplit.SourceSplit.GameSpecific;
 using static LiveSplit.SourceSplit.GameMemory;
 using System.Reflection;
+using LiveSplit.SourceSplit.Utils;
 
 namespace LiveSplit.SourceSplit
 {
@@ -95,12 +96,12 @@ namespace LiveSplit.SourceSplit
         private GameMemory _gameMemory;
 
         private float _intervalPerTick;
-        private int _sessionTicks;
-        private int _totalMapTicks;
-        private int _totalTicks;
-        private int _sessionTicksOffset;
+        private long _sessionTicks;
+        private long _totalMapTicks;
+        private long _totalTicks;
+        private long _sessionTicksOffset;
         private int _tickOffset;
-        private float _cumulativeTime;
+        private long _cumulativeTime;
         private GameTimingMethod _gameRecommendedTimingMethod;
 
         private bool _waitingForDelay;
@@ -133,11 +134,11 @@ namespace LiveSplit.SourceSplit
         {
             get
             {
-                float time = _cumulativeTime + (_totalTicks + _sessionTicks - _sessionTicksOffset) * _intervalPerTick;
-                return TimeSpan.FromTicks((long)(time * 1000 * TimeSpan.TicksPerMillisecond));
+                long time = (_totalTicks + _sessionTicks - _sessionTicksOffset);
+                return TimeSpan.FromTicks(time * (long)(_intervalPerTick * TimeSpan.TicksPerSecond) + _cumulativeTime);
             }
         }
-
+        private TimeSpan _prevGameTime = TimeSpan.Zero;
 
         public SourceSplitComponent(LiveSplitState state, bool isLayoutComponent)
         {
@@ -153,8 +154,8 @@ namespace LiveSplit.SourceSplit
 
             this.Settings = new SourceSplitSettings();
 
-            AltTimingComponent = new InternalComponent(Settings.ShowGameTime, new InfoTextComponent("Game Time", ""));
-            TickCountComponent = new InternalComponent(Settings.ShowTickCount, new InfoTextComponent("Tick Count", ""));
+            AltTimingComponent = new InternalComponent(Settings.ShowGameTime.Value, new InfoTextComponent("Game Time", ""));
+            TickCountComponent = new InternalComponent(Settings.ShowTickCount.Value, new InfoTextComponent("Tick Count", ""));
 
             _componentRenderer.Components.AddRange( new InternalComponent[]
             {
@@ -241,29 +242,29 @@ namespace LiveSplit.SourceSplit
                 state.SetGameTime(this.GameTime >= TimeSpan.Zero ? this.GameTime : TimeSpan.Zero);
             }
 
-            AltTimingComponent.Enabled = Settings.ShowGameTime;
-            TickCountComponent.Enabled = Settings.ShowTickCount;
+            AltTimingComponent.Enabled = Settings.ShowGameTime.Value;
+            TickCountComponent.Enabled = Settings.ShowTickCount.Value;
 
             _componentRenderer.Update(invalidator, state, width, height, mode);
 
             if (_componentRenderer.VisibleComponents.Any())
             {
                 _cache.Restart();
-                if (this.Settings.ShowGameTime)
+                if (this.Settings.ShowGameTime.Value)
                 {
                     // change this if we ever have new timing methods
                     TimingMethod method = state.CurrentTimingMethod;
-                    if (Settings.ShowAltTime)
+                    if (Settings.ShowAltTime.Value)
                         method = (TimingMethod)(((int)method + 1) % 2);
 
-                    this.AltTimingComponent.SetText(state.CurrentTime[method], Settings.GameTimeDecimalPlaces);
+                    this.AltTimingComponent.SetText(state.CurrentTime[method], Settings.GameTimeDecimalPlaces.Value);
                     this.AltTimingComponent.SetName(method == TimingMethod.RealTime ? "Real Time" : "Game Time");
 
                     _cache["TimeValue"] = this.AltTimingComponent.Component.ValueLabel.Text;
                     _cache["TimingMethod"] = state.CurrentTimingMethod;
                 }
 
-                if (this.Settings.ShowTickCount)
+                if (this.Settings.ShowTickCount.Value)
                 {
                     TickCountComponent.SetText(((long)(GameTime.TotalSeconds / _intervalPerTick)).ToString());
                     _cache["TickCount"] = this.TickCountComponent.Component.ValueLabel.Text;
@@ -272,6 +273,17 @@ namespace LiveSplit.SourceSplit
                 if (_cache.HasChanged)
                     invalidator?.Invalidate(0f, 0f, width, height);
             }
+
+#if DEBUG
+            if (_prevGameTime <= GameTime)
+                _prevGameTime = GameTime;
+            else
+            {
+                Debug.WriteLine($"game time sunk mid run" +
+                    $"\n\ntotal ticks: {_totalTicks}\nsession ticks: {_sessionTicks}\n\n" +
+                    $"game time now: {GameTime}\ngame time then: {_prevGameTime}");
+            }
+#endif
         }
 
         public void DrawVertical(Graphics g, LiveSplitState state, float width, Region region)
@@ -298,8 +310,10 @@ namespace LiveSplit.SourceSplit
 
         void state_OnStart(object sender, EventArgs e)
         {
+            _prevGameTime = TimeSpan.Zero;
+
             // assume we're holding pause
-            _holdingFirstPause = Settings.HoldUntilPause;
+            _holdingFirstPause = Settings.HoldUntilPause.Value;
 
             _cumulativeTime = 0;
             _timer.InitializeGameTime();
@@ -361,6 +375,8 @@ namespace LiveSplit.SourceSplit
         // first tick when player is fully in game
         void gameMemory_OnSessionStarted(object sender, SessionStartedEventArgs e)
         {
+            _totalTicks += Settings.SLPenalty.Value;
+
             _currentMap = e.Map;
         }
 
@@ -370,7 +386,8 @@ namespace LiveSplit.SourceSplit
             // different game versions, causing the existing ticks to produce the wrong time
             // so store this time and reset the total tick count
             Debug.WriteLine("tickrate " + e.IntervalPerTick);
-            _cumulativeTime += (float)(_totalTicks * _intervalPerTick) - _cumulativeTime;
+            Debug.WriteLine($"add to cumulative time: {GameTime.Ticks - _cumulativeTime}");
+            _cumulativeTime += GameTime.Ticks - _cumulativeTime;
             _totalTicks = 0;
             _intervalPerTick = e.IntervalPerTick;
         }
@@ -383,6 +400,11 @@ namespace LiveSplit.SourceSplit
         // called when player is fully in game
         void gameMemory_OnSessionTimeUpdate(object sender, SessionTicksUpdateEventArgs e)
         {
+#if DEBUG
+            if (e.TickDifference < 0)
+                new ErrorDialog("bogus time difference");
+#endif
+
             _holdingFirstPause = false;
             _sessionTicks += e.TickDifference;
         }
@@ -404,8 +426,8 @@ namespace LiveSplit.SourceSplit
         {
             Debug.WriteLine("gameMemory_OnMapChanged " + e.Map + " " + e.PrevMap);
 
-            if (!(Settings.AutoSplitOnLevelTrans && !e.IsGeneric))
-                if (!(Settings.AutoSplitOnGenericMap && e.IsGeneric))
+            if (!(Settings.AutoSplitOnLevelTrans.Value && !e.IsGeneric))
+                if (!(Settings.AutoSplitOnGenericMap.Value && e.IsGeneric))
                     return;
 
             // this is in case they load a save that was made before current map
@@ -425,13 +447,24 @@ namespace LiveSplit.SourceSplit
 
         void gameMemory_OnPlayerGainedControl(object sender, PlayerControlChangedEventArgs e)
         {
-            if (!this.Settings.AutoStartEndResetEnabled)
+            if (!this.Settings.AutoStartEnabled.Value)
                 return;
+
+            if (_timer.CurrentState.CurrentPhase == TimerPhase.Running)
+            {
+                if (Settings.SplitInstead.Value)
+                {
+                    gameMemory_ManualSplit(sender, e);
+                    return;
+                }
+                else if (!Settings.AutoResetEnabled.Value)
+                    return;
+            }
 
             _timer.Reset(); // make sure to reset for games that start from a quicksave (Aperture Tag)
             _timer.Start();
 
-            if (Settings.RTAStartOffset)
+            if (Settings.RTAStartOffset.Value)
                 _timer.CurrentState.AdjustedStartTime -= TimeSpan.FromSeconds(Math.Abs(e.TicksOffset) * _intervalPerTick);
             
             _sessionTicksOffset += e.TicksOffset;
@@ -440,7 +473,7 @@ namespace LiveSplit.SourceSplit
 
         void gameMemory_OnPlayerLostControl(object sender, PlayerControlChangedEventArgs e)
         {
-            if (!this.Settings.AutoStartEndResetEnabled)
+            if (!this.Settings.AutoStopEnabled.Value)
                 return;
 
             _sessionTicksOffset += e.TicksOffset;
@@ -449,7 +482,7 @@ namespace LiveSplit.SourceSplit
 
         void gameMemory_ManualSplit(object sender, PlayerControlChangedEventArgs e)
         {
-            if (!this.Settings.AutoStartEndResetEnabled || !this.Settings.AutoSplitOnSpecial)
+            if (!this.Settings.AutoStartEnabled.Value || !this.Settings.AutoSplitOnSpecial.Value)
                 return;
 
             _tickOffset = e.TicksOffset;
@@ -460,7 +493,11 @@ namespace LiveSplit.SourceSplit
 
         void gameMemory_OnNewGameStarted(object sender, EventArgs e)
         {
-            if (!this.Settings.AutoStartEndResetEnabled)
+            if (!this.Settings.AutoStartEnabled.Value)
+                return;
+
+            if (_timer.CurrentState.CurrentPhase == TimerPhase.Running)
+                if (!this.Settings.AutoResetEnabled.Value)
                 return;
 
             _timer.Reset();
@@ -468,6 +505,10 @@ namespace LiveSplit.SourceSplit
 
         void gameMemory_OnMiscTime(object sender, MiscTimeEventArgs e)
         {
+#if DEBUG
+            if (e.TickDifference < 0)
+                new ErrorDialog("bogus time difference");
+#endif
             switch (e.Type)
             {
                 case MiscTimeType.PauseTime:
@@ -489,7 +530,7 @@ namespace LiveSplit.SourceSplit
 
         void AutoSplit(string map)
         {
-            if (!this.Settings.AutoSplitEnabled)
+            if (!this.Settings.AutoSplitEnabled.Value)
                 return;
 
             Debug.WriteLine("AutoSplit " + map);
@@ -498,7 +539,7 @@ namespace LiveSplit.SourceSplit
 
             string[] blacklist = this.Settings.MapBlacklist.Select(x => x.ToLower()).ToArray();
 
-            if (this.Settings.AutoSplitType == AutoSplitType.Whitelist)
+            if (this.Settings.AutoSplitType.Value == AutoSplitType.Whitelist)
             {
                 string[] whitelist = this.Settings.MapWhitelist.Select(x => x.ToLower()).ToArray();
 
@@ -512,9 +553,9 @@ namespace LiveSplit.SourceSplit
                     this.DoSplit();
                 }
             }
-            else if (this.Settings.AutoSplitType == AutoSplitType.Interval)
+            else if (this.Settings.AutoSplitType.Value == AutoSplitType.Interval)
             {
-                if (!blacklist.Contains(map) && ++_splitCount >= this.Settings.SplitInterval)
+                if (!blacklist.Contains(map) && ++_splitCount >= this.Settings.SplitInterval.Value)
                 {
                     _splitCount = 0;
                     this.DoSplit();

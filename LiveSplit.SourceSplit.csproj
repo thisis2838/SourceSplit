@@ -56,9 +56,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Utils\Detour.cs" />
+    <Compile Include="Extensions\ProcExtensions.cs" />
+    <Compile Include="SettingEntry.cs" />
     <Compile Include="GameSpecific\HL2Mods\HL2Mods_SouthernmostCombine.cs" />
-    <Compile Include="Utils\AppData.cs" />
     <Compile Include="Utils\CustomCommand.cs" />
     <Compile Include="Extensions\NumericsExtensions.cs" />
     <Compile Include="Extensions\SignatureScannerExtensions.cs" />
@@ -162,6 +162,7 @@
     <Compile Include="Utils\Util.cs" />
     <Compile Include="Utils\ValueWatcher.cs" />
     <Compile Include="Utils\WinAPI.cs" />
+    <Compile Include="Utils\XMLOperations.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="MapTimesForm.resx">

@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
+using static LiveSplit.SourceSplit.Utils.XMLOperations;
 
 namespace LiveSplit.SourceSplit
 {
@@ -27,21 +28,26 @@ namespace LiveSplit.SourceSplit
 
     public partial class SourceSplitSettings : UserControl
     {
-        public bool AutoSplitEnabled { get; set; }
-        public bool AutoSplitOnLevelTrans { get; set; }
-        public bool AutoSplitOnGenericMap { get; set; }
-        public bool AutoSplitOnSpecial { get; set; }
-        public int SplitInterval { get; set; }
-        public AutoSplitType AutoSplitType { get; private set; }
-        public bool ShowGameTime { get; set; }
-        public bool ShowAltTime { get; set; }
-        public int GameTimeDecimalPlaces { get; set; }
-        public bool ShowTickCount { get; set; }
-        public bool AutoStartEndResetEnabled { get; set; }
-        public bool HoldUntilPause { get; set; }
-        public bool RTAStartOffset { get; set; }
-        public string StartMap { get; set; }
-
+        private List<SettingEntryBase> _settingEntries = new List<SettingEntryBase>();
+        public SettingEntry<bool> AutoSplitEnabled { get; set; } = new SettingEntry<bool>("AutoSplitEnabled", true);
+        public SettingEntry<bool> AutoSplitOnLevelTrans { get; set; } = new SettingEntry<bool>("AutoSplitOnLevelTrans", true);
+        public SettingEntry<bool> AutoSplitOnGenericMap { get; set; } = new SettingEntry<bool>("AutoSplitOnGenericMap", false);
+        public SettingEntry<bool> AutoSplitOnSpecial { get; set; } = new SettingEntry<bool>("AutoSplitOnSpecial", true);
+        public SettingEntry<int> SplitInterval { get; set; } = new SettingEntry<int>("SplitInterval", 1);
+        public SettingEntry<AutoSplitType> AutoSplitType { get; private set; } = new SettingEntry<AutoSplitType>("AutoSplitType", SourceSplit.AutoSplitType.Interval);
+        public SettingEntry<bool> ShowGameTime { get; set; } = new SettingEntry<bool>("ShowGameTime", false);
+        public SettingEntry<bool> ShowAltTime { get; set; } = new SettingEntry<bool>("ShowAltTime", false);
+        public SettingEntry<int> GameTimeDecimalPlaces { get; set; } = new SettingEntry<int>("GameTimeDecimalPlaces", 6);
+        public SettingEntry<bool> ShowTickCount { get; set; } = new SettingEntry<bool>("ShowTickCount", false);
+        public SettingEntry<bool> AutoStartEnabled { get; set; } = new SettingEntry<bool>("AutoStartEnabled", true);
+        public SettingEntry<bool> AutoStopEnabled { get; set; } = new SettingEntry<bool>("AutoStopEnabled", true);
+        public SettingEntry<bool> AutoResetEnabled { get; set; } = new SettingEntry<bool>("AutoResetEnabled", true);
+        public SettingEntry<bool> HoldUntilPause { get; set; } = new SettingEntry<bool>("HoldUntilUnpause", true);
+        public SettingEntry<bool> RTAStartOffset { get; set; } = new SettingEntry<bool>("RTAStartOffset", true);
+        public SettingEntry<string> StartMap { get; set; } = new SettingEntry<string>("StartMap", "");
+        public SettingEntry<bool> ServerInitialTicks { get; set; } = new SettingEntry<bool>("ServerInitialTicks", false);
+        public SettingEntry<int> SLPenalty { get; set; } = new SettingEntry<int>("SLPenalty", 0);
+        public SettingEntry<bool> SplitInstead { get; set; } = new SettingEntry<bool>("SplitInstead", false);
 
         public string[] MapWhitelist => GetListboxValues(this.lbMapWhitelist);
         public string[] MapBlacklist => GetListboxValues(this.lbMapBlacklist);
@@ -92,34 +98,30 @@ namespace LiveSplit.SourceSplit
 
         private readonly object _lock = new object();
 
-        private const int DEFAULT_SPLITINTERVAL = 1;
-        private const bool DEFAULT_SHOWGAMETIME = true;
-        private const bool DEFAULT_AUTOSPLIT_ENABLED = true;
-        private const bool DEFAULT_AUTOSPLIT_ON_GENERIC_MAP = false;
-        private const bool DEFAULT_AUTOSTARTENDRESET_ENABLED = true;
-        private const bool DEFAULT_SHOWALTTIME = true;
-        private const bool DEFAULT_RTA_START_OFFSET = true;
-        private const int DEFAULT_GAMETIMEDECIMALPLACES = 6;
-        private const AutoSplitType DEFAULT_AUTOSPLITYPE = AutoSplitType.Interval;
         private const GameTimingMethodSetting DEFAULT_GAME_TIMING_METHOD = GameTimingMethodSetting.Automatic;
 
         public SourceSplitSettings()
         {
             this.InitializeComponent();
-            
-            this.chkAutoSplitEnabled.DataBindings.Add("Checked", this, nameof(this.AutoSplitEnabled), false, DataSourceUpdateMode.OnPropertyChanged);
-            this.chkSplitGenericMap.DataBindings.Add("Checked", this, nameof(this.AutoSplitOnGenericMap), false, DataSourceUpdateMode.OnPropertyChanged);
-            this.chkSplitLevelTrans.DataBindings.Add("Checked", this, nameof(this.AutoSplitOnLevelTrans), false, DataSourceUpdateMode.OnPropertyChanged);
-            this.chkSplitSpecial.DataBindings.Add("Checked", this, nameof(this.AutoSplitOnSpecial), false, DataSourceUpdateMode.OnPropertyChanged);
-            this.dmnSplitInterval.DataBindings.Add("Value", this, nameof(this.SplitInterval), false, DataSourceUpdateMode.OnPropertyChanged);
-            this.chkShowGameTime.DataBindings.Add("Checked", this, nameof(this.ShowGameTime), false, DataSourceUpdateMode.OnPropertyChanged);
-            this.chkShowAlt.DataBindings.Add("Checked", this, nameof(this.ShowAltTime), false, DataSourceUpdateMode.OnPropertyChanged);
-            this.nudDecimalPlaces.DataBindings.Add("Value", this, nameof(this.GameTimeDecimalPlaces), false, DataSourceUpdateMode.OnPropertyChanged);
-            this.chkAutoStartEndReset.DataBindings.Add("Checked", this, nameof(this.AutoStartEndResetEnabled), false, DataSourceUpdateMode.OnPropertyChanged);
-            this.boxStartMap.DataBindings.Add("Text", this, nameof(this.StartMap), false, DataSourceUpdateMode.OnPropertyChanged);
-            this.chkShowTickCount.DataBindings.Add("Checked", this, nameof(this.ShowTickCount), false, DataSourceUpdateMode.OnPropertyChanged);
-            this.chkHoldUntilPause.DataBindings.Add("Checked", this, nameof(this.HoldUntilPause), false, DataSourceUpdateMode.OnPropertyChanged);
-            this.chkRTAStartOffset.DataBindings.Add("Checked", this, nameof(this.RTAStartOffset), false, DataSourceUpdateMode.OnPropertyChanged);
+
+            AutoSplitEnabled.Bind(chkAutoSplitEnabled, "Checked"); _settingEntries.Add(AutoSplitEnabled);
+            AutoSplitOnGenericMap.Bind(chkSplitGenericMap, "Checked"); _settingEntries.Add(AutoSplitOnGenericMap);
+            AutoSplitOnLevelTrans.Bind(chkSplitLevelTrans, "Checked"); _settingEntries.Add(AutoSplitOnLevelTrans);
+            AutoSplitOnSpecial.Bind(chkSplitSpecial, "Checked"); _settingEntries.Add(AutoSplitOnSpecial);
+            SplitInterval.Bind(dmnSplitInterval, "Value"); _settingEntries.Add(SplitInterval);
+            ShowGameTime.Bind(chkShowGameTime, "Checked"); _settingEntries.Add(ShowGameTime);
+            ShowAltTime.Bind(chkShowAlt, "Checked"); _settingEntries.Add(ShowAltTime);
+            GameTimeDecimalPlaces.Bind(nudDecimalPlaces, "Value"); _settingEntries.Add(GameTimeDecimalPlaces);
+            AutoStartEnabled.Bind(chkAutoStart, "Checked"); _settingEntries.Add(AutoStartEnabled);
+            AutoStopEnabled.Bind(chkAutoStop, "Checked"); _settingEntries.Add(AutoStopEnabled);
+            AutoResetEnabled.Bind(chkAutoReset, "Checked"); _settingEntries.Add(AutoResetEnabled);
+            StartMap.Bind(boxStartMap, "Text"); _settingEntries.Add(StartMap);
+            ShowTickCount.Bind(chkShowTickCount, "Checked"); _settingEntries.Add(ShowTickCount);
+            HoldUntilPause.Bind(chkHoldUntilPause, "Checked"); _settingEntries.Add(HoldUntilPause);
+            RTAStartOffset.Bind(chkRTAStartOffset, "Checked"); _settingEntries.Add(RTAStartOffset);
+            ServerInitialTicks.Bind(chkServerInitialTicks, "Checked"); _settingEntries.Add(ServerInitialTicks);
+            SLPenalty.Bind(nudSLPenalty, "Value"); _settingEntries.Add(SLPenalty);
+            SplitInstead.Bind(boxSplitInstead, "Checked"); _settingEntries.Add(SplitInstead);
 
             this.rdoWhitelist.CheckedChanged += rdoAutoSplitType_CheckedChanged;
             this.rdoInterval.CheckedChanged += rdoAutoSplitType_CheckedChanged;
@@ -128,19 +130,7 @@ namespace LiveSplit.SourceSplit
 
             // defaults
             lbGameProcessesSetDefault();
-            this.SplitInterval = DEFAULT_SPLITINTERVAL;
-            this.AutoSplitType = DEFAULT_AUTOSPLITYPE;
-            this.ShowGameTime = DEFAULT_SHOWGAMETIME;
-            this.GameTimeDecimalPlaces = DEFAULT_GAMETIMEDECIMALPLACES;
-            this.AutoSplitEnabled = DEFAULT_AUTOSPLIT_ENABLED;
-            this.AutoSplitOnGenericMap = DEFAULT_AUTOSPLIT_ON_GENERIC_MAP;
-            this.AutoSplitOnLevelTrans = DEFAULT_AUTOSPLIT_ENABLED;
-            this.AutoSplitOnSpecial = DEFAULT_AUTOSPLIT_ENABLED;
-            this.AutoStartEndResetEnabled = DEFAULT_AUTOSTARTENDRESET_ENABLED;
-            this.HoldUntilPause = true;
-            this.RTAStartOffset = DEFAULT_RTA_START_OFFSET;
             this.GameTimingMethod = DEFAULT_GAME_TIMING_METHOD;
-            this.StartMap = "";
 
             this.UpdateDisabledControls(this, EventArgs.Empty);
 
@@ -189,15 +179,7 @@ namespace LiveSplit.SourceSplit
 
             settingsNode.AppendChild(ToElement(doc, "Version", Assembly.GetExecutingAssembly().GetName().Version.ToString(3)));
 
-            settingsNode.AppendChild(ToElement(doc, nameof(this.AutoSplitEnabled), this.AutoSplitEnabled));
-
-            settingsNode.AppendChild(ToElement(doc, nameof(this.AutoSplitOnGenericMap), this.AutoSplitOnGenericMap));
-
-            settingsNode.AppendChild(ToElement(doc, nameof(this.AutoSplitOnLevelTrans), this.AutoSplitOnLevelTrans));
-
-            settingsNode.AppendChild(ToElement(doc, nameof(this.AutoSplitOnSpecial), this.AutoSplitOnSpecial));
-
-            settingsNode.AppendChild(ToElement(doc, nameof(this.SplitInterval), this.SplitInterval));
+            _settingEntries.ForEach(x => x.InsertSettings(doc, settingsNode));
 
             string whitelist = String.Join("|", this.MapWhitelist);
             settingsNode.AppendChild(ToElement(doc, nameof(this.MapWhitelist), whitelist));
@@ -208,65 +190,17 @@ namespace LiveSplit.SourceSplit
             string gameProcesses = String.Join("|", this.GameProcesses);
             settingsNode.AppendChild(ToElement(doc, nameof(this.GameProcesses), gameProcesses));
 
-            settingsNode.AppendChild(ToElement(doc, nameof(this.AutoSplitType), this.AutoSplitType));
-
-            settingsNode.AppendChild(ToElement(doc, nameof(this.ShowGameTime), this.ShowGameTime));
-
-            settingsNode.AppendChild(ToElement(doc, nameof(this.ShowAltTime), this.ShowAltTime));
-
-            settingsNode.AppendChild(ToElement(doc, nameof(this.GameTimeDecimalPlaces), this.GameTimeDecimalPlaces));
-
             settingsNode.AppendChild(ToElement(doc, nameof(this.GameTimingMethod), this.GameTimingMethod));
-
-            settingsNode.AppendChild(ToElement(doc, nameof(this.AutoStartEndResetEnabled), this.AutoStartEndResetEnabled));
-
-            settingsNode.AppendChild(ToElement(doc, nameof(this.StartMap), this.StartMap));
-
-            settingsNode.AppendChild(ToElement(doc, nameof(this.ShowTickCount), this.ShowTickCount));
-
-            settingsNode.AppendChild(ToElement(doc, nameof(this.HoldUntilPause), this.HoldUntilPause));
-
-            settingsNode.AppendChild(ToElement(doc, nameof(this.RTAStartOffset), this.RTAStartOffset));
 
             return settingsNode;
         }
 
-        private T GetSetting<T>(XmlNode settings, T setting, string name, T def)
-        {
-            var converter = TypeDescriptor.GetConverter(typeof(T));
-            if (converter == null)
-                converter = TypeDescriptor.GetConverter(typeof(Enum));
-            string settingEntry = settings[name]?.InnerText ?? null;
-            try
-            {
-                return settingEntry == null ? def : (T)converter.ConvertFromString(settingEntry);
-            }
-            catch (NotSupportedException)
-            {
-                return def;
-            }
-        }
-
         public void SetSettings(XmlNode settings)
         {
-            AutoSplitEnabled = GetSetting(settings, AutoSplitEnabled, nameof(AutoSplitEnabled), DEFAULT_AUTOSPLIT_ENABLED);
-            AutoSplitOnLevelTrans = GetSetting(settings, AutoSplitOnLevelTrans, nameof(AutoSplitOnLevelTrans), DEFAULT_AUTOSPLIT_ENABLED);
-            AutoSplitOnGenericMap = GetSetting(settings, AutoSplitOnGenericMap, nameof(AutoSplitOnGenericMap), DEFAULT_AUTOSPLIT_ON_GENERIC_MAP);
-            AutoSplitOnSpecial = GetSetting(settings, AutoSplitOnSpecial, nameof(AutoSplitOnSpecial), DEFAULT_AUTOSPLIT_ENABLED);
-            AutoStartEndResetEnabled = GetSetting(settings, AutoStartEndResetEnabled, nameof(AutoStartEndResetEnabled), DEFAULT_AUTOSTARTENDRESET_ENABLED);
-            SplitInterval = GetSetting(settings, SplitInterval, nameof(SplitInterval), DEFAULT_SPLITINTERVAL);
-            ShowGameTime = GetSetting(settings, ShowGameTime, nameof(ShowGameTime), DEFAULT_SHOWGAMETIME);
-            ShowAltTime = GetSetting(settings, ShowAltTime, nameof(ShowAltTime), DEFAULT_SHOWALTTIME);
-            GameTimeDecimalPlaces = GetSetting(settings, GameTimeDecimalPlaces, nameof(GameTimeDecimalPlaces), DEFAULT_GAMETIMEDECIMALPLACES);
-            GameTimingMethod = GetSetting(settings, GameTimingMethod, nameof(GameTimingMethod), DEFAULT_GAME_TIMING_METHOD);
-            AutoSplitType = GetSetting(settings, AutoSplitType, nameof(AutoSplitType), DEFAULT_AUTOSPLITYPE);
-            StartMap = GetSetting(settings, StartMap, nameof(StartMap), "");
-            ShowTickCount = GetSetting(settings, ShowTickCount, nameof(ShowTickCount), false);
-            HoldUntilPause = GetSetting(settings, HoldUntilPause, nameof(HoldUntilPause), true);
-            RTAStartOffset = GetSetting(settings, RTAStartOffset, nameof(RTAStartOffset), DEFAULT_RTA_START_OFFSET);
+            _settingEntries.ForEach(x => x.GetValueFromSetting(settings));
 
-            this.rdoInterval.Checked = this.AutoSplitType == AutoSplitType.Interval;
-            this.rdoWhitelist.Checked = this.AutoSplitType == AutoSplitType.Whitelist;
+            this.rdoInterval.Checked = this.AutoSplitType.Value == SourceSplit.AutoSplitType.Interval;
+            this.rdoWhitelist.Checked = this.AutoSplitType.Value == SourceSplit.AutoSplitType.Whitelist;
 
             this.lbMapWhitelist.Rows.Clear();
             string whitelist = settings[nameof(this.MapWhitelist)]?.InnerText ?? String.Empty;
@@ -299,9 +233,9 @@ namespace LiveSplit.SourceSplit
 
         void rdoAutoSplitType_CheckedChanged(object sender, EventArgs e)
         {
-            this.AutoSplitType = this.rdoInterval.Checked ?
-                AutoSplitType.Interval :
-                AutoSplitType.Whitelist;
+            this.AutoSplitType.Value = this.rdoInterval.Checked ?
+                SourceSplit.AutoSplitType.Interval :
+                SourceSplit.AutoSplitType.Whitelist;
 
             this.UpdateDisabledControls(sender, e);
         }
@@ -313,18 +247,13 @@ namespace LiveSplit.SourceSplit
                 this.lblMaps.Enabled = this.chkAutoSplitEnabled.Checked;
 
             this.lbMapWhitelist.Enabled =
-                (this.AutoSplitType == AutoSplitType.Whitelist && chkAutoSplitEnabled.Checked);
+                (this.AutoSplitType.Value == SourceSplit.AutoSplitType.Whitelist && chkAutoSplitEnabled.Checked);
             this.lbMapBlacklist.Enabled = 
-                (this.AutoSplitType == AutoSplitType.Interval && chkAutoSplitEnabled.Checked);
+                (this.AutoSplitType.Value == SourceSplit.AutoSplitType.Interval && chkAutoSplitEnabled.Checked);
+
+            gSplitOn.Enabled = chkAutoSplitEnabled.Checked;
 
             nudDecimalPlaces.Enabled = chkShowAlt.Enabled = chkShowGameTime.Checked;
-        }
-
-        static XmlElement ToElement<T>(XmlDocument document, string name, T value)
-        {
-            XmlElement str = document.CreateElement(name);
-            str.InnerText = value.ToString();
-            return str;
         }
 
         static string[] GetListboxValues(EditableListBox lb)

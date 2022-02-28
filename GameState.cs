@@ -384,7 +384,7 @@ namespace LiveSplit.SourceSplit
 
         public ProcessModuleWow64Safe GetModule(string name)
         {
-            var proc = GameProcess.ModulesWow64Safe().FirstOrDefault(x => x.ModuleName.ToLower() == name.ToLower());
+            var proc = GameProcess.ModulesWow64SafeNoCache().FirstOrDefault(x => x.ModuleName.ToLower() == name.ToLower());
             Trace.Assert(proc != null);
             return proc;
         }

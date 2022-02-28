@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq;
 using LiveSplit.ComponentUtil;
+using LiveSplit.SourceSplit.Extensions;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -26,7 +27,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public override void OnGameAttached(GameState state)
         {
-            ProcessModuleWow64Safe server = state.GameProcess.ModulesWow64Safe().FirstOrDefault(x => x.ModuleName.ToLower() == "server.dll");
+            ProcessModuleWow64Safe server = state.GameProcess.ModulesWow64SafeNoCache().FirstOrDefault(x => x.ModuleName.ToLower() == "server.dll");
             Trace.Assert(server != null);
 
             var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);

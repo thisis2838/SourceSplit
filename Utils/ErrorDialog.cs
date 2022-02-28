@@ -22,11 +22,14 @@ namespace LiveSplit.SourceSplit.Utils
 
             boxMsg.Text = msg.Replace("\n", "\r\n");
             SystemSounds.Exclamation.Play();
+
+            this.ShowDialog();
         }
 
         private void ErrorDialog_Load(object sender, EventArgs e)
         {
-            iconWarning.Image = SystemIcons.Error.ToBitmap();
+            iconWarning.Image = SystemIcons.Warning.ToBitmap();
+            this.Icon = SystemIcons.Warning;
         }
 
         private void butReport_Click(object sender, EventArgs e)

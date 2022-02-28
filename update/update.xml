@@ -106,4 +106,19 @@
       <change>Fixed Save Deleting splitting when Splitting on Generic Map Split is enabled.</change>
     </changelog>
   </update>
+  <update version="3.2.3">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Added an option to count server initialization ticks</change>
+      <change>Added an option to add extra ticks per game load</change>
+      <change>Added an option to Auto-Split instead of Auto-Resetting the timer</change>
+      <change>Redesigned timer monitoring to no longer rely on memory injection</change>
+      <change>Fixed some issues with time keeping, particularly with decimal precision</change>
+      <change>Split Auto Start / Stop / Reset into 3 separate settings</change>
+      <change>Cleaned up Setting-handling code</change>
+      <change>Minor adjustments to settings UI</change>
+    </changelog>
+  </update>
 </updates>

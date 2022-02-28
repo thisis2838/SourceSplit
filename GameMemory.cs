@@ -69,17 +69,8 @@ namespace LiveSplit.SourceSplit
 
         private SourceSplitSettings _settings;
 
-        private ValueWatcher<int> _custTimeCountWatcher;
+        private ValueWatcher<long> _custTimeCountWatcher;
         private IntPtr _custTimeCountPtr;
-        private Detour _custTimeInjection;
-        private void ResetTimeInjection(Process game)
-        {
-            if (game != null)
-            {
-                _custTimeInjection?.Restore(game);
-                AppData.DeleteData("Detours", "host_runframe");
-            }
-        }
 
         public GameState _state;
 
@@ -497,8 +488,6 @@ namespace LiveSplit.SourceSplit
             {
                 try
                 {
-                    ResetTimeInjection(game);
-
                     GameOffsets offsets;
                     while (!this.TryGetGameProcess(out game, out offsets))
                     {
@@ -513,25 +502,21 @@ namespace LiveSplit.SourceSplit
                     if (cts.IsCancellationRequested)
                         goto ret;
                 }
-                catch (Win32Exception win32ex)
-                {
-                    Trace.WriteLine(win32ex.ToString());
-                    Thread.Sleep(1000);
-                }
-                catch (Exception ex) // probably a Win32Exception on access denied to a process
+                catch (Exception ex) when (ex is InvalidOperationException || ex is Win32Exception)
                 {
                     Trace.WriteLine(ex.ToString());
-
-                    var errorWindow = new ErrorDialog($"Main:\n{ex}\n\nInner:\n{ex.InnerException?.ToString()}");
-                    errorWindow.ShowDialog();
                     Thread.Sleep(1000);
+                }
+                catch (Exception ex)
+                {
+                    Trace.WriteLine(ex.ToString());
+                    new ErrorDialog($"Main:\n{ex}\n\nInner:\n{ex.InnerException?.ToString()}");
 
-                    ResetTimeInjection(game);
+                    Thread.Sleep(1000);
                 }
             }
 
             ret:
-            ResetTimeInjection(game);
             Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.Normal;
             timeEndPeriod(1);
         }
@@ -568,8 +553,8 @@ namespace LiveSplit.SourceSplit
                 return false;
 
             // process is up, check if engine and server are both loaded yet
-            ProcessModuleWow64Safe engine = p.ModulesWow64Safe().FirstOrDefault(x => x.ModuleName.ToLower() == "engine.dll");
-            ProcessModuleWow64Safe server = p.ModulesWow64Safe().FirstOrDefault(x => x.ModuleName.ToLower() == "server.dll");
+            ProcessModuleWow64Safe engine = p.ModulesWow64SafeNoCache().FirstOrDefault(x => x.ModuleName.ToLower() == "engine.dll");
+            ProcessModuleWow64Safe server = p.ModulesWow64SafeNoCache().FirstOrDefault(x => x.ModuleName.ToLower() == "server.dll");
 
             if (engine == null || server == null)
                 return false;
@@ -599,34 +584,8 @@ namespace LiveSplit.SourceSplit
                 && !scanForPtr(ref offsets.SignOnStatePtr, _signOnStateTarget2, scanner, "CBaseClientState::m_nSignonState", "2"))
                 return false;
 
-            #region HOST_RUNFRAME TICK COUNT DETOUR
+            #region HOST_RUNFRAME TICK COUNT
 
-            const int timeCountPtrOff = 0x8;
-
-            string serialzedFilePath = AppData.GetDataPath("Detours", "host_runframe");
-            _custTimeCountWatcher = new ValueWatcher<int>(0);
-            if (File.Exists(serialzedFilePath))
-            {
-                Stream dStream = File.Open(serialzedFilePath, FileMode.Open);
-                try
-                {
-                    BinaryFormatter dBinary = new BinaryFormatter();
-                    dBinary.Binder = new SerialBinder();
-                    Detour dDetour = (Detour)dBinary.Deserialize(dStream);
-                    bool good = dDetour.VerifyIntegrity(p);
-                    if (good)
-                    {
-                        _custTimeInjection = dDetour;
-                        _custTimeCountPtr = _custTimeInjection.Destination - timeCountPtrOff;
-                        goto skipTimeHooks;
-                    }
-                }
-                finally
-                {
-                    dStream.Close();
-                }
-            }
-            
             // find the beginning of _host_runframe
             // find string pointer and reference
             SigScanTarget _hrfStringTarg = new SigScanTarget("_Host_RunFrame (top):  _heapchk() != _HEAPOK\n".ConvertToHex() + "00");
@@ -640,82 +599,33 @@ namespace LiveSplit.SourceSplit
                     "host_runframe target jump"))
                 return false;
 
-            // we can't detour the jl directly due to weird performance issues so back track until we
-            // found our target cmp instruction
-
-            // find out where the jl goes to
+            // find out where the jl goes to, which should be the top of the update loop
             IntPtr loopTo = _hrfStringPtr + p.ReadValue<int>(_hrfStringPtr + 0x2) + 0x6;
-            // find cmp instruction
-            int i = 0;
-            // should never be more than 15 bytes away...
-            for (i = 0; i < 15; i++)
-            {
-                byte curByte = p.ReadValue<byte>(_hrfStringPtr - i);
-                // we are cmp'ing 2 registeres normally, so use 0x39 and 0x3B
-                if (new byte[] { 0x39, 0x3B }.Contains(curByte))
-                {
-                    byte prev = p.ReadValue<byte>(_hrfStringPtr - i - 1);
-                    // ignore this byte if this is part of a mov
-                    if ((prev <= 0x8E && prev >= 0x89))
-                        continue;
 
-                    _hrfStringPtr -= i;
-                    Debug.WriteLine($"host_runframe target cmp at 0x{_hrfStringPtr.ToString("X")}");
-                    goto success;
+            while ((long)loopTo <= (long)_hrfStringPtr)
+            {
+                loopTo = loopTo + 1;
+                uint candidateHostFrameCount = p.ReadValue<uint>(loopTo);
+
+                if (scanner.IsWithin(candidateHostFrameCount))
+                {
+                    for (int i = 1; i <= 2; i++)
+                    {
+                        uint candidateNextPtr = p.ReadValue<uint>(loopTo + 4 + i);
+                        if (scanner.IsWithin(candidateNextPtr) && candidateNextPtr - candidateHostFrameCount <= 0x8)
+                        {
+                            _custTimeCountPtr = (IntPtr)candidateHostFrameCount;
+                            Debug.WriteLine($"host_runframe host_tickcount ptr is 0x{_custTimeCountPtr.ToString("X")}");
+                            goto skipTimeHooks;
+                        }
+                    }
                 }
+
             }
             return false;
 
-            success:
-            // allocate memory for our detour
-            IntPtr workSpace = p.AllocateMemory(0x100);
-            // bytes of the ptr to our custom tick count var
-            byte[] timePtrBytes = BitConverter.GetBytes(workSpace.ToInt64());
-            _custTimeInjection = new Detour(
-                p,
-                _hrfStringPtr,
-                workSpace + timeCountPtrOff,
-                6 + i,
-                new byte[]
-                {
-                // inc [tick count val]
-                0xFF, 0x05, timePtrBytes[0], timePtrBytes[1], timePtrBytes[2], timePtrBytes[3],
-                },
-                true);
-            // because the detour just simply copies bytes over, we'll have to rewrite the jl instruction
-            // to correct the offset back to the start of the loop
-            // bytes of the ptr from the detoured jl to the start of the loop
-            byte[] loopToBytes = BitConverter.GetBytes((int)loopTo - (int)(workSpace + 0x8 + 0x6 + i + 0x6));
-            p.WriteBytes(workSpace + 0x8 + 6 + i, new byte[]
-                {
-                0x0F, 0x8C, loopToBytes[0], loopToBytes[1], loopToBytes[2], loopToBytes[3],
-                });
-            // final memory layout should look like this:
-            // workspace + 0x0          [tick count val]
-            // workspace + 0x8          inc [tick count val]
-            // workspace + 0xE          (cmp and along with any other bytes in between that and the jl)
-            // workspace + 0xE + i      jl [loop start]
-            // workspace + 0xE + i + 6  jmp [loop end]
-            _custTimeCountPtr = workSpace;
-
-            // serialize data and store it off in case livesplit crashes and we can't restore the original bytes
-            {
-                Stream s = File.Create(serialzedFilePath);
-                try
-                {
-                    BinaryFormatter bf = new BinaryFormatter();
-                    bf.Binder = new SerialBinder();
-                    bf.Serialize(s, _custTimeInjection);
-                }
-                finally
-                {
-                    s.Close();
-                }
-
-            }
-
             skipTimeHooks:
-
+            _custTimeCountWatcher = new ValueWatcher<long>(0);
             #endregion
 
             // get the game dir now to evaluate game-specific stuff
@@ -742,7 +652,7 @@ namespace LiveSplit.SourceSplit
 
             #region CLIENT
             // optional client fade list
-            ProcessModuleWow64Safe client = p.ModulesWow64Safe().FirstOrDefault(x => x.ModuleName.ToLower() == "client.dll");
+            ProcessModuleWow64Safe client = p.ModulesWow64SafeNoCache().FirstOrDefault(x => x.ModuleName.ToLower() == "client.dll");
             if (client != null)
             {
                 var clientScanner = new SignatureScanner(p, client.BaseAddress, client.ModuleMemorySize);
@@ -1109,7 +1019,7 @@ namespace LiveSplit.SourceSplit
             {
                 // note: seems to be slow sometimes. ~3ms
                 
-                if (state.TickCount > 0)
+                if (_settings.ServerInitialTicks.Value || state.TickCount > 0)
                 {
                     if (state.ServerState.Current == ServerState.Paused)
                         this.SendMiscTimeEvent(_custTimeCountWatcher.Current - _custTimeCountWatcher.Old, MiscTimeType.PauseTime);
@@ -1194,7 +1104,7 @@ namespace LiveSplit.SourceSplit
                                 this.SendNewGameStartedEvent(levelName);
 
                             if (!string.IsNullOrWhiteSpace(levelName) && 
-                                (levelName == _settings.StartMap
+                                (levelName == _settings.StartMap.Value
                                 || state.GameSupport.StartOnFirstLoadMaps.Contains(levelName)
                                 || state.GameSupport.AdditionalGameSupport.Any(x => x.StartOnFirstLoadMaps.Contains(levelName))))
                             {
@@ -1262,13 +1172,13 @@ namespace LiveSplit.SourceSplit
 
         public class SessionTicksUpdateEventArgs : EventArgs
         {
-            public int TickDifference { get; private set; }
-            public SessionTicksUpdateEventArgs(int tickDifference)
+            public long TickDifference { get; private set; }
+            public SessionTicksUpdateEventArgs(long tickDifference)
             {
                 this.TickDifference = tickDifference;
             }
         }
-        public void SendSessionTimeUpdateEvent(int tickDifference)
+        public void SendSessionTimeUpdateEvent(long tickDifference)
         {
             // note: sometimes this takes a few ms
             _uiThread.Post(d => {
@@ -1336,9 +1246,9 @@ namespace LiveSplit.SourceSplit
 
         public class MiscTimeEventArgs : EventArgs
         {
-            public int TickDifference { get; private set; }
+            public long TickDifference { get; private set; }
             public MiscTimeType Type { get; private set; }
-            public MiscTimeEventArgs(int tickDiff, MiscTimeType type)
+            public MiscTimeEventArgs(long tickDiff, MiscTimeType type)
             {
                 this.TickDifference = tickDiff;
                 this.Type = type;
@@ -1351,7 +1261,7 @@ namespace LiveSplit.SourceSplit
             PauseTime,
             ClientDisconnectTime
         }
-        public void SendMiscTimeEvent(int tickDiff, MiscTimeType type)
+        public void SendMiscTimeEvent(long tickDiff, MiscTimeType type)
         {
             _uiThread.Post(d => {
                 this.OnMiscTime?.Invoke(this, new MiscTimeEventArgs(tickDiff, type));
