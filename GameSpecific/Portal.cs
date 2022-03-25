@@ -110,7 +110,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 finally { _elevSplitTime = splitTime; }
             }
 
-
             if (_onceFlag)
                 return GameSupportResult.DoNothing;
 

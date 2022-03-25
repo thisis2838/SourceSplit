@@ -36,9 +36,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         public override GameSupportResult OnUpdate(GameState state)
         {
             if (_onceFlag)
-            {
                 return GameSupportResult.DoNothing;
-            }
 
             if (this.IsFirstMap)
             {
@@ -50,7 +48,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     return GameSupportResult.PlayerGainedControl;
                 }
             }
-
             else if (this.IsLastMap && _spriteIndex != 1)
             {
                 var newBlack = state.GetEntInfoByIndex(_spriteIndex);
