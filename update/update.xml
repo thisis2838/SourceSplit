@@ -129,4 +129,12 @@
       <change>Made Auto-Reset reset split-related states, even if it is disabled.</change>
     </changelog>
   </update>
+  <update version="3.2.3.2">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Fixed Splitter sometimes missing splits.</change>
+    </changelog>
+  </update>
 </updates>

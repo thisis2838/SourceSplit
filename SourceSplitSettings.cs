@@ -48,6 +48,7 @@ namespace LiveSplit.SourceSplit
         public SettingEntry<bool> ServerInitialTicks { get; set; } = new SettingEntry<bool>("ServerInitialTicks", false);
         public SettingEntry<int> SLPenalty { get; set; } = new SettingEntry<int>("SLPenalty", 0);
         public SettingEntry<bool> SplitInstead { get; set; } = new SettingEntry<bool>("SplitInstead", false);
+        public SettingEntry<bool> ResetMapTransitions { get; set; } = new SettingEntry<bool>("ResetMapTransitions", false);
 
         public string[] MapWhitelist => GetListboxValues(this.lbMapWhitelist);
         public string[] MapBlacklist => GetListboxValues(this.lbMapBlacklist);
@@ -122,6 +123,7 @@ namespace LiveSplit.SourceSplit
             ServerInitialTicks.Bind(chkServerInitialTicks, "Checked"); _settingEntries.Add(ServerInitialTicks);
             SLPenalty.Bind(nudSLPenalty, "Value"); _settingEntries.Add(SLPenalty);
             SplitInstead.Bind(boxSplitInstead, "Checked"); _settingEntries.Add(SplitInstead);
+            ResetMapTransitions.Bind(chkResetMapTransitions, "Checked"); _settingEntries.Add(ResetMapTransitions);
 
             this.rdoWhitelist.CheckedChanged += rdoAutoSplitType_CheckedChanged;
             this.rdoInterval.CheckedChanged += rdoAutoSplitType_CheckedChanged;

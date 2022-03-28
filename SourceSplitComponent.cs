@@ -320,6 +320,8 @@ namespace LiveSplit.SourceSplit
             _totalTicks = 0;
             MapTimesForm.Instance.Reset();
             _totalMapTicks = 0;
+            _splitOperations.Clear();
+            _splitCount = 0;
 
             _gameMemory._state?.GameSupport?.OnTimerResetFull(true);
 
@@ -445,11 +447,14 @@ namespace LiveSplit.SourceSplit
 
         void gameMemory_OnPlayerGainedControl(object sender, PlayerControlChangedEventArgs e)
         {
+            if (Settings.ResetMapTransitions.Value)
+            {
+                _splitOperations.Clear();
+                _splitCount = 0;
+            }
+
             if (!this.Settings.AutoStartEnabled.Value)
                 return;
-
-            _splitOperations.Clear();
-            _splitCount = 0;
 
             if (_timer.CurrentState.CurrentPhase == TimerPhase.Running)
             {
