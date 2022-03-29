@@ -137,4 +137,12 @@
       <change>Fixed Splitter sometimes missing splits.</change>
     </changelog>
   </update>
+  <update version="3.2.3.3">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Fixed Dangerous World's Auto-Start firing on loading a save anywhere on the first map.</change>
+    </changelog>
+  </update>
 </updates>

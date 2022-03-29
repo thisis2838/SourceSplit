@@ -10,8 +10,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // ending: when the final trigger_once is hit and the fade finishes
 
         private bool _onceFlag = false;
-        private int _laggedMovementOffset = -1;
-        private MemoryWatcher<float> _playerLaggedMoveValue;
         private float _splitTime;
 
         public HL2Mods_DangerousWorld()
@@ -19,27 +17,17 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("dw_ep1_01");
             this.AddLastMap("dw_ep1_08");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
-        }
-
-        public override void OnGameAttached(GameState state)
-        {
-            ProcessModuleWow64Safe server = state.GetModule("server.dll");
-            var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
-            if (GameMemory.GetBaseEntityMemberOffset("m_flLaggedMovementValue", state.GameProcess, scanner, out _laggedMovementOffset))
-                Debug.WriteLine("CBasePlayer::m_flLaggedMovementValue offset = 0x" + _laggedMovementOffset.ToString("X"));
         }
 
         public override void OnSessionStart(GameState state)
         {
             base.OnSessionStart(state);
             if (this.IsFirstMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
-                _playerLaggedMoveValue = new MemoryWatcher<float>(state.PlayerEntInfo.EntityPtr + _laggedMovementOffset);
+                _splitTime = state.FindOutputFireTime("break", "Break", "", 20);
             else if (this.IsLastMap)
                 _splitTime = state.FindOutputFireTime("sound_outro_amb_03", "PlaySound", "", 20);
             _onceFlag = false;
         }
-
 
         public override GameSupportResult OnUpdate(GameState state)
         {
@@ -48,13 +36,17 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsFirstMap)
             {
-                _playerLaggedMoveValue.Update(state.GameProcess);
-                if (_playerLaggedMoveValue.Current == 1 && _playerLaggedMoveValue.Old != 1)
+                float splitTime = state.FindOutputFireTime("break", "Break", "", 20);
+                try
                 {
-                    Debug.WriteLine("dangerous world start");
-                    _onceFlag = true;
-                    return GameSupportResult.PlayerGainedControl;
+                    if (splitTime == 0 && _splitTime != 0)
+                    {
+                        Debug.WriteLine("dangerous world start");
+                        _onceFlag = true;
+                        return GameSupportResult.PlayerGainedControl;
+                    }
                 }
+                finally { _splitTime = splitTime; }
             }
             else if (this.IsLastMap)
             {
