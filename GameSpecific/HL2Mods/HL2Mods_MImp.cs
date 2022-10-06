@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -15,42 +16,40 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_MImp()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("mimp1");
             this.AddLastMap("mimp3");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsFirstMap)
             {
-                _splitTime = state.FindOutputFireTime("cave_giveitems_equipper", 5);
+                _splitTime = state.GameEngine.GetOutputFireTime("cave_giveitems_equipper", 5);
             }
             else if (this.IsLastMap)
             {
-                this._camIndex = state.GetEntIndexByName("outro.camera");
-                Debug.WriteLine("_camIndex index is " + this._camIndex);
+                this._camIndex = state.GameEngine.GetEntIndexByName("outro.camera");
+                //Debug.WriteLine("_camIndex index is " + this._camIndex);
             }
             _onceFlag = false;
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
-                float newSplitTime = state.FindOutputFireTime("cave_giveitems_equipper", 5);
+                float newSplitTime = state.GameEngine.GetOutputFireTime("cave_giveitems_equipper", 5);
                 if (_splitTime != 0f && newSplitTime == 0f)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("mimp start");
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
                 _splitTime = newSplitTime;
             }
@@ -60,11 +59,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("mimp end");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

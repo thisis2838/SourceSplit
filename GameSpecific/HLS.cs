@@ -3,7 +3,8 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using LiveSplit.SourceSplit.Extensions;
+using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -18,17 +19,21 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HLS()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("c1a0");
             this.AddLastMap("c4a3");
-            this.StartOnFirstLoadMaps.AddRange(this.FirstMap);
+            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
-        public override void OnGameAttached(GameState state)
+
+        public override GameEngine GetEngine()
+        {
+            return new HLSEngine();
+        }
+        public override void OnGameAttached(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
             var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
 
-            this.EndOffsetTicks = 0;
+            EndOffsetTicks = 0;
 
 
             IntPtr getStringPtr(string str)
@@ -88,22 +93,23 @@ namespace LiveSplit.SourceSplit.GameSpecific
             Debug.WriteLine("nihi dead bool offset is 0x" + _nihiDeadOffset.ToString("x"));
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
             if (IsLastMap)
             {
-                IntPtr ptr = state.GetEntityByName("nihilanth");
+                IntPtr ptr = state.GameEngine.GetEntityByName("nihilanth");
                 _nihiDead = new MemoryWatcher<bool>(ptr + _nihiDeadOffset);
             }
             _onceFlag = false;
+
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsLastMap)
             {
@@ -113,11 +119,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _onceFlag = true;
                     Debug.WriteLine("hls end");
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

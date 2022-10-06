@@ -1,5 +1,6 @@
 ﻿using LiveSplit.ComponentUtil;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -15,33 +16,31 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_Precursor()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("r_map1");
             this.AddLastMap("r_map7");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
             if (IsFirstMap)
             {
-                _startCamIndex = state.GetEntIndexByName("camera2_camera");
-                Debug.WriteLine("found start cam index at " + _startCamIndex);
+                _startCamIndex = state.GameEngine.GetEntIndexByName("camera2_camera");
+                //Debug.WriteLine("found start cam index at " + _startCamIndex);
             }
             else if (IsLastMap)
             {
-                _endCamIndex = state.GetEntIndexByName("end_lockplayer");
-                Debug.WriteLine("found end cam index at " + _endCamIndex);
+                _endCamIndex = state.GameEngine.GetEntIndexByName("end_lockplayer");
+                //Debug.WriteLine("found end cam index at " + _endCamIndex);
             }
             _onceFlag = false;
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
@@ -49,7 +48,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _onceFlag = true;
                     Debug.WriteLine("precursor start");
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
             else if (this.IsLastMap)
@@ -58,11 +57,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _onceFlag = true;
                     Debug.WriteLine("precursor end");
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

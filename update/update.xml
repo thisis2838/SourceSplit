@@ -145,4 +145,33 @@
       <change>Fixed Dangerous World's Auto-Start firing on loading a save anywhere on the first map.</change>
     </changelog>
   </update>
+  <update version="3.3.0">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Added Demo Recording interoperability for timing, so run time can more closely match demo time.</change>
+      <change>Added a feature to print the information of the latest Demo to the Console.</change>
+      <change>Added a feature to display the current Demo's name and tick count on the layout.</change>
+      <change>Added an option to open SourceSplit's settings under the Control drowdown in LiveSplit.</change>
+      <change>Added an option to add RTA to IGT when the game is not running.</change>
+      <change>Added an extra condition for Auto-Starting when transitioning to a map or loading a save with a particular name.</change>
+      <change>Added an option to disable Auto-Resetting when starting a New Game on the first map.</change>
+      <change>Added support for Local Motive, Portal: Crumbs of Truth.</change>
+      <change>Added extra split points for The Beginner's Guide.</change>
+      <change>Redesigned map whitelist/blacklisting to allow/disallow specific transitions.</change>
+      <change>Redesigned Map Times window.</change>      
+      <change>Redesigned settings and added an About page.</change>      
+      <change>Changed the timing for all Portal games/mods to abide by new rules.</change>
+      <change>Changed the method for detecting Auto-Start in Portal to use file hash.</change>
+      <change>Made Auto-Splitting history roll back when undoing splits.</change>
+      <change>Some custom commands' values are now saved like settings.</change>
+      <change>Made time and values shown by Additional Timers monospaced.</change>
+      <change>Made the Tick Count display also show the tick count for the current Session.</change>
+      <change>Removed Game Process List for automated game process acquisition logic.</change>
+      <change>Split Timing Method into separate options.</change>
+      <change>Fixed various bugs related to split tracking.</change>
+      <change>Massive internal code revisions and refactoring.</change>
+    </changelog>
+  </update>
 </updates>

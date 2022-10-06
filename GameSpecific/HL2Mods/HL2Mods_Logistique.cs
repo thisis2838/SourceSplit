@@ -1,5 +1,6 @@
 ﻿using LiveSplit.ComponentUtil;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {      
@@ -18,15 +19,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_Logistique()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("Lg-1");
             this.AddLastMap("Lg-4");
-            this.StartOnFirstLoadMaps.AddRange(this.FirstMap);
+            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnGameAttached(GameState state)
+        public override void OnGameAttached(GameState state, TimerActions actions)
         {
-            base.OnGameAttached(state);
+            base.OnGameAttached(state, actions);
 
             ProcessModuleWow64Safe vguimatsurface = state.GetModule("vguimatsurface.dll");
 
@@ -39,16 +39,16 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _watcher = new MemoryWatcherList { _creditsYPos, _creditsCount, _yResolution };
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsLastMap)
             {
@@ -60,11 +60,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _onceFlag = true;
                     Debug.WriteLine("logistique end");
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

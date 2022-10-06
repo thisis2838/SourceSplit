@@ -1,6 +1,7 @@
 ﻿using LiveSplit.ComponentUtil;
 using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -14,56 +15,56 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_DangerousWorld()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
+            
             this.AddFirstMap("dw_ep1_01");
             this.AddLastMap("dw_ep1_08");
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
             if (this.IsFirstMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
-                _splitTime = state.FindOutputFireTime("break", "Break", "", 20);
+                _splitTime = state.GameEngine.GetOutputFireTime("break", "Break", "", 20);
             else if (this.IsLastMap)
-                _splitTime = state.FindOutputFireTime("sound_outro_amb_03", "PlaySound", "", 20);
+                _splitTime = state.GameEngine.GetOutputFireTime("sound_outro_amb_03", "PlaySound", "", 20);
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
-                float splitTime = state.FindOutputFireTime("break", "Break", "", 20);
+                float splitTime = state.GameEngine.GetOutputFireTime("break", "Break", "", 20);
                 try
                 {
                     if (splitTime == 0 && _splitTime != 0)
                     {
                         Debug.WriteLine("dangerous world start");
                         _onceFlag = true;
-                        return GameSupportResult.PlayerGainedControl;
+                        actions.Start(StartOffsetTicks); return;
                     }
                 }
                 finally { _splitTime = splitTime; }
             }
             else if (this.IsLastMap)
             {
-                float splitTime = state.FindOutputFireTime("sound_outro_amb_03", "PlaySound", "", 20);
+                float splitTime = state.GameEngine.GetOutputFireTime("sound_outro_amb_03", "PlaySound", "", 20);
                 try
                 {
                     if (splitTime != 0 && _splitTime == 0)
                     {
                         _onceFlag = true;
                         Debug.WriteLine("dangerous world end");
-                        return GameSupportResult.PlayerLostControl;
+                        actions.End(EndOffsetTicks); return;
                     }
                 }
                 finally { _splitTime = splitTime; }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using LiveSplit.ComponentUtil;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -24,10 +25,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddFirstMap("sp_a1_intro1");
             this.AddLastMap("sp_a4_finale4");
         }
-
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             _endDetectEntity = IntPtr.Zero;
             _lastEntCheckTime = 0;
@@ -35,12 +35,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (this.IsFirstMap)
-                return base.OnUpdate(state);
+                base.OnUpdate(state, actions);
             else if (!this.IsLastMap || _onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             // GetEntityByName is rather expensive so don't check every tick
             // there's a period of about 10-15 seconds from when it's created until it's used, so a 5 second
@@ -48,7 +48,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             if (_endDetectEntity == IntPtr.Zero && state.TickTime - _lastEntCheckTime > 5.0f)
             {
                 Debug.WriteLine("checking for ending_vehicle ent");
-                _endDetectEntity = state.GetEntityByName("ending_vehicle");
+                _endDetectEntity = state.GameEngine.GetEntityByName("ending_vehicle");
                 _lastEntCheckTime = state.TickTime;
 
                 if (_endDetectEntity != IntPtr.Zero)
@@ -69,13 +69,13 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     Debug.WriteLine("portal 2 ending detection");
                     _onceFlag = true;
                     _endDetectEntity = IntPtr.Zero;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
 
                 _prevCanShoot = canShoot;
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

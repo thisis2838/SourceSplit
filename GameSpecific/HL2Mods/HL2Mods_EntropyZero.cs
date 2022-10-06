@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -14,40 +15,39 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_EntropyZero()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("az_intro");
             this.AddLastMap("az_c4_3");
-            this.StartOnFirstLoadMaps.AddRange(this.FirstMap);
+            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (IsLastMap)
-                _splitTime = state.FindOutputFireTime("STASIS_SEQ_LazyGo", 3);
+                _splitTime = state.GameEngine.GetOutputFireTime("STASIS_SEQ_LazyGo", 3);
 
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (IsLastMap)
             {
-                float newSplitTime = state.FindOutputFireTime("STASIS_SEQ_LazyGo", 3);
+                float newSplitTime = state.GameEngine.GetOutputFireTime("STASIS_SEQ_LazyGo", 3);
                 if (newSplitTime == 0f && _splitTime != 0f)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("entropy zero end");
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
                 _splitTime = newSplitTime;
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

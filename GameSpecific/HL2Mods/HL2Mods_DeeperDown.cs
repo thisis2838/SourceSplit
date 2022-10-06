@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -16,34 +17,32 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_DeeperDown()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("ep2_dd2_1");
             this.AddLastMap("ep2_dd2_9");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsFirstMap)
             {
-                this._camIndex = state.GetEntIndexByName("PointViewCont1");
-                Debug.WriteLine("_camIndex index is " + this._camIndex);
+                this._camIndex = state.GameEngine.GetEntIndexByName("PointViewCont1");
+                //Debug.WriteLine("_camIndex index is " + this._camIndex);
             }
             else if (this.IsLastMap)
             {
-                _splitTime = state.FindOutputFireTime("OW_Dead_Relay", 2);
+                _splitTime = state.GameEngine.GetOutputFireTime("OW_Dead_Relay", 2);
             }
 
             _onceFlag = false;
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
@@ -51,22 +50,22 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _onceFlag = true;
                     Debug.WriteLine("deeper down start");
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
 
             else if (this.IsLastMap)
             {
-                float newSplitTime = state.FindOutputFireTime("OW_Dead_Relay", 2);
+                float newSplitTime = state.GameEngine.GetOutputFireTime("OW_Dead_Relay", 2);
                 if (_splitTime != 0f && newSplitTime == 0f)
                 {
                     Debug.WriteLine("deeper down end");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
                 _splitTime = newSplitTime;
             }
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

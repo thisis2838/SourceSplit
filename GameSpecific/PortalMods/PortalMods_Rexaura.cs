@@ -1,8 +1,9 @@
 ﻿using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
-    class PortalMods_Rexaura : GameSupport
+    class PortalMods_Rexaura : PortalBase
     {
         // how to match this timing with demos:
         // start: on view entity changing to the player's
@@ -12,36 +13,34 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private int _endCamIndex;
         private bool _onceFlag;
 
-        public PortalMods_Rexaura()
+        public PortalMods_Rexaura() : base()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("rex_00_intro");
-            this.AddLastMap("rex_19_remote");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
+            this.AddLastMap("rex_19_remote");    
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsFirstMap)
             {
-                _startCamIndex = state.GetEntIndexByName("wub_viewcontrol");
-                Debug.WriteLine("found start cam index at " + _startCamIndex);
+                _startCamIndex = state.GameEngine.GetEntIndexByName("wub_viewcontrol");
+                //Debug.WriteLine("found start cam index at " + _startCamIndex);
             }
             else if (this.IsLastMap)
             {
-                _endCamIndex = state.GetEntIndexByName("end_game_camera");
-                Debug.WriteLine("found end cam index at " + _endCamIndex);
+                _endCamIndex = state.GameEngine.GetEntIndexByName("end_game_camera");
+                //Debug.WriteLine("found end cam index at " + _endCamIndex);
             }
 
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
@@ -49,7 +48,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("rexaura start");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
             else if (this.IsLastMap)
@@ -58,11 +57,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("rexaura end");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
 
     }

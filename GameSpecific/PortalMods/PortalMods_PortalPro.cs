@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
-    class PortalMods_PortalPro : GameSupport
+    class PortalMods_PortalPro : Portal
     {
         // how to match this timing with demos:
         // start: on view entity changing from start camera's to the player's
@@ -14,37 +15,36 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private int _startCamIndex;
         private int _endCamIndex;
 
-        public PortalMods_PortalPro()
+        public PortalMods_PortalPro() : base()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("start");
             this.AddLastMap("boss");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
+             
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsFirstMap)
             {
-                _startCamIndex = state.GetEntIndexByName("wub_viewcontrol");
-                Debug.WriteLine("found start cam index at " + _startCamIndex);
+                _startCamIndex = state.GameEngine.GetEntIndexByName("wub_viewcontrol");
+                //Debug.WriteLine("found start cam index at " + _startCamIndex);
             }
 
             if (this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
-                _endCamIndex = state.GetEntIndexByName("end_game_camera");
-                Debug.WriteLine("found end cam index at " + _endCamIndex);
+                _endCamIndex = state.GameEngine.GetEntIndexByName("end_game_camera");
+                //Debug.WriteLine("found end cam index at " + _endCamIndex);
             }
 
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
@@ -52,7 +52,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("portal pro start");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
             else if (this.IsLastMap)
@@ -61,11 +61,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("portal pro end");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
 
     }

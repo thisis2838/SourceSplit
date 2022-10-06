@@ -2,10 +2,11 @@
 using System.Diagnostics;
 using System.Linq;
 using LiveSplit.ComponentUtil;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
-    class PortalMods_PRMO : GameSupport
+    class PortalMods_PRMO : PortalBase
     {
         // how to match this timing with demos:
         // start: on first map load
@@ -15,16 +16,15 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private int _playerSuppressingCrosshairOffset = -1;
         private bool _onceFlag;
 
-        public PortalMods_PRMO()
+        public PortalMods_PRMO() : base()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AutoStartType = AutoStart.ViewEntityChanged;
             this.AddFirstMap("escape_02_d");
             this.AddLastMap("testchmb_a_00_d");
-            this.StartOnFirstLoadMaps.AddRange(this.FirstMap);
+            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnGameAttached(GameState state)
+        public override void OnGameAttached(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
 
@@ -34,9 +34,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CPortalPlayer::m_bSuppressingCrosshair offset = 0x" + _playerSuppressingCrosshairOffset.ToString("X"));
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero && _playerSuppressingCrosshairOffset != -1)
                 _crosshairSuppressed = new MemoryWatcher<bool>(state.PlayerEntInfo.EntityPtr + _playerSuppressingCrosshairOffset);
@@ -44,10 +44,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsLastMap)
             {
@@ -57,11 +57,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _onceFlag = true;
                     Debug.WriteLine("porto crosshair detected");
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

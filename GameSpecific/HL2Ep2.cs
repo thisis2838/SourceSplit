@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using LiveSplit.ComponentUtil;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -21,17 +22,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Ep2()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("ep2_outland_01");
             this.AddLastMap("ep2_outland_12a");
-            this.RequiredProperties = PlayerProperties.ParentEntity;
-
-            AdditionalGameSupport = new List<GameSupport>(new GameSupport[] { _darkIntervention, _hellsMines, _upmineStruggle});
+            AdditionalGameSupport = new List<GameSupport>(){ _darkIntervention, _hellsMines, _upmineStruggle };
         }
 
-        public override void OnGameAttached(GameState state)
+        public override void OnGameAttached(GameState state, TimerActions actions)
         {
-            base.OnGameAttached(state);
+            base.OnGameAttached(state, actions);
 
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
             var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
@@ -40,9 +38,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CBasePlayer::m_flLaggedMovementValue offset = 0x" + _basePlayerLaggedMovementOffset.ToString("X"));
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (state.PlayerEntInfo.EntityPtr != IntPtr.Zero && _basePlayerLaggedMovementOffset != -1)
                 state.GameProcess.ReadValue(state.PlayerEntInfo.EntityPtr + _basePlayerLaggedMovementOffset, out _prevLaggedMovementValue);
@@ -50,10 +48,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero && _basePlayerLaggedMovementOffset != -1)
             {
@@ -67,7 +65,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("ep2 start");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
 
                 _prevLaggedMovementValue = laggedMovementValue;
@@ -81,12 +79,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("ep2 end");
                     _onceFlag = true;
-                    this.EndOffsetTicks = 0;
-                    return GameSupportResult.PlayerLostControl;
+                    EndOffsetTicks = 0;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

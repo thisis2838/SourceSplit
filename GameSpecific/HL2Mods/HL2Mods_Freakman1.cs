@@ -1,6 +1,7 @@
 ﻿using LiveSplit.ComponentUtil;
 using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -18,12 +19,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_Freakman1()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("gordon1");
             this.AddLastMap("endbattle");
         }
 
-        public override void OnGameAttached(GameState state)
+        public override void OnGameAttached(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
 
@@ -33,40 +33,40 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsFirstMap)
             {
-                _trigIndex = state.GetEntIndexByPos(-1472f, -608f, 544f);
+                _trigIndex = state.GameEngine.GetEntIndexByPos(-1472f, -608f, 544f);
                 Debug.WriteLine("start trigger index is " + _trigIndex);
             }
             _onceFlag = false;
 
             if (this.IsLastMap)
             {
-                _kleinerHP = new MemoryWatcher<int>(state.GetEntInfoByIndex(state.GetEntIndexByPos(0f, 0f, 1888f, 1f)).EntityPtr + _baseEntityHealthOffset);
+                _kleinerHP = new MemoryWatcher<int>(state.GameEngine.GetEntInfoByIndex(state.GameEngine.GetEntIndexByPos(0f, 0f, 1888f, 1f)).EntityPtr + _baseEntityHealthOffset);
             }
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap && _trigIndex != -1)
             {
-                var newTrig = state.GetEntInfoByIndex(_trigIndex);
+                var newTrig = state.GameEngine.GetEntInfoByIndex(_trigIndex);
 
                 if (newTrig.EntityPtr == IntPtr.Zero)
                 {
                     _trigIndex = -1;
                     _onceFlag = true;
                     Debug.WriteLine("freakman1 start");
-                    this.StartOffsetTicks = -7;
-                    return GameSupportResult.PlayerGainedControl;
+                    StartOffsetTicks = -7;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
             else if (this.IsLastMap)
@@ -76,11 +76,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _onceFlag = true;
                     Debug.WriteLine("freakman1 end");
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -16,20 +17,20 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Survivor()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicks;
             this.AddFirstMap("chapter01_1");
             this.AddLastMap("chapter10_5");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
+
+            this.TimingSpecifics.DefaultTimingMethod = new GameTimingMethod(pauses: false);
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsLastMap)
             {
-                _finalCamIndex = state.GetEntIndexByName("cam02");
-                Debug.WriteLine("found final camera's entity index at " + _finalCamIndex);
+                _finalCamIndex = state.GameEngine.GetEntIndexByName("cam02");
+                //Debug.WriteLine("found final camera's entity index at " + _finalCamIndex);
             }
 
             _onceFlag = false;
@@ -37,27 +38,27 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _splitTime = 0f;
         }
 
-        public override void OnGenericUpdate(GameState state)
+        public override void OnGenericUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag) 
                 return;
 
-            float splitTime = state.FindOutputFireTime("*", "NextScene", "", 7);
+            float splitTime = state.GameEngine.GetOutputFireTime("*", "NextScene", "", 7);
             if (splitTime == 0f)
-                splitTime = state.FindOutputFireTime("*", "StageClear", "", 7);
+                splitTime = state.GameEngine.GetOutputFireTime("*", "StageClear", "", 7);
             _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
 
-            if (state.CompareToInternalTimer(_splitTime, 0f, false, true))
+            if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
             {
-                state.QueueOnNextSessionEnd = GameSupportResult.PlayerLostControl;
+                state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
                 _splitTime = 0f;
             }
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap && !_startFlag)
             {
@@ -67,7 +68,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     // can't have onceflag here as it'd negate the splitting code on this map
                     _startFlag = true;
                     Debug.WriteLine("hl2 survivor start");
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
             else if (this.IsLastMap)
@@ -76,11 +77,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _onceFlag = true;
                     Debug.WriteLine("hl2 survivor end");
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

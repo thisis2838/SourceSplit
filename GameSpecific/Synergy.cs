@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -20,17 +22,17 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public Synergy()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
+            
             _cmdHandler = new CustomCommandHandler(_autosplitIL);
             this.AdditionalGameSupport.AddRange(new GameSupport[] { _hl2 , _ep1 , _ep2 });
         }
 
-        public override void OnGameAttached(GameState state)
+        public override void OnGameAttached(GameState state, TimerActions actions)
         {
             _cmdHandler.Init(state);
         }
 
-        public override void OnGenericUpdate(GameState state)
+        public override void OnGenericUpdate(GameState state, TimerActions actions)
         {
             _cmdHandler.Update(state);
 
@@ -43,27 +45,28 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (!state.PlayerFlags.Current.HasFlag(_dead) &&
                     state.PlayerFlags.Old.HasFlag(_dead))
                 {
-                    this.OnSessionStartFull(state);
+                    this.OnSessionStart(state, actions);
+                    this.AdditionalGameSupport.ForEach(x => x.OnSessionStart(state, actions));
                     Debug.WriteLine("synergy session start");
                 }    
             }
 
             if (_autosplitIL.BValue)
             {
-                if (!StartOnFirstLoadMaps.Contains(state.CurrentMap))
+                if (!StartOnFirstLoadMaps.Contains(state.Map.Current))
                 {
                     StartOnFirstLoadMaps.Clear();
-                    StartOnFirstLoadMaps.Add(state.CurrentMap);
+                    StartOnFirstLoadMaps.Add(state.Map.Current);
                 }
             }
             else
                 StartOnFirstLoadMaps.Clear();
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             _cmdHandler.Update(state);
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

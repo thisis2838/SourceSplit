@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using LiveSplit.ComponentUtil;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -21,26 +22,25 @@ namespace LiveSplit.SourceSplit.GameSpecific
         {
             this.AddFirstMap("gg_intro_wakeup");
             this.AddLastMap("gg_stage_theend");
-            this.RequiredProperties = PlayerProperties.Position;
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             _onceFlag = false;
             _endDetectEntityPtr = IntPtr.Zero;
 
             if (this.IsLastMap)
-                _endDetectEntityPtr = state.GetEntityByName("atw_c_note");
+                _endDetectEntityPtr = state.GameEngine.GetEntityByName("atw_c_note");
         }
 
         // TODO: detect the secret ending
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             // "OnTrigger" "tele_out_shower Enable 1.05 -1"
             if (this.IsFirstMap)
@@ -50,7 +50,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("aperture tag start");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks);
+                    return;
                 }
             }
             // "OnHitMax" "atw_c_note Volume 0 0 -1"
@@ -60,17 +61,16 @@ namespace LiveSplit.SourceSplit.GameSpecific
             {
                 int volume;
                 if (!state.GameProcess.ReadValue(_endDetectEntityPtr + CAmbientGenericVolumeOffset, out volume))
-                    return GameSupportResult.DoNothing;
+                    return;
                 if (volume == 0)
                 {
                     Debug.WriteLine("aperture tag end");
                     _onceFlag = true;
                     _endDetectEntityPtr = IntPtr.Zero;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks);
+                    return;
                 }
             }
-
-            return GameSupportResult.DoNothing;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -14,36 +15,34 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_DaBaby()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
-            this.AddFirstMap("dababy_hallway_ai");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
+            this.AddFirstMap("dababy_hallway_ai");  
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsFirstMap)
             {
-                _endingCamIndex = state.GetEntIndexByName("final_viewcontrol");
-                _startCamIndex = state.GetEntIndexByName("viewcontrol");
-                Debug.WriteLine($"found start cam index at {_startCamIndex} and end cam at {_endingCamIndex}");
+                _endingCamIndex = state.GameEngine.GetEntIndexByName("final_viewcontrol");
+                _startCamIndex = state.GameEngine.GetEntIndexByName("viewcontrol");
+                //Debug.WriteLine($"found start cam index at {_startCamIndex} and end cam at {_endingCamIndex}");
             }
 
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (_startCamIndex != -1)
             {
                 if (state.PlayerViewEntityIndex.Current == 1 && state.PlayerViewEntityIndex.Old == _startCamIndex)
                 {
                     Debug.WriteLine("da baby start");
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
 
@@ -53,10 +52,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("da baby end");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using LiveSplit.ComponentUtil;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -10,32 +11,31 @@ namespace LiveSplit.SourceSplit.GameSpecific
         public PortalStoriesMel()
         {
             this.AutoStartType = AutoStart.Unfrozen;
-            this.RequiredProperties |= PlayerProperties.Position;
             this.AddFirstMap("sp_a1_tramride");
             this.AddLastMap("sp_a4_finale");
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (this.IsFirstMap)
-                return base.OnUpdate(state);
+                base.OnUpdate(state, actions);
             else if (!this.IsLastMap || _onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             // "OnPressed" "end_teleport Teleport 0 -1"
             if (state.PlayerPosition.Current.DistanceXY(_endPos) <= 1.0)
             {
                 _onceFlag = true;
-                return GameSupportResult.PlayerLostControl;
+                actions.End(EndOffsetTicks); return;
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using LiveSplit.ComponentUtil;
 using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -17,7 +18,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_ExperimentalFuel()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("bmg1_experimental_fuel");
         }
 
@@ -26,29 +26,29 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _resetFlag = resetFlagTo;
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsFirstMap)
             {
-                _blockBrushIndex = state.GetEntIndexByName("dontrunaway");
-                _dustmoteIndex = state.GetEntIndexByName("kokedepth");
+                _blockBrushIndex = state.GameEngine.GetEntIndexByName("dontrunaway");
+                _dustmoteIndex = state.GameEngine.GetEntIndexByName("kokedepth");
             }
 
             _onceFlag = false;
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
-                var newMote = state.GetEntInfoByIndex(_dustmoteIndex);
-                var newBrush = state.GetEntInfoByIndex(_blockBrushIndex);
+                var newMote = state.GameEngine.GetEntInfoByIndex(_dustmoteIndex);
+                var newBrush = state.GameEngine.GetEntInfoByIndex(_blockBrushIndex);
 
                 if (state.PlayerPosition.Current.DistanceXY(new Vector3f(7784.5f, 7284f, -15107f)) >= 2
                     && state.PlayerPosition.Old.DistanceXY(new Vector3f(7784.5f, 7284f, -15107f)) < 2
@@ -56,7 +56,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("exp fuel start");
                     _resetFlag = true;
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
 
                 if (newMote.EntityPtr == IntPtr.Zero)
@@ -64,11 +64,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     _onceFlag = true;
                     _dustmoteIndex = -1;
                     Debug.WriteLine("exp fuel end");
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

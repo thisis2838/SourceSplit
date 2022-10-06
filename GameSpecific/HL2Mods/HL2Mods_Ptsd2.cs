@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -18,12 +19,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_Ptsd2()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("ptsd_2_p1");
             this.AddLastMap("ptsd_2_final_day");
         }
 
-        public override void OnGameAttached(GameState state)
+        public override void OnGameAttached(GameState state, TimerActions actions)
         {
             var bink = state.GetModule("video_bink.dll");
             Trace.Assert(bink != null);
@@ -40,17 +40,17 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _videoPlaying = new MemoryWatcher<byte>(binkScanner.Scan(target));
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsFirstMap)
-                _splitTime = state.FindOutputFireTime("scream", "PlaySound", "", 5);
+                _splitTime = state.GameEngine.GetOutputFireTime("scream", "PlaySound", "", 5);
 
             _onceFlag = false;
         }
 
-        public override void OnGenericUpdate(GameState state)
+        public override void OnGenericUpdate(GameState state, TimerActions actions)
         {
             if (this.IsLastMap)
             {
@@ -60,31 +60,31 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("ptsd end");
                     _onceFlag = true;
-                    state.QueueOnNextSessionEnd = GameSupportResult.PlayerLostControl;
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
                 }
             }
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
-                float splitTime = state.FindOutputFireTime("scream", "PlaySound", "", 5);
+                float splitTime = state.GameEngine.GetOutputFireTime("scream", "PlaySound", "", 5);
 
                 if (splitTime == 0f && _splitTime != 0f)
                 {
                     Debug.WriteLine("ptsd start");
                     _onceFlag = true;
                     _splitTime = splitTime;
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
 
                 _splitTime = splitTime;
             }
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

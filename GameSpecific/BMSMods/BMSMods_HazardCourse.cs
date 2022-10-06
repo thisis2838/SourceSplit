@@ -1,5 +1,6 @@
 ﻿using LiveSplit.ComponentUtil;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -21,13 +22,13 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public BMSMods_HazardCourse()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
+            
             this.AddFirstMap("hc_t0a0");
             this.AddLastMap("hc_t0a3");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
+             
         }
 
-        public override void OnGameAttached(GameState state)
+        public override void OnGameAttached(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
 
@@ -37,28 +38,28 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CBaseEntity::m_fEffects offset = 0x" + _baseEffectsFlagsOffset.ToString("X"));
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             _onceFlag = false;
 
             if (IsFirstMap)
             {
-                _hcStartDoorPos = new MemoryWatcher<Vector3f>(state.GetEntityByName("tram_door_door_out") + state.GameOffsets.BaseEntityAbsOriginOffset);
+                _hcStartDoorPos = new MemoryWatcher<Vector3f>(state.GameEngine.GetEntityByName("tram_door_door_out") + state.GameEngine.BaseEntityAbsOriginOffset);
                 _hcStartDoorPos.Update(state.GameProcess);
             }
             else if (IsLastMap)
             {
-                _hcEndSpriteFlags = new MemoryWatcher<uint>(state.GetEntityByName("spr_camera_flash") + _baseEffectsFlagsOffset);
+                _hcEndSpriteFlags = new MemoryWatcher<uint>(state.GameEngine.GetEntityByName("spr_camera_flash") + _baseEffectsFlagsOffset);
                 _hcEndSpriteFlags.Update(state.GameProcess);
             }
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (IsFirstMap)
             {
@@ -69,22 +70,22 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _onceFlag = true;
                     Debug.WriteLine("bms hc mod start");
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
             else if (IsLastMap)
             {
                 _hcEndSpriteFlags.Update(state.GameProcess);
 
-                if (state.TickCount >= 10 && (_hcEndSpriteFlags.Old & 0x20) == 0 &&
+                if (state.TickCount.Current >= 10 && (_hcEndSpriteFlags.Old & 0x20) == 0 &&
                     (_hcEndSpriteFlags.Current & 0x20) != 0)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("bms hc mod end");
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

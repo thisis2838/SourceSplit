@@ -1,6 +1,7 @@
 ﻿using LiveSplit.ComponentUtil;
 using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -18,20 +19,20 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public EstrangedAct1()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
+            
             this.AddFirstMap("sp01thebeginning");
             this.AddLastMap("sp10thewarehouse");
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsFirstMap)
-                this._titleCardActive = new MemoryWatcher<byte>(state.GetEntityByName("gillnetter_titlecard") + _interactiveScreenActiveFlag);
+                this._titleCardActive = new MemoryWatcher<byte>(state.GameEngine.GetEntityByName("gillnetter_titlecard") + _interactiveScreenActiveFlag);
             else if (this.IsLastMap)
             {
-                this._trig2Index = state.GetEntIndexByPos(5240f, -7800f, -206f);
+                this._trig2Index = state.GameEngine.GetEntIndexByPos(5240f, -7800f, -206f);
                 Debug.WriteLine("trig2 index is " + this._trig2Index);
             }
 
@@ -39,10 +40,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
@@ -51,24 +52,24 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("estranged2 start");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
             else if (this.IsLastMap && this._trig2Index != -1)
             {
-                var newTrig2 = state.GetEntInfoByIndex(_trig2Index);
+                var newTrig2 = state.GameEngine.GetEntInfoByIndex(_trig2Index);
 
                 if (newTrig2.EntityPtr == IntPtr.Zero)
                 {
                     _trig2Index = -1;
                     Debug.WriteLine("estranged1 end");
                     _onceFlag = true;
-                    this.EndOffsetTicks = (int)Math.Ceiling(0.1f / state.IntervalPerTick);
-                    return GameSupportResult.PlayerLostControl;
+                    EndOffsetTicks = (int)Math.Ceiling(0.1f / state.IntervalPerTick);
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -16,37 +17,34 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_Ptsd1()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("ptsd_1");
             this.AddLastMap("ptsd_final");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
         }
 
-
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsFirstMap)
             {
-                this._camIndex = state.GetEntIndexByName("camera_1");
-                Debug.WriteLine("start cam index is " + _camIndex);
+                this._camIndex = state.GameEngine.GetEntIndexByName("camera_1");
+                //Debug.WriteLine("start cam index is " + _camIndex);
             }
 
             if (this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
-                this._breenIndex = state.GetEntIndexByName("banana2");
-                Debug.WriteLine("banana2 index is " + this._breenIndex);
+                this._breenIndex = state.GameEngine.GetEntIndexByName("banana2");
+                //Debug.WriteLine("banana2 index is " + this._breenIndex);
             }
 
             _onceFlag = false;
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap && _camIndex != -1)
             {
@@ -55,22 +53,22 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("ptsd start");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
             else if (this.IsLastMap && this._breenIndex != -1)
             {
-                var newBlack = state.GetEntInfoByIndex(_breenIndex);
+                var newBlack = state.GameEngine.GetEntInfoByIndex(_breenIndex);
 
                 if (newBlack.EntityPtr == IntPtr.Zero)
                 {
                     _breenIndex = -1;
                     Debug.WriteLine("ptsd end");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -12,43 +13,43 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_TheLostCity()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
+            
             this.AddFirstMap("lostcity01");
             this.AddLastMap("lostcity02");
-            this.StartOnFirstLoadMaps.AddRange(this.FirstMap);
+            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsLastMap)
-                _splitTime = state.FindOutputFireTime("fade1", "fade", "", 3);
+                _splitTime = state.GameEngine.GetOutputFireTime("fade1", "fade", "", 3);
 
             _onceFlag = false;
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsLastMap)
             {
-                float newSplitTime = state.FindOutputFireTime("fade1", "fade", "" , 3);
+                float newSplitTime = state.GameEngine.GetOutputFireTime("fade1", "fade", "" , 3);
 
                 if (newSplitTime != 0 && _splitTime == 0)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("the lost city end");
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
 
                 _splitTime = newSplitTime;
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

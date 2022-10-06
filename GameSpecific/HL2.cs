@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using LiveSplit.ComponentUtil;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -22,28 +23,25 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("d1_trainstation_01");
             this.AddLastMap("d3_breen_01");
-            this.RequiredProperties = PlayerProperties.Position;
-
-            AdditionalGameSupport = new List<GameSupport>(new GameSupport[] { _lostCity, _tinje, _experimentalFuel });
+            AdditionalGameSupport = new List<GameSupport>() { _lostCity, _tinje, _experimentalFuel };
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             _onceFlag = false;
 
             if (this.IsLastMap)
-                _splitTime = state.FindOutputFireTime("sprite_end_final_explosion_1", "ShowSprite", "", 20);
+                _splitTime = state.GameEngine.GetOutputFireTime("sprite_end_final_explosion_1", "ShowSprite", "", 20);
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap) 
             {
@@ -54,21 +52,19 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("hl2 start");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
             else if (this.IsLastMap)
             {
-                // "OnTrigger2" "weaponstrip_end_game,Strip,,0,-1"
-                // "OnTrigger2" "fade_blast_1,Fade,,0,-1"
-                float splitTime = state.FindOutputFireTime("sprite_end_final_explosion_1", "ShowSprite", "", 20);
+                float splitTime = state.GameEngine.GetOutputFireTime("sprite_end_final_explosion_1", "ShowSprite", "", 20);
                 try
                 {
                     if (splitTime > 0 && _splitTime == 0)
                     {
                         Debug.WriteLine("hl2 end");
                         _onceFlag = true;
-                        return GameSupportResult.PlayerLostControl;
+                        actions.End(EndOffsetTicks); return;
                     }
                 }
                 finally
@@ -77,7 +73,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -14,42 +15,41 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_DearEsther()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("donnelley");
             this.AddLastMap("Paul");
-            this.StartOnFirstLoadMaps.AddRange(this.FirstMap);
+            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
             if (IsLastMap)
             {
-                _trigIndex = state.GetEntIndexByName("triggerEndSequence");
-                Debug.WriteLine("trigger index is " + _trigIndex);
+                _trigIndex = state.GameEngine.GetEntIndexByName("triggerEndSequence");
+                //Debug.WriteLine("trigger index is " + _trigIndex);
             }
             _onceFlag = false;
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsLastMap)
             {
-                var newTrig = state.GetEntInfoByIndex(_trigIndex);
+                var newTrig = state.GameEngine.GetEntInfoByIndex(_trigIndex);
 
                 if (newTrig.EntityPtr == IntPtr.Zero)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("dearesther end");
-                    this.EndOffsetTicks = 7;
-                    return GameSupportResult.PlayerLostControl;
+                    EndOffsetTicks = 7;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

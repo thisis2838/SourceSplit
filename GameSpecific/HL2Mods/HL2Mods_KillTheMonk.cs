@@ -1,6 +1,7 @@
 ﻿using LiveSplit.ComponentUtil;
 using System.Diagnostics;
 using System.Linq;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -17,13 +18,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_KillTheMonk()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("ktm_c01_01");
             this.AddLastMap("ktm_c03_02");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
         }
 
-        public override void OnGameAttached(GameState state)
+        public override void OnGameAttached(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
 
@@ -32,27 +31,27 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (IsFirstMap)
             {
-                _camIndex = state.GetEntIndexByName("blackout_cam");
-                Debug.WriteLine("start cam index is " + _camIndex);
+                _camIndex = state.GameEngine.GetEntIndexByName("blackout_cam");
+                //Debug.WriteLine("start cam index is " + _camIndex);
             }
             else if (IsLastMap && _baseEntityHealthOffset != -1)
             {
-                _monkHP = new MemoryWatcher<int>(state.GetEntityByName("Monk") + _baseEntityHealthOffset);
+                _monkHP = new MemoryWatcher<int>(state.GameEngine.GetEntityByName("Monk") + _baseEntityHealthOffset);
             }
 
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
@@ -60,7 +59,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _onceFlag = true;
                     Debug.WriteLine("kill the monk start");
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
             else if (IsLastMap)
@@ -71,11 +70,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("kill the monk end");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

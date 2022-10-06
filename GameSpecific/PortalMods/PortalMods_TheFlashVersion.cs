@@ -2,11 +2,12 @@
 using System.Diagnostics;
 using System.Linq;
 using LiveSplit.ComponentUtil;
-using LiveSplit.SourceSplit.Extensions;
+using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
-    class PortalMods_TheFlashVersion : GameSupport
+    class PortalMods_TheFlashVersion : PortalBase
     {
         // how to match with demos:
         // start: first tick when your position is at 0 168 129 (cl_showpos 1)
@@ -17,15 +18,13 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private int _laggedMovementOffset = -1;
         private const int VAULT_SAVE_TICK = 3876;
 
-        public PortalMods_TheFlashVersion()
+        public PortalMods_TheFlashVersion() : base()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("portaltfv1");
             this.AddLastMap("portaltfv5");
-            this.RequiredProperties |= PlayerProperties.Position;
         }
 
-        public override void OnGameAttached(GameState state)
+        public override void OnGameAttached(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GameProcess.ModulesWow64SafeNoCache().FirstOrDefault(x => x.ModuleName.ToLower() == "server.dll");
             Trace.Assert(server != null);
@@ -36,16 +35,16 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CBasePlayer::m_flLaggedMovementValue offset = 0x" + _laggedMovementOffset.ToString("X"));
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
@@ -55,8 +54,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     Debug.WriteLine("tfv start");
                     _onceFlag = true;
                     int ticksSinceVaultSaveTick = state.TickBase - VAULT_SAVE_TICK; // account for missing ticks if update interval missed it
-                    this.StartOffsetTicks = -3803 - ticksSinceVaultSaveTick; // 57.045 seconds
-                    return GameSupportResult.PlayerGainedControl;
+                    StartOffsetTicks = -3803 - ticksSinceVaultSaveTick; // 57.045 seconds
+                    actions.Start(StartOffsetTicks); return;
                 }
 
                 // map started without vault save
@@ -64,7 +63,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("tfv start");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
             else if (this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
@@ -76,11 +75,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("tfv end");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

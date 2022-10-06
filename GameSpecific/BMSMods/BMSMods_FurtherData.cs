@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -13,42 +14,40 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public BMSMods_FurtherData()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("fd01");
-            this.StartOnFirstLoadMaps.AddRange(this.FirstMap);
-            this.RequiredProperties = PlayerProperties.ViewEntity;
+            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (IsFirstMap)
-                _splitTime = state.FindOutputFireTime("end_btd_sd", "PlaySound", "", 6);
+                _splitTime = state.GameEngine.GetOutputFireTime("end_btd_sd", "PlaySound", "", 6);
 
             _onceFlag = false;
 
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (IsFirstMap)
             {
-                float splitTime = state.FindOutputFireTime("end_btn_sd", "PlaySound", "", 6);
+                float splitTime = state.GameEngine.GetOutputFireTime("end_btn_sd", "PlaySound", "", 6);
                 if (splitTime != 0f && _splitTime == 0f)
                 {
                     Debug.WriteLine("fd end");
                     _splitTime = splitTime; 
                     _onceFlag = true;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
                 _splitTime = splitTime;
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

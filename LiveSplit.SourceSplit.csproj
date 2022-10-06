@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LiveSplit.SourceSplit</RootNamespace>
     <AssemblyName>LiveSplit.SourceSplit</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -44,6 +44,9 @@
       <HintPath>..\..\public\LiveSplit\LiveSplit\bin\Debug\LiveSplit.Core.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="LiveSplit.View">
+      <HintPath>..\..\..\~Livesplits\LiveSplit_1.7.6\LiveSplit.View.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -56,13 +59,56 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions\ProcExtensions.cs" />
-    <Compile Include="SettingEntry.cs" />
+    <Compile Include="ComponentHandling\DebugOutputForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ComponentHandling\DebugOutputForm.Designer.cs">
+      <DependentUpon>DebugOutputForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ComponentHandling\SessionsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ComponentHandling\SessionsForm.Designer.cs">
+      <DependentUpon>SessionsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ComponentHandling\SourceSplitComponent__GameMemoryResponses.cs" />
+    <Compile Include="ComponentHandling\SourceSplitComponent__Graphics.cs" />
+    <Compile Include="ComponentHandling\SourceSplitComponent__SplitOperations.cs" />
+    <Compile Include="ComponentHandling\SourceSplitComponent__TimerResponses.cs" />
+    <Compile Include="ComponentHandling\SourceSplitSettings__Settings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DemoHandling\DemoFile.cs" />
+    <Compile Include="DemoHandling\DemoMonitor.cs" />
+    <Compile Include="GameHandling\GameEngine.cs" />
+    <Compile Include="GameHandling\GameEngine__Interactions.cs" />
+    <Compile Include="GameHandling\GameEngine__Signatures.cs" />
+    <Compile Include="GameHandling\GameMemory__UIEvents.cs" />
+    <Compile Include="GameHandling\GameMemory__Update.cs" />
+    <Compile Include="GameHandling\GameSupport__Functions.cs" />
+    <Compile Include="GameHandling\GameSupport__Cases.cs" />
+    <Compile Include="ComponentHandling\Session.cs" />
+    <Compile Include="GameSpecific\HL2Mods\HL2Mods_Localmotive.cs" />
+    <Compile Include="GameSpecific\PortalMods\PortalMods_CrumbsOfTruth.cs" />
+    <Compile Include="GameSpecific\TheBeginnersGuide__SplitPoints.cs" />
+    <Compile Include="GameSpecific\TheBeginnersGuide__Models.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="ComponentHandling\Settings\SettingProvider.cs" />
+    <Compile Include="ComponentHandling\Settings\SettingUIRepresented.cs" />
+    <Compile Include="Utilities\EnumUtils.cs" />
+    <Compile Include="Utilities\FileUtils.cs" />
+    <Compile Include="ComponentHandling\DetailedListView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ComponentHandling\DetailedListView.Designer.cs">
+      <DependentUpon>DetailedListView.cs</DependentUpon>
+    </Compile>
     <Compile Include="GameSpecific\HL2Mods\HL2Mods_SouthernmostCombine.cs" />
-    <Compile Include="Utils\CustomCommand.cs" />
-    <Compile Include="Extensions\NumericsExtensions.cs" />
-    <Compile Include="Extensions\SignatureScannerExtensions.cs" />
-    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="GameHandling\CustomCommand.cs" />
     <Compile Include="GameSpecific\ApertureTag.cs" />
     <Compile Include="GameSpecific\BMSMods\BMSMods_FurtherData.cs" />
     <Compile Include="GameSpecific\BMSMods\BMSMods_HazardCourse.cs" />
@@ -73,7 +119,7 @@
     <Compile Include="GameSpecific\PortalMods\PortalMods_EpicEdition.cs" />
     <Compile Include="GameSpecific\Synergy.cs" />
     <Compile Include="GameSpecific\BMSRetail.cs" />
-    <Compile Include="GameSpecific\GameSupport.cs" />
+    <Compile Include="GameHandling\GameSupport.cs" />
     <Compile Include="GameSpecific\HL2.cs" />
     <Compile Include="GameSpecific\HL2Ep1.cs" />
     <Compile Include="GameSpecific\HL2Ep2.cs" />
@@ -130,56 +176,68 @@
     <Compile Include="GameSpecific\Portal2.cs" />
     <Compile Include="GameSpecific\PortalStoriesMel.cs" />
     <Compile Include="GameSpecific\TheStanleyParable.cs" />
-    <Compile Include="GameState.cs" />
-    <Compile Include="Utils\ErrorDialog.cs">
+    <Compile Include="GameHandling\GameState.cs" />
+    <Compile Include="Utilities\ErrorDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Utils\ErrorDialog.Designer.cs">
+    <Compile Include="Utilities\ErrorDialog.Designer.cs">
       <DependentUpon>ErrorDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="Utils\InternalComponent.cs" />
-    <Compile Include="MapTimesForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MapTimesForm.Designer.cs">
-      <DependentUpon>MapTimesForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Utils\RemoteOpsHandler.cs" />
-    <Compile Include="SourceSplitFactory.cs" />
-    <Compile Include="GameMemory.cs" />
-    <Compile Include="Utils\EditableListBox.cs">
+    <Compile Include="ComponentHandling\InternalComponent.cs" />
+    <Compile Include="ComponentHandling\SourceSplitFactory.cs" />
+    <Compile Include="GameHandling\GameMemory.cs" />
+    <Compile Include="ComponentHandling\EditableListBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="SourceSplitComponent.cs" />
-    <Compile Include="SourceSplitSettings.cs">
+    <Compile Include="ComponentHandling\SourceSplitComponent.cs" />
+    <Compile Include="ComponentHandling\SourceSplitSettings.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="SourceSplitSettings.Designer.cs">
+    <Compile Include="ComponentHandling\SourceSplitSettings.Designer.cs">
       <DependentUpon>SourceSplitSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utils\TryMany.cs" />
-    <Compile Include="Utils\Util.cs" />
-    <Compile Include="Utils\ValueWatcher.cs" />
-    <Compile Include="Utils\WinAPI.cs" />
-    <Compile Include="Utils\XMLOperations.cs" />
+    <Compile Include="Utilities\NumericUtils.cs" />
+    <Compile Include="Utilities\ProcUtils.cs" />
+    <Compile Include="Utilities\SigScannerUtils.cs" />
+    <Compile Include="Utilities\SigScanTargets.cs" />
+    <Compile Include="Utilities\StringUtils.cs" />
+    <Compile Include="Utilities\ThreadUtils.cs" />
+    <Compile Include="Utilities\TimeSpanUtils.cs" />
+    <Compile Include="Utilities\TryMany.cs" />
+    <Compile Include="Utilities\SourceSplitUtils.cs" />
+    <Compile Include="Utilities\ValueWatcher.cs" />
+    <Compile Include="Utilities\WinUtils.cs" />
+    <Compile Include="Utilities\XMLUtils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="MapTimesForm.resx">
-      <DependentUpon>MapTimesForm.cs</DependentUpon>
+    <EmbeddedResource Include="ComponentHandling\DebugOutputForm.resx">
+      <DependentUpon>DebugOutputForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SourceSplitSettings.resx">
+    <EmbeddedResource Include="ComponentHandling\SessionsForm.resx">
+      <DependentUpon>SessionsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ComponentHandling\SourceSplitSettings.resx">
       <DependentUpon>SourceSplitSettings.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Utils\ErrorDialog.resx">
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Utilities\ErrorDialog.resx">
       <DependentUpon>ErrorDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ComponentHandling\DetailedListView.resx">
+      <DependentUpon>DetailedListView.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="license.txt" />
+    <None Include="CONFIGURING.md" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\date_time.txt" />
     <Content Include="update\update.xml" />
   </ItemGroup>
   <ItemGroup />
@@ -187,6 +245,12 @@
   <PropertyGroup>
     <PostBuildEvent>if exist "$(ProjectDir)\update\Components\$(TargetFileName)\$(TargetPath)" del "$(ProjectDir)\update\$(TargetFileName)\$(TargetPath)"
 copy "$(TargetPath)" "$(ProjectDir)update\Components\$(TargetFileName)"</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>@echo off
+@for /f "skip=1" %25%25x in ('wmic os get localdatetime') do if not defined t set t=%25%25x
+echo %25t:~0,4%25-%25t:~4,2%25-%25t:~6,2%25 %25t:~8,2%25:%25t:~10,2%25:%25t:~12,2%25 &gt; "$(ProjectDir)\Resources\date_time.txt"
+</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

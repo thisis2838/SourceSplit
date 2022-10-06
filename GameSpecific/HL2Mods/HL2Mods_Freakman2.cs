@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -15,47 +16,45 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_Freakman2()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("kleiner0");
-            this.AddLastMap("thestoryhappyend");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
+            this.AddLastMap("thestoryhappyend");  
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsFirstMap)
             {
-                _trainIndex = state.GetEntIndexByName("lookatthis_move");
-                Debug.WriteLine("camera parent entity index is " + _trainIndex);
+                _trainIndex = state.GameEngine.GetEntIndexByName("lookatthis_move");
+                //Debug.WriteLine("camera parent entity index is " + _trainIndex);
             }
             _onceFlag = false;
 
             if (this.IsLastMap)
             {
-                _camIndex = state.GetEntIndexByName("credit_cam");
-                Debug.WriteLine("cam index is " + _camIndex);
+                _camIndex = state.GameEngine.GetEntIndexByName("credit_cam");
+               //Debug.WriteLine("cam index is " + _camIndex);
             }
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap && _trainIndex != -1)
             {
-                var newTrig = state.GetEntInfoByIndex(_trainIndex);
+                var newTrig = state.GameEngine.GetEntInfoByIndex(_trainIndex);
 
                 if (newTrig.EntityPtr == IntPtr.Zero)
                 {
                     _trainIndex = -1;
                     _onceFlag = true;
-                    this.StartOffsetTicks = -4;
+                    StartOffsetTicks = -4;
                     Debug.WriteLine("freakman2 start");
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
 
@@ -65,10 +64,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _onceFlag = true;
                     Debug.WriteLine("freakman2 end");
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

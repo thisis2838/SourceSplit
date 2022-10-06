@@ -1,9 +1,10 @@
 ﻿using LiveSplit.ComponentUtil;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
-    class PortalMods_StillAlive : GameSupport
+    class PortalMods_StillAlive : PortalBase
     {
         // how to match this timing with demos:
         // start: on first map load
@@ -13,58 +14,60 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private float _splitTime;
         private bool _onceFlag;
 
-        public PortalMods_StillAlive()
+        public PortalMods_StillAlive() : base()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("stillalive_1");
             this.AddLastMap("stillalive_14");
-            this.StartOnFirstLoadMaps.AddRange(this.FirstMap);
+            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnGenericUpdate(GameState state)
+        public override void OnGenericUpdate(GameState state, TimerActions actions)
         {
             if (state.HostState.Current == HostState.GameShutdown)
-                this.OnUpdate(state);
+                this.OnUpdate(state, actions);
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsLastMap)
-                _elevatorPos = new MemoryWatcher<Vector3f>(state.GetEntityByName("a10_a11_elevator_body") + state.GameOffsets.BaseEntityAbsOriginOffset);
+                _elevatorPos = new MemoryWatcher<Vector3f>(state.GameEngine.GetEntityByName("a10_a11_elevator_body") + state.GameEngine.BaseEntityAbsOriginOffset);
 
             _splitTime = 0f;
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             float splitTime = 0f;
             if (this.IsLastMap)
             {
                 _elevatorPos.Update(state.GameProcess);
                 if (_elevatorPos.Current.Z >= 3760)
-                    splitTime = state.FindOutputFireTime("client_command", 10);
+                    splitTime = state.GameEngine.GetOutputFireTime("client_command", 10);
             }
             else
-                splitTime = state.FindOutputFireTime("*command*", "Command", "*map *", 10);
+                splitTime = state.GameEngine.GetOutputFireTime("*command*", "Command", "*map *", 10);
 
             if (splitTime != 0f)
                 _splitTime = splitTime;
 
-            if (state.CompareToInternalTimer(_splitTime, 0f, false, true))
+            if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
             {
                 _splitTime = 0f;
                 Debug.WriteLine("portal still alive " + (!this.IsLastMap ? "split" : "end"));
                 _onceFlag = true;
-                state.QueueOnNextSessionEnd = this.IsLastMap ? GameSupportResult.PlayerLostControl : GameSupportResult.ManualSplit;
+
+                state.QueueOnNextSessionEnd = this.IsLastMap ?
+                    () => actions.End() :
+                    () => actions.Split();
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
 
     }

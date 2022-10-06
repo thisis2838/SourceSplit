@@ -1,5 +1,6 @@
 ﻿using LiveSplit.ComponentUtil;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -15,12 +16,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_GGEFC13()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("ge_city01");
             this.AddLastMap("ge_final");
         }
 
-        public override void OnGameAttached(GameState state)
+        public override void OnGameAttached(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
 
@@ -30,33 +30,34 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsFirstMap)
-                _splitTime = state.FindOutputFireTime("teleport_trigger");
+                _splitTime = state.GameEngine.GetOutputFireTime("teleport_trigger");
             else if (this.IsLastMap)
-                _heliHP = new MemoryWatcher<int>(state.GetEntityByName("helicopter") + _baseEntityHealthOffset);
+                _heliHP = new MemoryWatcher<int>(state.GameEngine.GetEntityByName("helicopter") + _baseEntityHealthOffset);
 
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
-                float splitTime = state.FindOutputFireTime("teleport_trigger", 5);
-                _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
-                if (state.CompareToInternalTimer(_splitTime, 0f, true))
+                float splitTime = state.GameEngine.GetOutputFireTime("teleport_trigger", 5);
+                if (splitTime == 0 && _splitTime != 0)
                 {
                     Debug.WriteLine("ggefc13 start");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks);
                 }
+
+                _splitTime = splitTime;
             }
             else if (this.IsLastMap)
             {
@@ -66,10 +67,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("ggefc13 end");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

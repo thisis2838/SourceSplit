@@ -1,10 +1,11 @@
 ﻿using LiveSplit.ComponentUtil;
-using LiveSplit.SourceSplit.Extensions;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -122,27 +123,24 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private MemoryWatcher<Vector3f> _modEndingMuseumPodPos;
         private Vector3f _modEndingApartmentSectorOrigin = new Vector3f(-3524f, 1368f, -620f);
 
-        private CustomCommand _noSpaceEnd = new CustomCommand("nospaceend", "0", "Disable splitting on Space Ending");
+        private CustomCommand _noSpaceEnd = new CustomCommand("nospaceend", "0", "Disable splitting on Space Ending", archived: true);
         private CustomCommandHandler _ccHandler;
 
         public TheStanleyParable()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
-            this.RequiredProperties = PlayerProperties.ViewEntity | PlayerProperties.Position | PlayerProperties.ParentEntity;
             _ccHandler = new CustomCommandHandler(_noSpaceEnd);
         }
 
         // Shorthands
-        private GameSupportResult DefaultEnd(string endingname, int endoffset = 0)
+        private void DefaultEnd(string endingname, TimerActions actions, int endoffset = 0)
         {
-            this.EndOffsetTicks = endoffset;
+            EndOffsetTicks = endoffset;
             _onceFlag = true;
             Debug.WriteLine(endingname + " ending");
 
-            if (endoffset != 0)
-                return GameSupportResult.ManualSplit;
-            else
-                return GameSupportResult.PlayerLostControl;
+            if (EndOffsetTicks == 0)
+                actions.End(endoffset);
+            else actions.Split(endoffset);
         }
 
         private bool EvaluateLatestClientCmd(string cmd)
@@ -160,36 +158,30 @@ namespace LiveSplit.SourceSplit.GameSpecific
             return state.PlayerViewEntityIndex.Old == prev && state.PlayerViewEntityIndex.Current == now;
         }
 
-
-
         private bool EvaluateChangedViewAngle(Vector3f prev, Vector3f now, Vector3f target)
         {
             return prev.Distance(target) <= _angleEpsilon && now.Distance(target) > _angleEpsilon;
         }
 
-        private GameSupportResult DefaultFadeEnd(GameState state, float fadeSpeed, string ending)
+        private void DefaultFadeEnd(GameState state, float fadeSpeed, string ending, TimerActions actions)
         {
-            float splitTime = state.FindFadeEndTime(fadeSpeed);
+            float splitTime = state.GameEngine.GetFadeEndTime(fadeSpeed);
             _defFadeSplitTime = splitTime == 0f ? _defFadeSplitTime : splitTime;
             if (state.CompareToInternalTimer(_defFadeSplitTime, 0f, true))
             {
                 _defFadeSplitTime = 0f;
-                return DefaultEnd(ending);
+                DefaultEnd(ending, actions);
             }
-            else
-                return GameSupportResult.DoNothing;
         }
 
-        private GameSupportResult DefualtOutputEnd(GameState state, float splitTime, string ending)
+        private void DefualtOutputEnd(GameState state, float splitTime, string ending, TimerActions actions)
         {
             _defOutputSplitTime = splitTime == 0f ? _defOutputSplitTime : splitTime;
             if (state.CompareToInternalTimer(_defOutputSplitTime, 0f))
             {
                 _defOutputSplitTime = 0f;
-                return DefaultEnd(ending);
+                DefaultEnd(ending, actions);
             }
-            else
-                return GameSupportResult.DoNothing;
         }
 
         public override void OnTimerReset(bool resetflagto)
@@ -199,10 +191,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _startAng.X = _demoStartAng.X = 0f;
         }
 
-        public override void OnGameAttached(GameState state)
+        public override void OnGameAttached(GameState state, TimerActions actions)
         {
             _ccHandler.Init(state);
-
 
             server = state.GetModule("server.dll");
             client = state.GetModule("client.dll");
@@ -225,8 +216,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 IntPtr ptrPtr = scanner.Scan(target);
                 if (ptrPtr == IntPtr.Zero)
                     return IntPtr.Zero;
-                IntPtr ret;
-                proc.ReadPointer(ptrPtr, out ret);
+                
+                proc.ReadPointer(ptrPtr, out IntPtr ret);
                 Debug.WriteLine("CVEngineServer::ClientCommand szOut ptr is 0x" + ret.ToString("X"));
                 return ret;
             };
@@ -240,17 +231,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _endingsWatcher.Add(_latestClientCmd);
         }
 
-        public override void OnGenericUpdate(GameState state)
+        public override void OnGenericUpdate(GameState state, TimerActions actions)
         {
-            if (state.CurrentMap.ToString() == "map" && state.HostState.Current == HostState.GameShutdown)
-                this.OnUpdate(state);
-
             _ccHandler.Update(state);
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             _defFadeSplitTime = 0f;
             _defOutputSplitTime = 0f;
@@ -264,57 +252,57 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _endingsWatcher.Add(_playerViewAng);
 
 
-            switch (state.CurrentMap.ToLower())
+            switch (state.Map.Current.ToLower())
             {
                 case "stanley":
                     {
-                        this._modEndingFreedomCamIndex = state.GetEntIndexByName("freedom_camera");
-                        this._modEndingMuseumPodPos = new MemoryWatcher<Vector3f>(state.GetEntityByName("alt_pris_train") + state.GameOffsets.BaseEntityAbsOriginOffset);
-                        this._modEndingGenericCamIndex = state.GetEntIndexByName("camera_credits");
-                        this._modEndingInsaneCamIndex = state.GetEntIndexByName("mariella_camera");
+                        this._modEndingFreedomCamIndex = state.GameEngine.GetEntIndexByName("freedom_camera");
+                        this._modEndingMuseumPodPos = new MemoryWatcher<Vector3f>(state.GameEngine.GetEntityByName("alt_pris_train") + state.GameEngine.BaseEntityAbsOriginOffset);
+                        this._modEndingGenericCamIndex = state.GameEngine.GetEntIndexByName("camera_credits");
+                        this._modEndingInsaneCamIndex = state.GameEngine.GetEntIndexByName("mariella_camera");
                         _endingsWatcher.Add(_modEndingMuseumPodPos);
                         break;
                     }
                 case "thedemo":
                     {
-                        this._demoEndingCamIndex = state.GetEntIndexByName("democredits1");
+                        this._demoEndingCamIndex = state.GameEngine.GetEntIndexByName("democredits1");
                         break;
                     }
                 case "map1":
                     {
-                        this._startDoorAng = new MemoryWatcher<Vector3f>(state.GetEntityByName("427door") + _baseEntityAngleOffset);
+                        this._startDoorAng = new MemoryWatcher<Vector3f>(state.GameEngine.GetEntityByName("427door") + _baseEntityAngleOffset);
                         _endingsWatcher.Add(_startDoorAng);
-                        this._endingMap1CamIndex = state.GetEntIndexByName("cam_black");
-                        this._endingHeavenBrIndex = state.GetEntIndexByName("427compbr");
+                        this._endingMap1CamIndex = state.GameEngine.GetEntIndexByName("cam_black");
+                        this._endingHeavenBrIndex = state.GameEngine.GetEntIndexByName("427compbr");
                         state.GameProcess.ReadValue(server.BaseAddress + _buttonPasses, out _endingHeavenBPass1);
-                        this._endingInsaneCamIndex = state.GetEntIndexByName("mariella_camera");
-                        this._endingSongTimer = new MemoryWatcher<float>(state.GetEntityByName("narratorerroryes") + _logicChoreoTimerOffset);
-                        this._endingVOTimer = new MemoryWatcher<float>(state.GetEntityByName("narratorerrorno") + _logicChoreoTimerOffset);
+                        this._endingInsaneCamIndex = state.GameEngine.GetEntIndexByName("mariella_camera");
+                        this._endingSongTimer = new MemoryWatcher<float>(state.GameEngine.GetEntityByName("narratorerroryes") + _logicChoreoTimerOffset);
+                        this._endingVOTimer = new MemoryWatcher<float>(state.GameEngine.GetEntityByName("narratorerrorno") + _logicChoreoTimerOffset);
                         _endingsWatcher.Add(_endingSongTimer);
                         _endingsWatcher.Add(_endingVOTimer);
                         break;
                     }
                 case "map2":
                     {
-                        this._endingCountCamIndex = state.GetEntIndexByName("cam_white");
-                        this._endingDiscoAngVel = new MemoryWatcher<Vector3f>(state.GetEntityByName("emotionboothDrot") + _baseEntityAngleVelOffset);
+                        this._endingCountCamIndex = state.GameEngine.GetEntIndexByName("cam_white");
+                        this._endingDiscoAngVel = new MemoryWatcher<Vector3f>(state.GameEngine.GetEntityByName("emotionboothDrot") + _baseEntityAngleVelOffset);
                         _endingsWatcher.Add(_endingDiscoAngVel);
                         break;
                     }
                 case "redstair":
                     {
-                        this._endingEscapeCamIndex = state.GetEntIndexByName("blackcam");
+                        this._endingEscapeCamIndex = state.GameEngine.GetEntIndexByName("blackcam");
                         break;
                     }
                 case "babygame":
                     {
-                        this._endingArtCamIndex = state.GetEntIndexByName("whitecamera");
+                        this._endingArtCamIndex = state.GameEngine.GetEntIndexByName("whitecamera");
                         break;
                     }
                 case "testchmb_a_00":
                     {
-                        _endingGamesCamIndex = state.GetEntIndexByName("blackoutend");
-                        _endingStuckEndingCount = new MemoryWatcher<float>(state.GetEntityByName("buttonboxendingcount") + _mathCounterCurValueOffset);
+                        _endingGamesCamIndex = state.GameEngine.GetEntIndexByName("blackoutend");
+                        _endingStuckEndingCount = new MemoryWatcher<float>(state.GameEngine.GetEntityByName("buttonboxendingcount") + _mathCounterCurValueOffset);
                         _endingsWatcher.Add(_endingStuckEndingCount);
                         break;
                     }
@@ -325,7 +313,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     }
                 case "zending":
                     {
-                        _endingZendingCamIndex = state.GetEntIndexByName("cam_dead");
+                        _endingZendingCamIndex = state.GameEngine.GetEntIndexByName("cam_dead");
                         break;
                     }
             }
@@ -333,19 +321,17 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             _endingsWatcher.UpdateAll(state.GameProcess);
 
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
-            switch (state.CurrentMap.ToLower())
+            switch (state.Map.Current.ToLower())
             {
                 default:
-                    {
-                        return GameSupportResult.DoNothing;
-                    }
+                    return;
 
                 // demo freedom, countdown, insane, museum, apartment
                 case "stanley":
@@ -362,33 +348,37 @@ namespace LiveSplit.SourceSplit.GameSpecific
                             {
                                 _resetFlagDemo = true;
                                 Debug.WriteLine("mod start");
-                                return GameSupportResult.PlayerGainedControl;
+                                actions.Start(StartOffsetTicks); return;
                             }
                         }
 
                         // freedom ending
                         if (EvaluateChangedViewIndex(state, 1, _modEndingFreedomCamIndex))
                         {
-                            return DefaultEnd("mod freedom");
+                            DefaultEnd("mod freedom", actions);
+                            return;
                         }
 
                         // countdown ending
                         if (EvaluateLatestClientCmd("stopsound"))
                         {
-                            return DefaultEnd("mod countdown", 4);
+                            DefaultEnd("mod countdown", actions, 4);
+                            return;
                         }
 
                         // museum ending
                         if (_modEndingMuseumPodPos.Current.DistanceXY(_modEndingMuseumPodEndPos) <= 0.05f &&
                             _modEndingMuseumPodPos.Old.DistanceXY(_modEndingMuseumPodEndPos) > 0.05f)
                         {
-                            return DefaultEnd("mod museum");
+                            DefaultEnd("mod museum", actions);
+                            return;
                         }
 
                         // insane ending
                         if (EvaluateChangedViewIndex(state, _modEndingInsaneCamIndex, _modEndingGenericCamIndex))
                         {
-                            return DefaultEnd("mod insane");
+                            DefaultEnd("mod insane", actions);
+                            return;
                         }
 
                         // apartment ending
@@ -396,7 +386,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                             state.PlayerPosition.Current.DistanceXY(_modEndingApartmentSectorOrigin) <= 281f &&
                             state.PlayerPosition.Current.Z <= -544f)
                         {
-                            return DefaultEnd("mod apartment");
+                            DefaultEnd("mod apartment", actions);
+                            return;
                         }
 
                         break;
@@ -404,8 +395,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 // demo games
                 case "trainstation":
                     {
-                        float splitTime = state.FindOutputFireTime("the_end", 2);
-                        return DefualtOutputEnd(state, splitTime, "mod games");
+                        float splitTime = state.GameEngine.GetOutputFireTime("the_end", 2);
+                        DefualtOutputEnd(state, splitTime, "mod games", actions);
+                        return;
                     }
 
                 // tsp demo start and end
@@ -426,13 +418,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
                             {
                                 _resetFlagDemo = true;
                                 Debug.WriteLine("stanley demo start");
-                                return GameSupportResult.PlayerGainedControl;
+                                actions.Start(StartOffsetTicks); return;
                             }
                         }
 
                         if (EvaluateChangedViewIndex(state, 1, _demoEndingCamIndex))
                         {
-                            return DefaultEnd("stanley demo");
+                            DefaultEnd("stanley demo", actions);
+                            return;
                         }
                         break;
                     }
@@ -459,7 +452,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                                 {
                                     _resetFlag = true;
                                     Debug.WriteLine("stanley start");
-                                    return GameSupportResult.PlayerGainedControl;
+                                    actions.Start(StartOffsetTicks); return;
                                 }
                             }
                         }
@@ -468,19 +461,22 @@ namespace LiveSplit.SourceSplit.GameSpecific
                         {
                             if (EvaluateChangedViewIndex(state, _endingInsaneCamIndex, _endingMap1CamIndex))
                             {
-                                return DefaultEnd("insane", 3);
+                                DefaultEnd("insane", actions, 3);
+                                return;
                             }
 
                         }
                         else if (EvaluateChangedViewIndex(state, 1, _endingMap1CamIndex) &&
                             state.PlayerPosition.Old.Distance(_spawnPos) >= 5f)
                         {
-                            return DefaultEnd("map1 blackout", 4);
+                            DefaultEnd("map1 blackout", actions, 4);
+                            return;
                         }
 
                         if (EvaluateLatestClientCmd("tsp_broompass")) // broom closet ending
                         {
-                            return DefaultEnd("broom");
+                            DefaultEnd("broom", actions);
+                            return;
                         }
 
                         // heaven ending
@@ -488,31 +484,35 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                         if (buttonPresses >= 4)
                         {
-                            var newbr = state.GetEntInfoByIndex(_endingHeavenBrIndex);
+                            var newbr = state.GameEngine.GetEntInfoByIndex(_endingHeavenBrIndex);
 
                             if (newbr.EntityPtr == IntPtr.Zero && (buttonPresses > _endingHeavenBPass1))
                             {
-                                return DefaultEnd("heaven", 1);
+                                DefaultEnd("heaven", actions, 1);
+                                return;
                             }
                         }
 
                         // song ending
                         if (_endingSongTimer.Current >= 33.333 && _endingSongTimer.Old < 33.333)
                         {
-                            return DefaultEnd("song");
+                            DefaultEnd("song", actions);
+                            return;
                         }
 
                         //voice over ending
                         if (_endingVOTimer.Current >= 0.075 && _endingVOTimer.Old < 0.075)
                         {
-                            return DefaultEnd("voice over");
+                            DefaultEnd("voice over", actions);
+                            return;
                         }
 
                         // whiteboard ending
                         if (state.PlayerPosition.Current.Distance(_endingWhiteboardDoorOrigin) <= 800 &&
                             state.PlayerPosition.Current.X >= 1993 && state.PlayerPosition.Old.X < 1993)
                         {
-                            return DefaultEnd("whiteboard");
+                            DefaultEnd("whiteboard", actions);
+                            return;
                         }
 
                         break;
@@ -523,12 +523,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
                         if (state.PlayerViewEntityIndex.Current == _endingCountCamIndex)
                         {
                             // some really weird floating point inprecision happening here for some reason...
-                            return DefaultFadeEnd(state, -5222.399902f, "countdown");
+                            DefaultFadeEnd(state, -5222.399902f, "countdown", actions);
+                            return;
                         }
 
                         if (_endingDiscoAngVel.Current.Y == 20 && _endingDiscoAngVel.Old.Y != 20)
                         {
-                            return DefaultEnd("secret disco");
+                            DefaultEnd("secret disco", actions);
+                            return;
                         }
                         break;
                     }
@@ -537,7 +539,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     {
                         if (EvaluateChangedViewIndex(state, 1, _endingArtCamIndex))
                         {
-                            return DefaultEnd("art", 3);
+                            DefaultEnd("art", actions, 3);
+                            return;
                         }
                         break;
                     }
@@ -547,7 +550,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                         if (state.PlayerParentEntityHandle.Current != -1
                             && state.PlayerParentEntityHandle.Old == -1)
                         {
-                            return DefaultEnd("freedom", 2);
+                            DefaultEnd("freedom", actions, 2);
+                            return;
                         }
                         break;
                     }
@@ -556,43 +560,47 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     {
                         if (EvaluateChangedViewIndex(state, 1, _endingEscapeCamIndex))
                         {
-                            DefaultEnd("escape");
-                            EndOffsetTicks = 3;
-                            return GameSupportResult.ManualSplit;
+                            DefaultEnd("escape", actions, 3);
+                            return;
                         }
                         break;
                     }
 
                 case "incorrect": //choice ending
                     {
-                        float splitTime = state.FindOutputFireTime("smallnewtimerelay", 2);
-                        return DefualtOutputEnd(state, splitTime, "choice");
+                        float splitTime = state.GameEngine.GetOutputFireTime("smallnewtimerelay", 2);
+                        DefualtOutputEnd(state, splitTime, "choice", actions);
+                        return;
                     }
 
                 case "testchmb_a_00": // games, stuck ending
                     {
                         if (EvaluateChangedViewIndex(state, 1, _endingGamesCamIndex))
                         {
-                            return DefaultEnd("games", 3);
+                            DefaultEnd("games", actions, 3);
+                            return;
                         }
 
                         if (_endingStuckEndingCount.Old == 1 && _endingStuckEndingCount.Current == 2)
                         {
-                            return DefaultEnd("stuck");
+                            DefaultEnd("stuck", actions);
+                            return;
                         }
                         break;
                     }
 
                 case "map_death": //museum ending
                     {
-                        float splitTime = state.FindOutputFireTime("cmd", "command", "stopsound", 2);
-                        return DefualtOutputEnd(state, splitTime, "museum");;
+                        float splitTime = state.GameEngine.GetOutputFireTime("cmd", "command", "stopsound", 2);
+                        DefualtOutputEnd(state, splitTime, "museum", actions);
+                        return;
                     }
                 case "seriousroom": //serious ending
                     {
                         if (_endingSeriousCount == 3)
                         {
-                            return DefaultEnd("serious");
+                            DefaultEnd("serious", actions);
+                            return;
                         }
                         break;
                     }
@@ -602,28 +610,26 @@ namespace LiveSplit.SourceSplit.GameSpecific
                             state.PlayerPosition.Current.X >= -400)
                         {
                             Debug.WriteLine("space ending");
-                            return GameSupportResult.PlayerLostControl;
+                            actions.End(EndOffsetTicks); return;
                         }
 
                         if (EvaluateChangedViewIndex(state, 1, _endingZendingCamIndex))
                         {
-                            return DefaultEnd("zending", 4);
+                            DefaultEnd("zending", actions, 4);
+                            return;
                         }
                         break;
                     }
                 case "map":
                     {
-                        float splitTime = state.FindOutputFireTime("cmd", 2);
+                        float splitTime = state.GameEngine.GetOutputFireTime("cmd", 10);
                         _defOutputSplitTime = splitTime == 0f ? _defOutputSplitTime : splitTime;
-                        if (state.CompareToInternalTimer(_defOutputSplitTime, 0f, false, true))
-                        {
-                            DefaultEnd("confusion");
-                            state.QueueOnNextSessionEnd = GameSupportResult.PlayerLostControl;
-                        }
+                        if (state.CompareToInternalTimer(_defOutputSplitTime, GameState.IO_EPSILON, false, true))
+                            state.QueueOnNextSessionEnd = () => actions.End();
                         break;
                     }
             }
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -15,52 +16,51 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public LostCoast()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("hdrtest"); //beta%
             this.AddLastMap("d2_lostcoast");
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
             if (state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
-                _splitTime = state.FindOutputFireTime("blackout", "Kill", "", 10);
-                _splitTime2 = state.FindOutputFireTime("csystem_sound_start", "PlaySound", "", 10);
+                _splitTime = state.GameEngine.GetOutputFireTime("blackout", "Kill", "", 10);
+                _splitTime2 = state.GameEngine.GetOutputFireTime("csystem_sound_start", "PlaySound", "", 10);
             }
             _onceFlag = false;
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
-            float splitTime = state.FindOutputFireTime("blackout", "Kill", "", 8);
+            float splitTime = state.GameEngine.GetOutputFireTime("blackout", "Kill", "", 8);
 
             if (_splitTime == 0f && splitTime != 0f)
             {
                 Debug.WriteLine("lostcoast start");
                 // no once flag because the end wont trigger otherwise
                 _splitTime = splitTime;
-                return GameSupportResult.PlayerGainedControl;
+                actions.Start(StartOffsetTicks); return;
             }
 
             _splitTime = splitTime;
 
-            float splitTime2 = state.FindOutputFireTime("csystem_sound_start", "PlaySound", "", 8);
+            float splitTime2 = state.GameEngine.GetOutputFireTime("csystem_sound_start", "PlaySound", "", 8);
 
             if (_splitTime2 == 0f && splitTime2 != 0f)
             {
                 Debug.WriteLine("lostcoast end");
                 _onceFlag = true;
                 _splitTime2 = splitTime2;
-                return GameSupportResult.PlayerLostControl;
+                actions.End(EndOffsetTicks); return;
             }
 
             _splitTime2 = splitTime2;
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
-    class PortalMods_PCBORRR : GameSupport
+    class PortalMods_PCBORRR : PortalBase
     {
         // how to match this timing with demos:
         // start: on first map load
@@ -13,49 +14,48 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         private int _gladosIndex;
 
-        public PortalMods_PCBORRR()
+        public PortalMods_PCBORRR() : base()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("testchmb_a_00");
             this.AddLastMap("escape_02_d_180");
-            this.StartOnFirstLoadMaps.AddRange(this.FirstMap);
+            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
-                this._gladosIndex = state.GetEntIndexByName("glados_body");
-                Debug.WriteLine("Glados index is " + this._gladosIndex);
+                this._gladosIndex = state.GameEngine.GetEntIndexByName("glados_body");
+                //Debug.WriteLine("Glados index is " + this._gladosIndex);
             }
 
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsLastMap)
             {
                 if (this._gladosIndex != -1)
                 {
-                    var newglados = state.GetEntInfoByIndex(_gladosIndex);
+                    var newglados = state.GameEngine.GetEntInfoByIndex(_gladosIndex);
 
                     if (newglados.EntityPtr == IntPtr.Zero)
                     {
                         Debug.WriteLine("robot lady boom detected");
                         _onceFlag = true;
-                        this.EndOffsetTicks = -1;
-                        return GameSupportResult.PlayerLostControl;
+                        EndOffsetTicks = -1;
+                        actions.End(EndOffsetTicks); return;
                     }
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
 
     }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -44,15 +45,13 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_1187Ep1()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("1187d1");
             this.AddLastMap("1187d10");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
         }
 
-        public override void OnGameAttached(GameState state)
+        public override void OnGameAttached(GameState state, TimerActions actions)
         {
-            base.OnGameAttached(state);
+            base.OnGameAttached(state, actions);
 
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
 
@@ -62,21 +61,21 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsFirstMap)
             {
-                _startCamIndex = state.GetEntIndexByName("introcam03");
-                Debug.WriteLine("found start cam index at " + _startCamIndex);
+                _startCamIndex = state.GameEngine.GetEntIndexByName("introcam03");
+                //Debug.WriteLine("found start cam index at " + _startCamIndex);
             }
             else if (this.IsLastMap)
             {
                 for (int i = 0; i < 4; i++)
                 {
                     _vortPtr[i] = IntPtr.Zero;
-                    _spawnersPtr[i] = state.GetEntityByName(_vortsList.ElementAt(i).Value);
+                    _spawnersPtr[i] = state.GameEngine.GetEntityByName(_vortsList.ElementAt(i).Value);
                     Debug.WriteLine(_vortsList.ElementAt(i).Value + " ptr is 0x" + _spawnersPtr[i].ToString("X"));
                 }
             }
@@ -84,10 +83,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _onceFlag = false;
         }
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (IsFirstMap)
             {
@@ -95,7 +94,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("1187ep1 start");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
             else if (IsLastMap)
@@ -116,7 +115,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                         // if not and we don't have its pointer, scan for it
                         if (_vortPtr[i] == IntPtr.Zero)
                         {
-                            _vortPtr[i] = state.GetEntityByName(_vortsList.ElementAt(i).Key);
+                            _vortPtr[i] = state.GameEngine.GetEntityByName(_vortsList.ElementAt(i).Key);
                             Debug.WriteLine(_vortsList.ElementAt(i).Key + " ptr is 0x" + _vortPtr[i].ToString("X"));
                         }
                         // now get its health
@@ -128,10 +127,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("1187ep1 end");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

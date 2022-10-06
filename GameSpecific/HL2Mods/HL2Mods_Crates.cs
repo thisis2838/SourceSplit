@@ -1,5 +1,6 @@
 ﻿using LiveSplit.ComponentUtil;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -17,29 +18,27 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_TooManyCrates()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("cratastrophy");
-            this.StartOnFirstLoadMaps.AddRange(this.FirstMap);
-            this.RequiredProperties = PlayerProperties.ViewEntity;
+            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
             if (IsFirstMap)
             {
-                _counterSkin = new MemoryWatcher<int>(state.GetEntityByName("EndWords") + _baseSkinOffset);
-                _camIndex = state.GetEntIndexByName("EndCamera");
-                Debug.WriteLine("found end cam index at " + _camIndex);
+                _counterSkin = new MemoryWatcher<int>(state.GameEngine.GetEntityByName("EndWords") + _baseSkinOffset);
+                _camIndex = state.GameEngine.GetEntIndexByName("EndCamera");
+                //Debug.WriteLine("found end cam index at " + _camIndex);
             }
             _onceFlag = false;
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
@@ -48,11 +47,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _onceFlag = true;
                     Debug.WriteLine("toomanycrates end");
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

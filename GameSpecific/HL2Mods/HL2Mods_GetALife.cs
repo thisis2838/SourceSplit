@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -14,33 +15,31 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_GetALife()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("boulevard");
             this.AddLastMap("labo2");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
             if (IsFirstMap)
             {
-                _startCamIndex = state.GetEntIndexByName("point_viewcontrolintro");
-                Debug.WriteLine("found start cam at " + _startCamIndex);
+                _startCamIndex = state.GameEngine.GetEntIndexByName("point_viewcontrolintro");
+                //Debug.WriteLine("found start cam at " + _startCamIndex);
             }
             else if (IsLastMap)
             {
-                _endCamIndex = state.GetEntIndexByName("point_viewcontrol_finboss1");
-                Debug.WriteLine("found end cam at " + _endCamIndex);
+                _endCamIndex = state.GameEngine.GetEntIndexByName("point_viewcontrol_finboss1");
+                //Debug.WriteLine("found end cam at " + _endCamIndex);
             }
             _onceFlag = false;
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
@@ -48,7 +47,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _onceFlag = true;
                     Debug.WriteLine("get a life start");
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
             else if (this.IsLastMap)
@@ -57,11 +56,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _onceFlag = true;
                     Debug.WriteLine("get a life end");
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

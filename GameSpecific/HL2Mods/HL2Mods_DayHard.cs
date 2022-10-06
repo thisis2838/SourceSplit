@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -15,34 +16,32 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_DayHard()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("dayhardpart1");
             this.AddLastMap("breencave");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
             if (this.IsFirstMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
-                this._camIndex = state.GetEntIndexByName("cutscene3");
-                Debug.WriteLine("_camIndex index is " + this._camIndex);
+                this._camIndex = state.GameEngine.GetEntIndexByName("cutscene3");
+               // Debug.WriteLine("_camIndex index is " + this._camIndex);
             }
 
             if (this.IsLastMap)
             {
-                this._propIndex = state.GetEntIndexByName("Patch3");
-                Debug.WriteLine("_propIndex index is " + this._propIndex);
+                this._propIndex = state.GameEngine.GetEntIndexByName("Patch3");
+                //Debug.WriteLine("_propIndex index is " + this._propIndex);
             }
             _onceFlag = false;
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap && _camIndex != -1)
             {
@@ -51,24 +50,24 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("DayHard start");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
 
             }
 
             else if (this.IsLastMap && _propIndex != -1)
             {
-                var newProp = state.GetEntInfoByIndex(_propIndex);
+                var newProp = state.GameEngine.GetEntInfoByIndex(_propIndex);
 
                 if (newProp.EntityPtr == IntPtr.Zero)
                 {
                     Debug.WriteLine("DayHard end");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

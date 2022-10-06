@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -14,29 +15,29 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_Downfall()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
+            
             this.AddFirstMap("dwn01");
             this.AddLastMap("dwn01a");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
+             
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
 
             if (this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
-                this._spriteIndex = state.GetEntIndexByName("elevator02_button_sprite");
-                Debug.WriteLine("elevator02_button_sprite index is " + this._spriteIndex);
+                this._spriteIndex = state.GameEngine.GetEntIndexByName("elevator02_button_sprite");
+                //Debug.WriteLine("elevator02_button_sprite index is " + this._spriteIndex);
             }
             _onceFlag = false;
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
@@ -45,22 +46,22 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("downfall start");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
             else if (this.IsLastMap && _spriteIndex != 1)
             {
-                var newBlack = state.GetEntInfoByIndex(_spriteIndex);
+                var newBlack = state.GameEngine.GetEntInfoByIndex(_spriteIndex);
 
                 if (newBlack.EntityPtr == IntPtr.Zero)
                 {
                     _spriteIndex = -1;
                     Debug.WriteLine("downfall end");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

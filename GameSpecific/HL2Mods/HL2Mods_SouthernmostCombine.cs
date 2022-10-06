@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
+
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -9,43 +11,38 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // ending: when the trigger for alyx to do her wake up animation is hit
 
         private bool _onceFlag;
-
         private int _startCamIndex;
-
         private int _endCamIndex;
 
         public HL2Mods_SouthernmostCombine()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("smc_town01");
             this.AddLastMap("smc_powerplant03");
-            this.RequiredProperties = PlayerProperties.ViewEntity;
-            this._mapsLowercase = true;
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
             if (this.IsFirstMap)
             {
-                this._startCamIndex = state.GetEntIndexByName("cam");
-                Debug.WriteLine("start camera index is " + this._startCamIndex);
+                this._startCamIndex = state.GameEngine.GetEntIndexByName("cam");
+                //Debug.WriteLine("start camera index is " + this._startCamIndex);
             }
 
             if (this.IsLastMap)
             {
-                _endCamIndex = state.GetEntIndexByName("view_gman");
-                Debug.WriteLine("ending camera index is " + this._endCamIndex);
+                _endCamIndex = state.GameEngine.GetEntIndexByName("view_gman");
+                //Debug.WriteLine("ending camera index is " + this._endCamIndex);
             }
 
             _onceFlag = false;
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (IsFirstMap)
             {
@@ -53,7 +50,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("southernmost combine start");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
             else if (IsLastMap)
@@ -62,10 +59,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("southernmost combine end");
                     _onceFlag = true;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

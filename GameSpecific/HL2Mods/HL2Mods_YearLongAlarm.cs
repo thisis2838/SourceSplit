@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -26,12 +27,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_YearLongAlarm()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("yla_mine");
             this.AddLastMap("yla_bridge");
-            this.StartOnFirstLoadMaps.AddRange(this.FirstMap);
+            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
-        public override void OnGameAttached(GameState state)
+        public override void OnGameAttached(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
 
@@ -40,19 +40,19 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
             if (IsLastMap && _baseEntityHealthOffset != -1)
             {
                 for (int i = 0; i <= 1; i++)
                 {
                     // get the gunships' indicies
-                    _gunshipIndex[i] = state.GetEntIndexByName(_gunshipName[i]);
+                    _gunshipIndex[i] = state.GameEngine.GetEntIndexByName(_gunshipName[i]);
 
                     // and decide their hp
                     if (_gunshipIndex[i] != -1)
-                        _gunshipHP[i] = state.GameProcess.ReadValue<int>(state.GetEntInfoByIndex(_gunshipIndex[i]).EntityPtr + _baseEntityHealthOffset);
+                        _gunshipHP[i] = state.GameProcess.ReadValue<int>(state.GameEngine.GetEntInfoByIndex(_gunshipIndex[i]).EntityPtr + _baseEntityHealthOffset);
                     else 
                         _gunshipHP[i] = -1;
 
@@ -64,23 +64,23 @@ namespace LiveSplit.SourceSplit.GameSpecific
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsLastMap)
             {
                 // check if the trigger that spawns the 2nd gunship has been triggered, if so, check for its pointer
-                if (_gunshipIndex[0] == -1 && state.GetEntIndexByPos(-13.39f, 227.25f, 393.67f) == -1)
-                    _gunshipIndex[0] = state.GetEntIndexByName(_gunshipName[0]);
+                if (_gunshipIndex[0] == -1 && state.GameEngine.GetEntIndexByPos(-13.39f, 227.25f, 393.67f) == -1)
+                    _gunshipIndex[0] = state.GameEngine.GetEntIndexByName(_gunshipName[0]);
 
                 for (int i = 0; i <= 1; i++)
                 {
                     // store the old hp
                     _gunshipOldHP[i] = _gunshipHP[i];
                     // get the gunship's pointer
-                    IntPtr ptr = state.GetEntInfoByIndex(_gunshipIndex[i]).EntityPtr;
+                    IntPtr ptr = state.GameEngine.GetEntInfoByIndex(_gunshipIndex[i]).EntityPtr;
                     // if the gunship hasn't spawned in yet or they're deleted, exit early and reset its old index
                     if (_gunshipIndex[i] == -1 || ptr == IntPtr.Zero)
                     {
@@ -97,13 +97,13 @@ namespace LiveSplit.SourceSplit.GameSpecific
                             Debug.WriteLine("year long alarm end");
                             Debug.WriteLine(_gunshipName[i] + " died at hp " + _gunshipHP[i] + " and old hp " + _gunshipOldHP[i]);
                             _onceFlag = true;
-                            return GameSupportResult.PlayerLostControl;
+                            actions.End(EndOffsetTicks); return;
                         }
                     }
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

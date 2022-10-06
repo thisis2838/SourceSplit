@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -16,60 +17,60 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_DeepDown()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
+            
             this.AddFirstMap("ep2_deepdown_1");
             this.AddLastMap("ep2_deepdown_5");
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
             if (this.IsFirstMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
-                this._introIndex = state.GetEntIndexByName("IntroCredits1");
-                Debug.WriteLine("intro index is " + this._introIndex);
+                this._introIndex = state.GameEngine.GetEntIndexByName("IntroCredits1");
+                //Debug.WriteLine("intro index is " + this._introIndex);
             }
 
             if (this.IsLastMap)
             {
-                _splitTime = state.FindOutputFireTime("Titles_music1", 17);
+                _splitTime = state.GameEngine.GetOutputFireTime("Titles_music1", 17);
             }
             _onceFlag = false;
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
-            if (FirstMap.Contains(state.CurrentMap.ToLower()) && this._introIndex != -1)
+            if (FirstMaps.Contains(state.Map.Current.ToLower()) && this._introIndex != -1)
             {
-                var newIntro = state.GetEntInfoByIndex(_introIndex);
+                var newIntro = state.GameEngine.GetEntInfoByIndex(_introIndex);
 
                 if (newIntro.EntityPtr == IntPtr.Zero)
                 {
                     _introIndex = -1;
                     _onceFlag = true;
                     Debug.WriteLine("deepdown start");
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks); return;
                 }
             }
-            else if (LastMap.Contains(state.CurrentMap.ToLower()))
+            else if (LastMaps.Contains(state.Map.Current.ToLower()))
             {
-                float splitTime = state.FindOutputFireTime("AlyxWakeUp1", 7);
+                float splitTime = state.GameEngine.GetOutputFireTime("AlyxWakeUp1", 7);
 
                 if (_splitTime == 0f && splitTime != 0f)
                 {
                     Debug.WriteLine("deepdown end");
                     _onceFlag = true;
                     _splitTime = splitTime;
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
 
                 _splitTime = splitTime;
             }
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }

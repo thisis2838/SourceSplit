@@ -1,6 +1,7 @@
 ﻿using LiveSplit.ComponentUtil;
 using System;
 using System.Diagnostics;
+using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -20,74 +21,73 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_TheCitizen2AndReturns()
         {
-            this.GameTimingMethod = GameTimingMethod.EngineTicksWithPauses;
             this.AddFirstMap("sp_intro");
             this.AddLastMap("sp_square");
         }
 
-        public override void OnGameAttached(GameState state)
+        public override void OnGameAttached(GameState state, TimerActions actions)
         {
-            base.OnGameAttached(state);
-            _fadeListSize = new MemoryWatcher<int>(state.GameOffsets.FadeListPtr + 0x10);
+            base.OnGameAttached(state, actions);
+            _fadeListSize = new MemoryWatcher<int>(state.GameEngine.FadeListPtr + 0x10);
         }
 
-        public override void OnSessionStart(GameState state)
+        public override void OnSessionStart(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state);
+            base.OnSessionStart(state, actions);
             if (IsFirstMap)
             {
                 _splitTime = 0f;
-                _trigIndex = state.GetEntIndexByPos(-1973f, -4511f, -1901.5f);
+                _trigIndex = state.GameEngine.GetEntIndexByPos(-1973f, -4511f, -1901.5f);
                 Debug.WriteLine("target trigger found at " + _trigIndex);
             }
             _onceFlag = false;
         }
 
 
-        public override GameSupportResult OnUpdate(GameState state)
+        public override void OnUpdate(GameState state, TimerActions actions)
         {
             if (_onceFlag)
-                return GameSupportResult.DoNothing;
+                return;
 
             if (this.IsFirstMap)
             {
-                float splitTime = state.FindOutputFireTime("commander", "Command", "give item_suit", 4);
-                _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
-                IntPtr trigPtr = state.GetEntInfoByIndex(_trigIndex).EntityPtr;
-                if (trigPtr != IntPtr.Zero && state.CompareToInternalTimer(_splitTime, 0f, true))
+                float splitTime = state.GameEngine.GetOutputFireTime("commander", "Command", "give item_suit", 4);
+                IntPtr trigPtr = state.GameEngine.GetEntInfoByIndex(_trigIndex).EntityPtr;
+                if (trigPtr != IntPtr.Zero && splitTime == 0 && _splitTime != 0)
                 {
                     _onceFlag = true;
                     _splitTime = 0f;
                     Debug.WriteLine("the citizen 2 start");
-                    return GameSupportResult.PlayerGainedControl;
+                    actions.Start(StartOffsetTicks);
                 }
+                _splitTime = splitTime;
             }
             else if (this.IsLastMap)
             {
-                float splitTime = state.FindFadeEndTime(-2560f);
+                float splitTime = state.GameEngine.GetFadeEndTime(-2560f);
                 if (state.CompareToInternalTimer(splitTime))
                 {
                     _onceFlag = true;
-                    this.EndOffsetTicks = -1;
+                    EndOffsetTicks = -1;
                     Debug.WriteLine("the citizen 2 end");
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
-            else if (state.CurrentMap.ToLower() == "sp_waterplant2")
+            else if (state.Map.Current.ToLower() == "sp_waterplant2")
             {
                 _fadeListSize.Update(state.GameProcess);
 
-                float splitTime = state.FindFadeEndTime(-127.5f);
+                float splitTime = state.GameEngine.GetFadeEndTime(-127.5f);
 
                 if (splitTime != 0f && _fadeListSize.Old == 0 && _fadeListSize.Current == 1)
                 {
                     _onceFlag = true;
                     Debug.WriteLine("the citizen returns end");
-                    return GameSupportResult.PlayerLostControl;
+                    actions.End(EndOffsetTicks); return;
                 }
             }
 
-            return GameSupportResult.DoNothing;
+            return;
         }
     }
 }
