@@ -32,6 +32,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 case "ep2":
                     return new HL2Ep2();
                 case "portal":
+                case "portal_rtx":
                 case "portalelevators":
                 case "cssmovement":
                     return new Portal();
