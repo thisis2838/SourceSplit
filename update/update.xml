@@ -174,4 +174,16 @@
       <change>Massive internal code revisions and refactoring.</change>
     </changelog>
   </update>
+  <update version="3.3.1">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Added custom split points for Lost Coast.</change>
+      <change>Added support for Portal RTX, Entropy Zero 2, Dark Evening, Episode 3: The Closure, AJB Trajectory trilogy, Forest Train</change>
+      <change>Removed support for Portal 2, Portal Stories: Mel, and Aperature Tag as they were out of date and obsoleted by newer tools.</change>
+      <change>Fixed some issues related to Custom Commands.</change>
+      <change>Internal code revisions and cleanup.</change>
+    </changelog>
+  </update>
 </updates>

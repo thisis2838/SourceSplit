@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -9,8 +10,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: on first map
         // end: when the final output is queued 
 
-        private bool _onceFlag = false;
-        private float _splitTime;
+        private ValueWatcher<float> _splitTime = new ValueWatcher<float>();
 
         public BMSMods_FurtherData()
         {
@@ -18,33 +18,26 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (IsFirstMap)
-                _splitTime = state.GameEngine.GetOutputFireTime("end_btd_sd", "PlaySound", "", 6);
-
-            _onceFlag = false;
-
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("end_btd_sd", "PlaySound", "", 6);
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsFirstMap)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("end_btn_sd", "PlaySound", "", 6);
-                if (splitTime != 0f && _splitTime == 0f)
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("end_btn_sd", "PlaySound", "", 6);
+                if (_splitTime.ChangedFrom(0))
                 {
                     Debug.WriteLine("fd end");
-                    _splitTime = splitTime; 
-                    _onceFlag = true;
-                    actions.End(EndOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds); 
                 }
-                _splitTime = splitTime;
             }
 
             return;

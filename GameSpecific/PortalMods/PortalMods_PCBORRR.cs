@@ -10,8 +10,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: on first map load
         // ending: on glados' body entity being killed
 
-        private bool _onceFlag;
-
         private int _gladosIndex;
 
         public PortalMods_PCBORRR() : base()
@@ -21,22 +19,19 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
 
             if (this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
                 this._gladosIndex = state.GameEngine.GetEntIndexByName("glados_body");
                 //Debug.WriteLine("Glados index is " + this._gladosIndex);
             }
-
-            _onceFlag = false;
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsLastMap)
@@ -48,9 +43,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     if (newglados.EntityPtr == IntPtr.Zero)
                     {
                         Debug.WriteLine("robot lady boom detected");
-                        _onceFlag = true;
-                        EndOffsetTicks = -1;
-                        actions.End(EndOffsetTicks); return;
+                        OnceFlag = true;
+                        actions.End(-state.IntervalPerTick);
                     }
                 }
             }

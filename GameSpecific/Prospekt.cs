@@ -10,10 +10,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: when the view entity switches to the player
         // endings: when the view entity switches to the final camera
 
-        private bool _onceFlag = false;
-
         private int _startCamIndex;
-
         private int _endCamIndex;
 
         public Prospekt()
@@ -22,11 +19,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddLastMap("pxg_finallevel01a");
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-            _onceFlag = false;
-
             if (IsFirstMap)
             {
                 _startCamIndex = state.GameEngine.GetEntIndexByName("secondary_camera");
@@ -39,9 +33,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsFirstMap)
@@ -49,8 +43,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.PlayerViewEntityIndex.Current == 1 && state.PlayerViewEntityIndex.Old == _startCamIndex)
                 {
                     Debug.WriteLine("prospekt start");
-                    _onceFlag = true;
-                    actions.Start(StartOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.Start(StartOffsetMilliseconds); return;
                 }
             }
             else if (IsLastMap)
@@ -58,8 +52,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.PlayerViewEntityIndex.Current == _endCamIndex && state.PlayerViewEntityIndex.Old == 1)
                 {
                     Debug.WriteLine("prospekt end");
-                    _onceFlag = false;
-                    actions.End(EndOffsetTicks); return;
+                    OnceFlag = false;
+                    actions.End(EndOffsetMilliseconds); return;
                 }
             }
 

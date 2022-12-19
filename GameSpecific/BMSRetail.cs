@@ -17,8 +17,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // ending: first tick nihilanth's health is zero
         // earthbound ending: when view entity changes to the ending camera's
 
-        private bool _onceFlag;
-
         // offsets and binary sizes
         private int _baseEntityHealthOffset = -1;
         private const int _serverModernModuleSize = 0x9D6000;
@@ -45,11 +43,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private MemoryWatcher<int> _nihiPhaseCounter;
         private int _xenCamIndex;
         private IntPtr _getGlobalNameFuncPtr = IntPtr.Zero;
-        private const int _xenStartTick = 2493; // 38.953125s
+        private const float _xenStartMS = 38953.125f; // 38.953125s
 
         private MemoryWatcher<int> _susNextThink = null;
-
-        private CustomCommandHandler _cmdHandler;
 
         private BMSMods_HazardCourse _hazardCourse = new BMSMods_HazardCourse();
         private BMSMods_FurtherData _furtherData = new BMSMods_FurtherData();
@@ -60,20 +56,19 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddFirstMap("bm_c1a0a");
             this.AddLastMap("bm_c4a4a");
              
-            this.AdditionalGameSupport.AddRange(new GameSupport[] { _hazardCourse, _furtherData });
-            _cmdHandler = new CustomCommandHandler( 
+            this.AdditionalGameSupport.AddRange(_hazardCourse, _furtherData);
+            CommandHandler.Commands.AddRange
+            (
                 _xenSplitCommand, 
                 _xenStartCommand, 
                 _nihiSplitCommand, 
                 _ebEndCommand, 
-                _susClipTimeLeft);
+                _susClipTimeLeft
+            );
         }
 
-        public override void OnGameAttached(GameState state, TimerActions actions)
+        protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
-            base.OnGameAttached(state, actions);
-            _cmdHandler.Init(state);
-
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
 
             var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
@@ -84,7 +79,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (server.ModuleMemorySize < _serverModernModuleSize)
             {
-                _ebEndCommand.BValue = true;
+                _ebEndCommand.Boolean = true;
                 // for mod, eb's final map name is different
                 if (server.ModuleMemorySize <= _serverModModuleSize)
                     _ebEndMap = "bm_c3a2h";
@@ -93,13 +88,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
             GameMemory.GetBaseEntityMemberOffset("m_nNextThinkTick", state.GameProcess, scanner, out _nextThinkTickOffset);
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
-            _onceFlag = false;
-
-            string curMap = state.Map.Current.ToLower();
+            string curMap = state.Map.Current;
 
             if (curMap == _ebEndMap)
             {
@@ -123,22 +114,16 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public void DefaultEnd(string endingname, TimerActions actions)
         {
-            _onceFlag = true;
+            OnceFlag = true;
             Debug.WriteLine(endingname);
-            actions.End(StartOffsetTicks);
+            actions.End();
         }
 
-        public override void OnGenericUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            base.OnGenericUpdate(state, actions);
-            _cmdHandler.Update(state);
-        }
+            StartOffsetMilliseconds = EndOffsetMilliseconds = 0;
 
-        public override void OnUpdate(GameState state, TimerActions actions)
-        {
-            StartOffsetTicks = EndOffsetTicks = 0;
-
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsLastMap)
@@ -148,7 +133,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (_nihiHP.Current <= 0 && _nihiHP.Old > 0)
                     DefaultEnd("black mesa end", actions);
                     
-                if (_nihiSplitCommand.BValue)
+                if (_nihiSplitCommand.Boolean)
                 {
                     _nihiPhaseCounter.Update(state.GameProcess);
 
@@ -159,34 +144,34 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     }
                 }
             }
-            else if (_ebEndCommand.BValue && state.Map.Current.ToLower() == _ebEndMap)
+            else if (_ebEndCommand.Boolean && state.Map.Current == _ebEndMap)
             {
                 if (state.PlayerViewEntityIndex.Current == _ebCamIndex && state.PlayerViewEntityIndex.Old == 1)
                     DefaultEnd("bms eb end", actions);
             }
-            else if ((_xenStartCommand.BValue || _xenSplitCommand.BValue) && state.Map.Current.ToLower() == _xenStartMap)
+            else if ((_xenStartCommand.Boolean || _xenSplitCommand.Boolean) && state.Map.Current == _xenStartMap)
             {
                 if (state.PlayerViewEntityIndex.Current == 1 && state.PlayerViewEntityIndex.Old == _xenCamIndex)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("bms xen start");
 
-                    if (_xenStartCommand.BValue && _getGlobalNameFuncPtr != IntPtr.Zero)
+                    if (_xenStartCommand.Boolean && _getGlobalNameFuncPtr != IntPtr.Zero)
                     {
                         if (state.GameProcess.CallFunctionString("LC2XEN", _getGlobalNameFuncPtr) == uint.MaxValue)
                         {
-                            if (_xenStartCommand.IValue == 1) StartOffsetTicks = -_xenStartTick;
-                            actions.Start(StartOffsetTicks);
+                            if (_xenStartCommand.Integer == 1) StartOffsetMilliseconds = -_xenStartMS;
+                            actions.Start(StartOffsetMilliseconds);
                             return;
                         }
                     }
 
-                    if (_xenSplitCommand.BValue) actions.Split();
+                    if (_xenSplitCommand.Boolean) actions.Split();
                 }
             }
-            else if (state.Map.Current.ToLower() == "bm_c4a3d")
+            else if (state.Map.Current == "bm_c4a3d")
             {
-                if (!_susClipTimeLeft.BValue) 
+                if (!_susClipTimeLeft.Boolean) 
                     return;
 
                 _susNextThink.Update(state.GameProcess);
@@ -195,8 +180,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (left < 0 || !_susNextThink.Changed) 
                     return;
 
-                WinUtils.SendMessage(state.GameProcess,
-                $"echo \"sus clip time left: {left} ticks, {left * state.IntervalPerTick:0.000000} seconds\"");
+                state.GameProcess.SendMessage($"echo \"sus clip time left: {left} ticks, {left * state.IntervalPerTick:0.000000} seconds\"");
             }
 
             return;

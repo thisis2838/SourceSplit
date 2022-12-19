@@ -10,8 +10,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: on view entity changing from start camera's to the player's
         // ending: on view entity changing from the player's to final camera's
 
-        private bool _onceFlag;
-
         private int _startCamIndex;
         private int _endCamIndex;
 
@@ -19,13 +17,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
         {
             this.AddFirstMap("start");
             this.AddLastMap("boss");
-             
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (this.IsFirstMap)
             {
                 _startCamIndex = state.GameEngine.GetEntIndexByName("wub_viewcontrol");
@@ -37,13 +32,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 _endCamIndex = state.GameEngine.GetEntIndexByName("end_game_camera");
                 //Debug.WriteLine("found end cam index at " + _endCamIndex);
             }
-
-            _onceFlag = false;
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap)
@@ -51,8 +44,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.PlayerViewEntityIndex.Old == _startCamIndex && state.PlayerViewEntityIndex.Current == 1)
                 {
                     Debug.WriteLine("portal pro start");
-                    _onceFlag = true;
-                    actions.Start(StartOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.Start(StartOffsetMilliseconds);
                 }
             }
             else if (this.IsLastMap)
@@ -60,8 +53,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.PlayerViewEntityIndex.Old == 1 && state.PlayerViewEntityIndex.Current == _endCamIndex)
                 {
                     Debug.WriteLine("portal pro end");
-                    _onceFlag = true;
-                    actions.End(EndOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds); 
                 }
             }
 

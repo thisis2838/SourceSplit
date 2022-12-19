@@ -62,7 +62,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             _currentMap = e.Map;
             _sessions.Add(new Session(_currentMap, _intervalPerTick));
             _sessions.Current.OffsetTicks = (int)Settings.SLPenalty.Value;
-
         }
 
         void gameMemory_OnSetTickRate(object sender, SetTickRateEventArgs e)
@@ -90,7 +89,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         // called when player is fully in game
         void gameMemory_OnSessionTimeUpdate(object sender, SessionTicksUpdateEventArgs e)
         {
-
             if (e.TickDifference < 0)
                 Debug.WriteLine($"session update tick difference under 0!! ({e.TickDifference})");
             else if (e.TickDifference == 0)
@@ -125,6 +123,9 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         // called immediately after OnSessionEnded if it was a changelevel
         void gameMemory_OnMapChanged(object sender, MapChangedEventArgs e)
         {
+            if (e.Map == e.PrevMap) return;
+            if (e.Map == "" || e.PrevMap == "") return;
+
             Debug.WriteLine("gameMemory_OnMapChanged " + e.Map + " " + e.PrevMap);
 
             if (!(Settings.AutoSplitOnLevelTrans.Value && !e.IsGeneric))
@@ -181,13 +182,13 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
             if (Settings.RTAStartOffset.Value)
             {
-                var time = TicksToTime(e.TickOffset);
+                var time = TimeSpan.FromMilliseconds(e.MillisecondOffset);
                 // can't add for some reason...
                 _timer.CurrentState.AdjustedStartTime -= -time;
             }
 
             if (_sessions.Current != null)
-                _sessions.Current.StartTick = _sessions.Current.TotalTicks + e.TickOffset;
+                _sessions.Current.StartTick = _sessions.Current.TotalTicks + MillisecondsToTicks(e.MillisecondOffset);
         }
 
         void gameMemory_OnPlayerLostControl(object sender, TimerActionArgs e)
@@ -196,9 +197,9 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                 return;
 
             if (_sessions.Current != null)
-                _sessions.Current.OffsetTicks -= e.TickOffset;
+                _sessions.Current.OffsetTicks -= MillisecondsToTicks(e.MillisecondOffset);
 
-            this.DoSplit(e.TickOffset, false);
+            this.DoSplit(MillisecondsToTicks(e.MillisecondOffset), false);
         }
 
         void gameMemory_ManualSplit(object sender, TimerActionArgs e)
@@ -208,9 +209,9 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                 return;
 
             if (_sessions.Current != null)
-                _sessions.Current.OffsetTicks -= e.TickOffset;
+                _sessions.Current.OffsetTicks -= MillisecondsToTicks(e.MillisecondOffset);
 
-            this.DoSplit(e.TickOffset, true);
+            this.DoSplit(MillisecondsToTicks(e.MillisecondOffset), true);
         }
 
         void gameMemory_OnNewGameStarted(object sender, EventArgs e)
@@ -228,9 +229,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
         void gameMemory_OnMiscTime(object sender, MiscTimeEventArgs e)
         {
-
             if (e.TickDifference < 0)
-                Debug.WriteLine($"misc time update tick difference under 0!! ({e.TickDifference})");
+                Debug.WriteLine($"misc time update tick difference under 0! ({e.TickDifference})");
 
             switch (e.Type)
             {

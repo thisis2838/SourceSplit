@@ -6,7 +6,7 @@ using LiveSplit.SourceSplit.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using static LiveSplit.SourceSplit.GameSpecific.TBGFireTimeWatcher;
+using LiveSplit.SourceSplit.ComponentHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -15,13 +15,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: 2:27.50 before map load 
         // ending: when player move speed is modified
 
-        private bool _onceFlag = false;
-
         private MemoryWatcher<float> _playerMoveSpeed;
 
         private const int _pointMsgEnabledOffset = 0x366;
 
-        private CustomCommandHandler _ccHandler = new CustomCommandHandler();
         private CustomCommand _enableExtraSplits = new CustomCommand(
             "esplits", 
             "0", 
@@ -32,6 +29,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         private List<string> _maps = new List<string>()
         {
+            "intro",
             "whisper",
             "backwards",
             "entering",
@@ -54,55 +52,72 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public TheBeginnersGuide()
         {
-            StartOffsetTicks = -8850;
-            this.AddFirstMap("whisper");
+            this.AddFirstMap("intro");
+            this.StartOnFirstLoadMaps.AddRange(FirstMaps);
             this.AddLastMap("nomansland2");
-            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
 
             typeof(TheBeginnersGuide).GetFields(BindingFlags.NonPublic | BindingFlags.Instance) 
                 .Select (x => x.GetValue(this)).Where(x => x is ITBGExtraSplit).Select(x => x as ITBGExtraSplit)
                 .GroupBy(x => x.Map).ToList().ForEach(x => _points.Add(x.Key, x.ToList()));
 
-            _enableExtraSplits.Description = 
+            _enableExtraSplits.LongDescription =
                 $"Enables the following split points:\n" + 
-                string.Join("\n---------------\n", _points.Select(x => 
-                    "\t- " + x.Key + "\n\t\t" + string.Join("\n\t\t", x.Value.Select(y => "\"\"\"\"" + y.Description))));
+                string.Join("\n\n", _points.Select(x => 
+                    "\t- " + x.Key + "\n\t\t" + string.Join("\n\t\t", x.Value.Select(y => "\t" + y.Description))));
 
-            _ccHandler = new CustomCommandHandler(_enableExtraSplits);
+            CommandHandler.Commands.Add(_enableExtraSplits);
         }
 
-        public override void OnGameAttached(GameState state, TimerActions actions)
+        protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
-            ProcessModuleWow64Safe server;
-            server = state.GetModule("server.dll");
+            ProcessModuleWow64Safe server = state.GetModule("server.dll");
             _playerMoveSpeed = new MemoryWatcher<float>(server.BaseAddress + 0x761310);
-
-            _ccHandler.Init(state);
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-            _onceFlag = false;
-
-            if (_points.ContainsKey(state.Map.Current.ToLower()))
-                _points[state.Map.Current.ToLower()].ForEach(x => x.Reset(state));
+            if (_points.ContainsKey(state.Map.Current))
+                _points[state.Map.Current].ForEach(x => x.Reset(state));
         }
 
-        public override void OnGenericUpdate(GameState state, TimerActions actions)
+        protected override bool OnNewGameInternal(GameState state, TimerActions actions, string newMapName)
         {
-            base.OnGenericUpdate(state, actions);
-            _ccHandler.Update(state);
+            if (newMapName.StartsWith("menu")) return false;
+
+            switch (newMapName)
+            {
+                case "whisper": actions.Start(-147500f); break;
+                default:
+                    {
+                        if (SourceSplitComponent.Settings.AutoSplitOnGenericMap.Value)
+                            return true;
+
+                        var current = _maps.IndexOf(state.Map.Current);
+                        var next = _maps.IndexOf(newMapName);
+
+                        if (current >= 0 && next >= 0 && next - current == 1)
+                            actions.Split();
+
+                        break;
+                    }
+            }
+            return false;
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override bool OnChangelevelInternal(GameState state, TimerActions actions, string newMapName)
         {
-            if (_onceFlag)
+            if (newMapName == "whisper") actions.Start(-147500f); 
+            return false;
+        }
+
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
+        {
+            if (OnceFlag)
                 return;
 
-            if (_enableExtraSplits.BValue)
+            if (_enableExtraSplits.Boolean)
             {
-                string map = state.Map.Current.ToLower();
+                string map = state.Map.Current;
 
                 if (_points.ContainsKey(map))
                 {
@@ -121,11 +136,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 _playerMoveSpeed.Update(state.GameProcess);
                 if (_playerMoveSpeed.Old != 0 && _playerMoveSpeed.Current == 0)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("tbg end");
-                    actions.End(EndOffsetTicks); return;
+                    actions.End(EndOffsetMilliseconds);
                 }
             }
+
             return;
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -10,10 +11,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: when the view entity switches back to the player
         // ending: when the output to the final relay is fired
 
-        private bool _onceFlag;
-
         private int _camIndex;
-        private float _splitTime;
+        private ValueWatcher<float> _splitTime = new ValueWatcher<float>();
 
         public HL2Mods_DeeperDown()
         {
@@ -21,50 +20,45 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddLastMap("ep2_dd2_9");
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (this.IsFirstMap)
             {
-                this._camIndex = state.GameEngine.GetEntIndexByName("PointViewCont1");
+                _camIndex = state.GameEngine.GetEntIndexByName("PointViewCont1");
                 //Debug.WriteLine("_camIndex index is " + this._camIndex);
             }
             else if (this.IsLastMap)
             {
-                _splitTime = state.GameEngine.GetOutputFireTime("OW_Dead_Relay", 2);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("OW_Dead_Relay", 2);
             }
-
-            _onceFlag = false;
         }
 
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap)
             {
                 if (state.PlayerViewEntityIndex.Current == 1 && state.PlayerViewEntityIndex.Old == _camIndex)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("deeper down start");
-                    actions.Start(StartOffsetTicks); return;
+                    actions.Start(StartOffsetMilliseconds); 
+                }
+            }
+            else if (this.IsLastMap)
+            {
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("OW_Dead_Relay", 2);
+                if (_splitTime.ChangedTo(0))
+                {
+                    Debug.WriteLine("deeper down end");
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds);
                 }
             }
 
-            else if (this.IsLastMap)
-            {
-                float newSplitTime = state.GameEngine.GetOutputFireTime("OW_Dead_Relay", 2);
-                if (_splitTime != 0f && newSplitTime == 0f)
-                {
-                    Debug.WriteLine("deeper down end");
-                    _onceFlag = true;
-                    actions.End(EndOffsetTicks); return;
-                }
-                _splitTime = newSplitTime;
-            }
             return;
         }
     }

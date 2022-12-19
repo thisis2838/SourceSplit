@@ -38,12 +38,6 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Portal();
                 case "portal_tfv":
                     return new PortalMods_TheFlashVersion();
-                case "portal2":
-                    return new Portal2();
-                case "aperturetag":
-                    return new ApertureTag();
-                case "portal_stories":
-                    return new PortalStoriesMel();
                 case "bms":
                     return new BMSRetail();
                 case "lostcoast":
@@ -113,6 +107,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new HL2Mods_TheLostCity();
                 case "entropyzero":
                     return new HL2Mods_EntropyZero();
+                case "entropyzero2":
+                    return new HL2Mods_EntropyZero2();
                 case "deeperdown":
                     return new HL2Mods_DeeperDown();
                 case "thinktank":
@@ -199,6 +195,12 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new HL2Mods_Localmotive();
                 case "crumbsoftruth":
                     return new PortalMods_CrumbsOfTruth();
+                case "darkevening": 
+                    return new HL2Mods_DarkEvening();
+                case "halflife2-episode3":
+                    return new HL2Mods_EpisodeThree();
+                case "foresttrain":
+                    return new HL2Mods_ForestTrain();
             }
 
             return new DefaultGame();

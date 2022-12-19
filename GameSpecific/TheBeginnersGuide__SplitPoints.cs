@@ -6,13 +6,9 @@ using LiveSplit.SourceSplit.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using static LiveSplit.SourceSplit.GameSpecific.TBGFireTimeWatcher;
-using static LiveSplit.SourceSplit.GameSpecific.TBGPlayerViewEntity;
-using static LiveSplit.SourceSplit.GameSpecific.TBGEntityState;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
-
     partial class TheBeginnersGuide : GameSupport
     {
 

@@ -169,7 +169,6 @@ namespace LiveSplit.SourceSplit.DemoHandling
                 process.WriteValue<int>(framePtr, 1);
             }
 
-
             _watch = new MemoryWatcherList()
             {
                 _demoIndex,
@@ -180,11 +179,9 @@ namespace LiveSplit.SourceSplit.DemoHandling
                 _hostTick,
                 _startTick,
             };
-
             _watch.UpdateAll(process);
 
             Functional = true;
-
             return true;
         }
 
@@ -289,18 +286,19 @@ namespace LiveSplit.SourceSplit.DemoHandling
 
             void sendMsg(string msg)
             {
-                List<string> msgs = new List<string>();
-
-                msgs.Add(" ");
-                msgs.Add($"Info for: {file.Name}.dem");
-                msgs.Add(" ");
+                List<string> msgs = new List<string>
+                {
+                    " ",
+                    $"Info for: {file.Name}.dem",
+                    " "
+                };
 
                 msg = msg.Replace("\r\n", "\n").Trim(' ', '\n');
                 msg.Split('\n').ToList().ForEach(x => msgs.Add(x));
 
                 msgs.Add(" ");
 
-                WinUtils.SendMessage(state.GameProcess, "echo \"" + String.Join("\";echo \"", msgs) + " \"");
+                state.GameProcess.SendMessage("echo \"" + String.Join("\";echo \"", msgs) + " \"");
             }
 
             if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))

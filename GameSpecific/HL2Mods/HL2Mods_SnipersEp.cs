@@ -10,7 +10,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         //start: when player moves (excluding an on-the-spot jump)
         //end: when "gordon" is killed (hp is <= 0)
 
-        private bool _onceFlag;
         private int _baseEntityHealthOffset = -1;
         public static bool _resetFlag;
 
@@ -22,7 +21,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddFirstMap("bestmod2013");
         }
 
-        public override void OnGameAttached(GameState state, TimerActions actions)
+        protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
 
@@ -32,23 +31,20 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
         }
 
-        public override void OnTimerReset(bool resetFlagTo)
+        protected override void OnTimerResetInternal(bool resetFlagTo)
         {
             _resetFlag = resetFlagTo;
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-            _onceFlag = false;
-
             if (this.IsFirstMap)
                 _freemanHP = new MemoryWatcher<int>(state.GameEngine.GetEntityByName("bar") + _baseEntityHealthOffset);
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap)
@@ -56,15 +52,15 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.PlayerPosition.Old.BitEqualsXY(_startPos) && !state.PlayerPosition.Current.BitEqualsXY(_startPos) && !_resetFlag)
                 {
                     _resetFlag = true;
-                    actions.Start(StartOffsetTicks); return;
+                    actions.Start(StartOffsetMilliseconds); 
                 }
 
                 _freemanHP.Update(state.GameProcess);
                 if (_freemanHP.Current <= 0 && _freemanHP.Old > 0)
                 {
                     Debug.WriteLine("snipersep end");
-                    _onceFlag = true;
-                    actions.End(EndOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds); 
                 }
             }
             return;

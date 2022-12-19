@@ -10,8 +10,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: after player view entity changes
         // ending: when breen's banana hat (yes really) is killed
 
-        private bool _onceFlag;
-
         private int _breenIndex;
         private int _camIndex;
 
@@ -21,10 +19,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddLastMap("ptsd_final");
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (this.IsFirstMap)
             {
                 this._camIndex = state.GameEngine.GetEntIndexByName("camera_1");
@@ -36,14 +32,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 this._breenIndex = state.GameEngine.GetEntIndexByName("banana2");
                 //Debug.WriteLine("banana2 index is " + this._breenIndex);
             }
-
-            _onceFlag = false;
         }
 
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap && _camIndex != -1)
@@ -52,8 +46,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     && state.PlayerViewEntityIndex.Current == GameState.ENT_INDEX_PLAYER)
                 {
                     Debug.WriteLine("ptsd start");
-                    _onceFlag = true;
-                    actions.Start(StartOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.Start(StartOffsetMilliseconds); 
                 }
             }
             else if (this.IsLastMap && this._breenIndex != -1)
@@ -64,10 +58,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _breenIndex = -1;
                     Debug.WriteLine("ptsd end");
-                    _onceFlag = true;
-                    actions.End(EndOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds);
                 }
             }
+
             return;
         }
     }

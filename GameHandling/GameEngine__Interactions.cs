@@ -20,7 +20,6 @@ namespace LiveSplit.SourceSplit.GameHandling
 {
     public abstract partial class GameEngine
     {
-
         #region  RETRIEVAL FUNCTIONS
         public virtual HostState GetHostState()
         {

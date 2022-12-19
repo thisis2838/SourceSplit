@@ -49,7 +49,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
             // zending:     when the player view entity switches from the player to the final camera
             // whiteboard:  when the previous player's X pos is =< 1993 and current is >= 1993
 
-        private bool _onceFlag;
         public bool _resetFlag;
         public bool _resetFlagDemo;
         public bool _resetFlagMod;
@@ -60,9 +59,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
         //private const int _modClientModuleSize = 0x4cb000;
         private const float _angleEpsilon = 0.0005f;
 
-        ProcessModuleWow64Safe client;
-        ProcessModuleWow64Safe engine;
-        ProcessModuleWow64Safe server;
+        private ProcessModuleWow64Safe _client;
+        private ProcessModuleWow64Safe _engine;
+        private ProcessModuleWow64Safe _server;
 
         // offsets
         private int _baseEntityAngleOffset = -1;
@@ -124,22 +123,20 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private Vector3f _modEndingApartmentSectorOrigin = new Vector3f(-3524f, 1368f, -620f);
 
         private CustomCommand _noSpaceEnd = new CustomCommand("nospaceend", "0", "Disable splitting on Space Ending", archived: true);
-        private CustomCommandHandler _ccHandler;
 
         public TheStanleyParable()
         {
-            _ccHandler = new CustomCommandHandler(_noSpaceEnd);
+            CommandHandler.Commands.Add(_noSpaceEnd);
         }
 
         // Shorthands
         private void DefaultEnd(string endingname, TimerActions actions, int endoffset = 0)
         {
-            EndOffsetTicks = endoffset;
-            _onceFlag = true;
+            EndOffsetMilliseconds = endoffset * (1f / 60f) * 1000f;
+            OnceFlag = true;
             Debug.WriteLine(endingname + " ending");
 
-            if (EndOffsetTicks == 0)
-                actions.End(endoffset);
+            if (EndOffsetMilliseconds == 0) actions.End(endoffset);
             else actions.Split(endoffset);
         }
 
@@ -184,22 +181,20 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
         }
 
-        public override void OnTimerReset(bool resetflagto)
+        protected override void OnTimerResetInternal(bool resetflagto)
         {
             _resetFlag = _resetFlagDemo = _resetFlagMod = resetflagto;
             _endingSeriousCount = 0;
             _startAng.X = _demoStartAng.X = 0f;
         }
 
-        public override void OnGameAttached(GameState state, TimerActions actions)
+        protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
-            _ccHandler.Init(state);
+            _server = state.GetModule("server.dll");
+            _client = state.GetModule("client.dll");
+            _engine = state.GetModule("engine.dll");
 
-            server = state.GetModule("server.dll");
-            client = state.GetModule("client.dll");
-            engine = state.GetModule("engine.dll");
-
-            var serverScanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
+            var serverScanner = new SignatureScanner(state.GameProcess, _server.BaseAddress, _server.ModuleMemorySize);
 
             if (GameMemory.GetBaseEntityMemberOffset("m_angAbsRotation", state.GameProcess, serverScanner, out _baseEntityAngleOffset))
                 Debug.WriteLine("CBaseEntity::m_angAbsRotation offset = 0x" + _baseEntityAngleOffset.ToString("X"));
@@ -222,7 +217,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 return ret;
             };
 
-            var engineScanner = new SignatureScanner(state.GameProcess, engine.BaseAddress, engine.ModuleMemorySize);
+            var engineScanner = new SignatureScanner(state.GameProcess, _engine.BaseAddress, _engine.ModuleMemorySize);
 
             _endingsWatcher.ResetAll();
 
@@ -231,15 +226,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _endingsWatcher.Add(_latestClientCmd);
         }
 
-        public override void OnGenericUpdate(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            _ccHandler.Update(state);
-        }
-
-        public override void OnSessionStart(GameState state, TimerActions actions)
-        {
-            base.OnSessionStart(state, actions);
-
             _defFadeSplitTime = 0f;
             _defOutputSplitTime = 0f;
 
@@ -247,12 +235,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
             if (!_isMod)
                 _playerViewAng = new MemoryWatcher<Vector3f>(state.PlayerEntInfo.EntityPtr + _angleOffset);
             else
-                _playerViewAng = new MemoryWatcher<Vector3f>(client.BaseAddress + _modAngleOffset);
+                _playerViewAng = new MemoryWatcher<Vector3f>(_client.BaseAddress + _modAngleOffset);
 
             _endingsWatcher.Add(_playerViewAng);
 
 
-            switch (state.Map.Current.ToLower())
+            switch (state.Map.Current)
             {
                 case "stanley":
                     {
@@ -274,7 +262,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                         _endingsWatcher.Add(_startDoorAng);
                         this._endingMap1CamIndex = state.GameEngine.GetEntIndexByName("cam_black");
                         this._endingHeavenBrIndex = state.GameEngine.GetEntIndexByName("427compbr");
-                        state.GameProcess.ReadValue(server.BaseAddress + _buttonPasses, out _endingHeavenBPass1);
+                        state.GameProcess.ReadValue(_server.BaseAddress + _buttonPasses, out _endingHeavenBPass1);
                         this._endingInsaneCamIndex = state.GameEngine.GetEntIndexByName("mariella_camera");
                         this._endingSongTimer = new MemoryWatcher<float>(state.GameEngine.GetEntityByName("narratorerroryes") + _logicChoreoTimerOffset);
                         this._endingVOTimer = new MemoryWatcher<float>(state.GameEngine.GetEntityByName("narratorerrorno") + _logicChoreoTimerOffset);
@@ -318,17 +306,16 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     }
             }
 
-            _onceFlag = false;
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
             _endingsWatcher.UpdateAll(state.GameProcess);
 
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
-            switch (state.Map.Current.ToLower())
+            switch (state.Map.Current)
             {
                 default:
                     return;
@@ -348,7 +335,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                             {
                                 _resetFlagDemo = true;
                                 Debug.WriteLine("mod start");
-                                actions.Start(StartOffsetTicks); return;
+                                actions.Start(StartOffsetMilliseconds); return;
                             }
                         }
 
@@ -418,7 +405,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                             {
                                 _resetFlagDemo = true;
                                 Debug.WriteLine("stanley demo start");
-                                actions.Start(StartOffsetTicks); return;
+                                actions.Start(StartOffsetMilliseconds); return;
                             }
                         }
 
@@ -452,7 +439,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                                 {
                                     _resetFlag = true;
                                     Debug.WriteLine("stanley start");
-                                    actions.Start(StartOffsetTicks); return;
+                                    actions.Start(StartOffsetMilliseconds); return;
                                 }
                             }
                         }
@@ -480,7 +467,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                         }
 
                         // heaven ending
-                        state.GameProcess.ReadValue(server.BaseAddress + _buttonPasses, out int buttonPresses);
+                        state.GameProcess.ReadValue(_server.BaseAddress + _buttonPasses, out int buttonPresses);
 
                         if (buttonPresses >= 4)
                         {
@@ -606,11 +593,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     }
                 case "zending": // space, zending ending
                     {
-                        if (!_noSpaceEnd.BValue && state.PlayerPosition.Old.X <= -7000 &&
+                        if (!_noSpaceEnd.Boolean && state.PlayerPosition.Old.X <= -7000 &&
                             state.PlayerPosition.Current.X >= -400)
                         {
                             Debug.WriteLine("space ending");
-                            actions.End(EndOffsetTicks); return;
+                            actions.End(EndOffsetMilliseconds); return;
                         }
 
                         if (EvaluateChangedViewIndex(state, 1, _endingZendingCamIndex))

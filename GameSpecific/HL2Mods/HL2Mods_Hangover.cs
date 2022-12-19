@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -8,9 +9,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: on first map
         // ending: when the final output is fired
 
-        private bool _onceFlag;
-        private float _splitTime;
-
+        private ValueWatcher<float> _splitTime = new ValueWatcher<float>();
         private int _startCamIndex;
 
         public HL2Mods_Hangover()
@@ -19,22 +18,20 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddLastMap("hangover_02");
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
             if (IsFirstMap)
             {
                 _startCamIndex = state.GameEngine.GetEntIndexByName("at1_viewcontrol");
                 //Debug.WriteLine($"start cam index is {_startCamIndex}");
             }
             if (IsLastMap)
-                _splitTime = state.GameEngine.GetOutputFireTime("credits_weaponstrip", 10);
-            _onceFlag = false;
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("credits_weaponstrip", 10);
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap)
@@ -42,28 +39,22 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.PlayerViewEntityIndex.Old == _startCamIndex &&
                     state.PlayerViewEntityIndex.Current == 1)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("hangover start");
-                    actions.Start(StartOffsetTicks); return;
+                    actions.Start(StartOffsetMilliseconds);
                 }
             }
             else if (this.IsLastMap)
             {
                 float splitTime = state.GameEngine.GetOutputFireTime("credits_weaponstrip", 10);
-                try
+                if (_splitTime.ChangedTo(0f))
                 {
-                    if (splitTime == 0f && _splitTime != 0f)
-                    {
-                        _onceFlag = true;
-                        Debug.WriteLine("hangover end");
-                        actions.End(EndOffsetTicks); return;
-                    }
-                }
-                finally
-                {
-                    _splitTime = splitTime;
+                    OnceFlag = true;
+                    Debug.WriteLine("hangover end");
+                    actions.End(EndOffsetMilliseconds);
                 }
             }
+
             return;
         }
     }

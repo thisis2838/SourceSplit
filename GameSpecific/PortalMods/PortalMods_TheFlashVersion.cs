@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using LiveSplit.ComponentUtil;
 using LiveSplit.SourceSplit.GameHandling;
@@ -13,18 +14,17 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: first tick when your position is at 0 168 129 (cl_showpos 1)
         // ending: first tick player is slowed down by the ending trigger
 
-        private bool _onceFlag;
-        private Vector3f _startPos = new Vector3f(0f, 168f, 129f);
         private int _laggedMovementOffset = -1;
-        private const int VAULT_SAVE_TICK = 3876;
 
         public PortalMods_TheFlashVersion() : base()
         {
             this.AddFirstMap("portaltfv1");
             this.AddLastMap("portaltfv5");
+
+            this.StartOnFirstLoadMaps.AddRange(FirstMaps);
         }
 
-        public override void OnGameAttached(GameState state, TimerActions actions)
+        protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GameProcess.ModulesWow64SafeNoCache().FirstOrDefault(x => x.ModuleName.ToLower() == "server.dll");
             Trace.Assert(server != null);
@@ -35,38 +35,26 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CBasePlayer::m_flLaggedMovementValue offset = 0x" + _laggedMovementOffset.ToString("X"));
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSaveLoadedInternal(GameState state, TimerActions actions, string saveName)
         {
-            base.OnSessionStart(state, actions);
-            _onceFlag = false;
-        }
-
-        public override void OnUpdate(GameState state, TimerActions actions)
-        {
-            if (_onceFlag)
-                return;
-
-            if (this.IsFirstMap)
+            string path = Path.Combine(state.AbsoluteGameDir, "SAVE", saveName + ".sav");
+            if (File.Exists(path))
             {
-                // vault save starts at tick 3876, but update interval may miss it so be a little lenient
-                if ((state.TickBase >= VAULT_SAVE_TICK && state.TickBase <= VAULT_SAVE_TICK + 4))
+                string md5 = FileUtils.GetMD5(path);
+                if (md5 == "3b3a18c32a9a9de68a178e759db80104")
                 {
                     Debug.WriteLine("tfv start");
-                    _onceFlag = true;
-                    int ticksSinceVaultSaveTick = state.TickBase - VAULT_SAVE_TICK; // account for missing ticks if update interval missed it
-                    StartOffsetTicks = -3803 - ticksSinceVaultSaveTick; // 57.045 seconds
-                    actions.Start(StartOffsetTicks); return;
-                }
-
-                // map started without vault save
-                else if (state.PlayerPosition.Current.DistanceXY(_startPos) < 1.0f)
-                {
-                    Debug.WriteLine("tfv start");
-                    _onceFlag = true;
-                    actions.Start(StartOffsetTicks); return;
+                    actions.Start(-3803 * 0.015f * 1000f);
                 }
             }
-            else if (this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
+        }
+
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
+        {
+            if (OnceFlag)
+                return;
+
+            if (this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
                 // "OnTrigger" "weapon_disable2:ModifySpeed:0.4:0:-1"
                 float laggedMovementValue;
@@ -74,8 +62,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (laggedMovementValue == 0.4f)
                 {
                     Debug.WriteLine("tfv end");
-                    _onceFlag = true;
-                    actions.End(EndOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds); 
                 }
             }
 

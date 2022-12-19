@@ -13,7 +13,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         //          XOR if the start video is deleted and the map is newly spawned
         // ending:  when the blocker brush entity is killed
 
-        private bool _onceFlag;
         private bool _resetFlag;
         private bool _tutResetFlag = true;
         private int _basePlayerLaggedMovementOffset = -1;
@@ -32,7 +31,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddFirstMap("a0c0p0"); // boot camp
             this.AddLastMap("a4c1p2");  
         }
-        public override void OnGameAttached(GameState state, TimerActions actions)
+        protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
             ProcessModuleWow64Safe bink = state.GetModule("video_bink.dll");
@@ -44,7 +43,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
             if (GameMemory.GetBaseEntityMemberOffset("m_flLaggedMovementValue", state.GameProcess, scanner, out _basePlayerLaggedMovementOffset))
                 Debug.WriteLine("CBasePlayer::m_flLaggedMovementValue offset = 0x" + _basePlayerLaggedMovementOffset.ToString("X"));
 
-
             _watcher.ResetAll();
 
             // i would've sigscanned this but this dll is a 3rd party thing anyways so its unlikely to change between versions
@@ -53,18 +51,15 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _watcher.Add(_isInCutscene);
         }
 
-        public override void OnTimerReset(bool resetFlagTo)
+        protected override void OnTimerResetInternal(bool resetFlagTo)
         {
-            _onceFlag = false;
+            OnceFlag = false;
             _resetFlag = resetFlagTo;
-            if (!resetFlagTo)
-                _tutResetFlag = true;
+            if (!resetFlagTo) _tutResetFlag = true;
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (IsLastMap)
             {
                 _playerHP = new MemoryWatcher<int>(state.PlayerEntInfo.EntityPtr + _baseEntityHealthOffset);
@@ -78,19 +73,17 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 _blockerIndex = state.GameEngine.GetEntIndexByName("blocker");
                 Debug.WriteLine("blocker entity index is " + _blockerIndex);
             }
-
-            _onceFlag = false;
         }
 
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
             _watcher.UpdateAll(state.GameProcess);
 
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
-            if (state.Map.Current.ToLower() == "a0c0p1" && state.PlayerPosition.Current.DistanceXY(_startPos) <= 3f)
+            if (state.Map.Current == "a0c0p1" && state.PlayerPosition.Current.DistanceXY(_startPos) <= 3f)
             {
                 bool ifIntroNotDeleted = File.Exists(state.GameProcess.ReadString(state.GameEngine.GameDirPtr, 255) + "/media/a0b0c0s0.bik");
                 if (_tutResetFlag && 
@@ -98,9 +91,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     (!ifIntroNotDeleted && !_resetFlag && state.TickCount.Current <= 1 && state.RawTickCount.Current <= 150))
                 {
                     Debug.WriteLine("hdtf start");
-                    _onceFlag = true;
+                    OnceFlag = true;
                     _resetFlag = true;
-                    actions.Start(StartOffsetTicks); return;
+                    actions.Start(StartOffsetMilliseconds); return;
                 }
             }
             else if (IsFirstMap)
@@ -110,26 +103,26 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (_playerLaggedMovementValue.Current == 1.0f && _playerLaggedMovementValue.Old == 0f)
                 {
                     Debug.WriteLine("hdtf tutorial start");
-                    actions.Start(StartOffsetTicks); return;
+                    actions.Start(StartOffsetMilliseconds); return;
                 }
 
                 IntPtr blockerNew = state.GameEngine.GetEntInfoByIndex(_blockerIndex).EntityPtr;
                 if (blockerNew == IntPtr.Zero && _blockerIndex != -1)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     _blockerIndex = -1; 
                     Debug.WriteLine("hdtf tutorial end");
                     _tutResetFlag = false;
-                    actions.End(EndOffsetTicks); return;
+                    actions.End(EndOffsetMilliseconds); return;
                 }
             }
             else if (this.IsLastMap)
             {
                 if (_playerHP.Old > 0 && _playerHP.Current <= 0)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("hdtf end");
-                    actions.End(EndOffsetTicks); return;
+                    actions.End(EndOffsetMilliseconds); return;
                 }
             }
 

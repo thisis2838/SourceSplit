@@ -11,7 +11,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         private int _startCamIndex;
         private int _endCamIndex;
-        private bool _onceFlag;
 
         public PortalMods_Rexaura() : base()
         {
@@ -19,10 +18,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddLastMap("rex_19_remote");    
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (this.IsFirstMap)
             {
                 _startCamIndex = state.GameEngine.GetEntIndexByName("wub_viewcontrol");
@@ -33,13 +30,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 _endCamIndex = state.GameEngine.GetEntIndexByName("end_game_camera");
                 //Debug.WriteLine("found end cam index at " + _endCamIndex);
             }
-
-            _onceFlag = false;
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap)
@@ -47,8 +42,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.PlayerViewEntityIndex.Old == _startCamIndex && state.PlayerViewEntityIndex.Current == 1)
                 {
                     Debug.WriteLine("rexaura start");
-                    _onceFlag = true;
-                    actions.Start(StartOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.Start(StartOffsetMilliseconds);
                 }
             }
             else if (this.IsLastMap)
@@ -56,8 +51,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.PlayerViewEntityIndex.Old == 1 && state.PlayerViewEntityIndex.Current == _endCamIndex)
                 {
                     Debug.WriteLine("rexaura end");
-                    _onceFlag = true;
-                    actions.End(EndOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds);
                 }
             }
 

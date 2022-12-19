@@ -36,17 +36,17 @@ namespace LiveSplit.SourceSplit.Utilities
             for (int i = 0; i < numMods; i++)
             {
                 sb.Clear();
-                if (ComponentUtil.WinAPI.GetModuleFileNameEx(p.Handle, hModules[i], sb, (uint)sb.Capacity) == 0)
+                if (WinAPI.GetModuleFileNameEx(p.Handle, hModules[i], sb, (uint)sb.Capacity) == 0)
                     throw new Win32Exception();
                 string fileName = sb.ToString();
 
                 sb.Clear();
-                if (ComponentUtil.WinAPI.GetModuleBaseName(p.Handle, hModules[i], sb, (uint)sb.Capacity) == 0)
+                if (WinAPI.GetModuleBaseName(p.Handle, hModules[i], sb, (uint)sb.Capacity) == 0)
                     throw new Win32Exception();
                 string baseName = sb.ToString();
 
-                var moduleInfo = new ComponentUtil.WinAPI.MODULEINFO();
-                if (!ComponentUtil.WinAPI.GetModuleInformation(p.Handle, hModules[i], out moduleInfo, (uint)Marshal.SizeOf(moduleInfo)))
+                var moduleInfo = new WinAPI.MODULEINFO();
+                if (!WinAPI.GetModuleInformation(p.Handle, hModules[i], out moduleInfo, (uint)Marshal.SizeOf(moduleInfo)))
                     throw new Win32Exception();
 
                 ret.Add(new ProcessModuleWow64Safe()
@@ -62,10 +62,10 @@ namespace LiveSplit.SourceSplit.Utilities
             return ret.ToArray();
         }
 
-        public static void SendMessage(this Process proc, string input)
+        public static int SendMessage(this Process proc, string input)
         {
             if (proc == null || proc.HasExited || proc.Handle == IntPtr.Zero || input.Length == 0)
-                return;
+                return 0;
 
             input = input + "\0";
 
@@ -75,7 +75,9 @@ namespace LiveSplit.SourceSplit.Utilities
                 dwData = IntPtr.Zero,
                 lpData = Marshal.StringToHGlobalAnsi(input)
             };
+
             int res = WinUtils.SendMessage(proc.MainWindowHandle, WM_COPYDATA, 0, ref copy);
+            return res;
         }
 
         public static uint CallFunctionString(this Process process, string input, IntPtr funcPtr)
@@ -83,18 +85,24 @@ namespace LiveSplit.SourceSplit.Utilities
             if (process == null || funcPtr == IntPtr.Zero || process.HasExited || process.Handle == IntPtr.Zero)
                 return 0;
 
-            IntPtr procHandle = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION | PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ,
+            IntPtr procHandle = OpenProcess
+            (
+                PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION | 
+                PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ,
                 false,
-                process.Id);
+                process.Id
+            );
 
             uint bufSize = (uint)((input.Length + 1) * Marshal.SizeOf(typeof(char)));
 
-            IntPtr stringBuf = VirtualAllocEx(
+            IntPtr stringBuf = VirtualAllocEx
+            (
                 procHandle,
                 IntPtr.Zero,
                 (UIntPtr)bufSize,
                 (uint)(MemPageState.MEM_COMMIT | MemPageState.MEM_RESERVE),
-                MemPageProtect.PAGE_READWRITE);
+                MemPageProtect.PAGE_READWRITE
+            );
 
             if (stringBuf == IntPtr.Zero)
                 return 0;
@@ -116,5 +124,6 @@ namespace LiveSplit.SourceSplit.Utilities
 
             return ret;
         }
+
     }
 }

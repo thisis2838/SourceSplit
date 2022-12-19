@@ -89,9 +89,11 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
                 if (Settings.ShowTickCount.Value)
                 {
-                    _tickCountComponent.SetText(
+                    _tickCountComponent.SetText
+                    (
                         $"{(long)(GameTime.TotalSeconds / _intervalPerTick)} | " +
-                        $"{StringUtils.NumberAlign(_sessions.Current?.TotalTicks ?? 0, 5)}");
+                        $"{StringUtils.NumberAlign(_sessions.Current?.TotalTicks ?? 0, 5)}"
+                    );
                     _tickCountComponent.Update(invalidator, state, width, height, mode);
                 }
 

@@ -9,8 +9,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: when player gains control from camera entity (when the its parent entity is killed)
         // ending: when player's view entity changes to the ending camera
 
-        private bool _onceFlag;
-
         private int _trainIndex;
         private int _camIndex;
 
@@ -20,17 +18,13 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddLastMap("thestoryhappyend");  
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (this.IsFirstMap)
             {
                 _trainIndex = state.GameEngine.GetEntIndexByName("lookatthis_move");
                 //Debug.WriteLine("camera parent entity index is " + _trainIndex);
             }
-            _onceFlag = false;
-
             if (this.IsLastMap)
             {
                 _camIndex = state.GameEngine.GetEntIndexByName("credit_cam");
@@ -39,9 +33,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
         }
 
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap && _trainIndex != -1)
@@ -51,22 +45,21 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (newTrig.EntityPtr == IntPtr.Zero)
                 {
                     _trainIndex = -1;
-                    _onceFlag = true;
-                    StartOffsetTicks = -4;
+                    OnceFlag = true;
                     Debug.WriteLine("freakman2 start");
-                    actions.Start(StartOffsetTicks); return;
+                    actions.Start(-60);
                 }
             }
-
             else if (this.IsLastMap && _camIndex != -1)
             {
                 if (state.PlayerViewEntityIndex.Old != _camIndex && state.PlayerViewEntityIndex.Current == _camIndex)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("freakman2 end");
-                    actions.End(EndOffsetTicks); return;
+                    actions.End(EndOffsetMilliseconds);
                 }
             }
+
             return;
         }
     }

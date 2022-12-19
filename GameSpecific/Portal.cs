@@ -26,10 +26,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
             // portal: crosshair appear
             // portal tfv map pack: on first map
 
-        private bool _onceFlag;
         private int _baseEntityHealthOffset = -1;
         private const int VAULT_SAVE_TICK = 4261;
-        private float _splitTime = 0;
+        private ValueWatcher<float> _splitTime = new ValueWatcher<float>();
         private float _elevSplitTime = 0;
         private MemoryWatcher<int> _playerHP;
 
@@ -45,7 +44,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
 #if DEBUG
         private CustomCommand _enduranceTesting = new CustomCommand("endurancetesting", "", "Do endurance testing");
 #endif
-        private CustomCommandHandler _ccHandler;
 
         public Portal() : base()
         {
@@ -53,17 +51,18 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddLastMap("escape_02");        
              
             this.AdditionalGameSupport.Add(new PortalMods_TheFlashVersion());
-            _ccHandler = new CustomCommandHandler(
+            CommandHandler.Commands.AddRange
+            (
                 _newStart, 
                 _elevSplit, 
                 _deathSplit
 #if DEBUG
                 , _enduranceTesting
 #endif      
-                );
+            );
         }
 
-        public override void OnGameAttached(GameState state, TimerActions actions)
+        protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
 
@@ -72,48 +71,37 @@ namespace LiveSplit.SourceSplit.GameSpecific
             if (GameMemory.GetBaseEntityMemberOffset("m_iHealth", state.GameProcess, scanner, out _baseEntityHealthOffset))
                 Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
 
-            _ccHandler.Init(state);
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (IsFirstMap)
-                _splitTime = state.GameEngine.GetOutputFireTime("scene_*", "PitchShift", "2.0", 50);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("scene_*", "PitchShift", "2.0", 50);
 
             if (this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
-                _splitTime = state.GameEngine.GetOutputFireTime("cable_detach_04", 50);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("cable_detach_04", 50);
 
-            if (_elevSplit.BValue)
+            if (_elevSplit.Boolean)
             {
                 _elevSplitTime = state.GameEngine.GetOutputFireTime("*elev_start", 15);
                 Debug.WriteLine("Elevator split time is " + _elevSplitTime);
             }
 
             _playerHP = new MemoryWatcher<int>(state.PlayerEntInfo.EntityPtr + _baseEntityHealthOffset);
-
-            _onceFlag = false;
         }
 
-        public override void OnGenericUpdate(GameState state, TimerActions actions)
-        {
-            base.OnGenericUpdate(state, actions);
-            _ccHandler.Update(state);
 
-        }
-
-        public override void OnSaveLoaded(GameState state, TimerActions actions, string name)
+        protected override void OnSaveLoadedInternal(GameState state, TimerActions actions, string name)
         {
-            base.OnSaveLoaded(state, actions, name);
+            if (_newStart.Boolean) return;
 
             var path = Path.Combine(state.AbsoluteGameDir, "SAVE", name + ".sav");
             string md5 = FileUtils.GetMD5(path);
 
             if (_vaultHashes.Contains(md5))
             {
-                actions.Start(state.Retick(-3534, 0.015f) + 1);
-                _onceFlag = true;
+                actions.Start(-53010); // don't add a tick here since this gets done on the next session start
+                OnceFlag = true;
                 Debug.WriteLine($"portal vault save start");
                 return;
             }
@@ -161,22 +149,22 @@ namespace LiveSplit.SourceSplit.GameSpecific
         Random rand = new Random();
 #endif
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
 #if DEBUG
-            if (_enduranceTesting.BValue)
+            if (_enduranceTesting.Boolean)
             {
-                var e = _enduranceTesting.Value.Split('|');
+                var e = _enduranceTesting.String.Split('|');
                 int wait = rand.Next(int.Parse(e[0]), int.Parse(e[1]));
                 if (state.TickCount.Current > wait)
                 {
-                    Utilities.WinUtils.SendMessage(state.GameProcess, _commands[rand.Next(0, _commands.Length - 1)]);
+                    state.GameProcess.SendMessage(_commands[rand.Next(0, _commands.Length - 1)]);
                 }
             }
 #endif
             _playerHP.Update(state.GameProcess);
 
-            if (_elevSplit.BValue)
+            if (_elevSplit.Boolean)
             {
                 float splitTime = 0;
 
@@ -186,47 +174,39 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     () => splitTime = state.GameEngine.GetOutputFireTime("*elevator_door_model_close", 15));
                 findSplitTime.Begin();
 
-                try
+                if (splitTime == 0 && _elevSplitTime != 0)
                 {
-                    if (splitTime == 0 && _elevSplitTime != 0)
-                    {
-                        Debug.WriteLine("Elevator began moving!");
-                        actions.Split(); return;
-                    }
+                    Debug.WriteLine("Elevator began moving!");
+                    actions.Split();
                 }
-                finally { _elevSplitTime = splitTime; }
+                _elevSplitTime = splitTime;
             }
 
-            if (IsFirstMap && _deathSplit.BValue)
+            if (IsFirstMap && _deathSplit.Boolean)
             {
                 if (_playerHP.Old > 0 && _playerHP.Current <= 0)
                 {
                     Debug.WriteLine("Death% end");
-                    actions.Split(); return;
+                    actions.Split();
                 }
             }
 
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsFirstMap)
             {
                 bool isInside = state.PlayerPosition.Current.InsideBox(-636, -452, -412, -228, 383, 158);
 
-                if (_newStart.BValue)
+                if (_newStart.Boolean)
                 {
-                    float splitTime = state.GameEngine.GetOutputFireTime("relay_portal_cancel_room1", 50);
-                    try
+                    _splitTime.Current = state.GameEngine.GetOutputFireTime("relay_portal_cancel_room1", 50);
+                    if (_splitTime.ChangedTo(0) && isInside)
                     {
-                        if (_splitTime != 0 && splitTime == 0 && isInside)
-                        {
-                            StartOffsetTicks = state.Retick(-3801, 0.015f);
-                            Debug.WriteLine("portal portal open start");
-                            _onceFlag = true;
-                            actions.Start(StartOffsetTicks);
-                        }
+                        Debug.WriteLine("portal portal open start");
+                        OnceFlag = true;
+                        actions.Start(-(57015 + 0.015f));
                     }
-                    finally { _splitTime = splitTime; }
                 }
                 /*else
                 {
@@ -245,21 +225,21 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                 if (isInside && state.PlayerViewEntityIndex.ChangedTo(1))
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("portal bed start");
-                    actions.Start(); return;
+                    actions.Start(); 
+                    return;
                 }
             }
             else if (IsLastMap)
             {
-                var splitTime = state.GameEngine.GetOutputFireTime("cable_detach_04", 50);
-                if (splitTime > 0 && _splitTime == 0)
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("cable_detach_04", 50);
+                if (_splitTime.ChangedFrom(0))
                 {
                     Debug.WriteLine("portal delayed end");
-                    _onceFlag = true;
-                    actions.End(-1); // -1 for unknown reasons
+                    OnceFlag = true;
+                    actions.End(-state.IntervalPerTick * 1000); // -1 for unknown reasons
                 }
-                _splitTime = splitTime;
             }
 
             return;

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,6 +32,12 @@ namespace LiveSplit.SourceSplit.Utilities
             Old = t;
         }
 
+        public ValueWatcher()
+        {
+            _current = default;
+            Old = default;
+        }
+
         public void Reset(T newVal)
         {
             Old = _current = newVal;
@@ -39,22 +46,22 @@ namespace LiveSplit.SourceSplit.Utilities
         public bool ChangedFromTo(T from, T to)
         {
             return 
-                (Old == null ? from == null : Old.Equals(from)) && 
-                (Current == null ? to == null : Current.Equals(to));
+                (Old is null ? from is null : Old.Equals(from)) && 
+                (Current is null ? to is null : Current.Equals(to));
         }
 
         public bool ChangedTo(T to)
         {
             return
-                !(Old == null ? to == null : Old.Equals(to)) &&
-                (Current == null ? to == null : Current.Equals(to));
+                !(Old is null ? to is null : Old.Equals(to)) &&
+                (Current is null ? to is null : Current.Equals(to));
         }
 
         public bool ChangedFrom(T from)
         {
             return
-                (Old == null ? from == null : Old.Equals(from)) &&
-                !(Current == null ? from == null : Current.Equals(from));
+                (Old is null ? from is null : Old.Equals(from)) &&
+                !(Current is null ? from is null : Current.Equals(from));
         }
 
         public override string ToString()

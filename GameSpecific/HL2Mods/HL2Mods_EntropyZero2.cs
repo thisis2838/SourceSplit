@@ -5,7 +5,7 @@ using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
-    class HL2Mods_EntropyZero : GameSupport
+    class HL2Mods_EntropyZero2 : GameSupport
     {
         // how to match with demos:
         // start: on first map load
@@ -13,17 +13,16 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         private ValueWatcher<float> _splitTime = new ValueWatcher<float>();
 
-        public HL2Mods_EntropyZero()
+        public HL2Mods_EntropyZero2()
         {
-            this.AddFirstMap("az_intro");
-            this.AddLastMap("az_c4_3");
-            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
+            this.AddFirstMap("ez2_c0_1");
+            //this.AddLastMap("ez2_c6_4");
         }
 
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            if (IsLastMap)
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("STASIS_SEQ_LazyGo", 3);
+            if (IsFirstMap) 
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("intro_teleport", 20);
         }
 
         protected override void OnUpdateInternal(GameState state, TimerActions actions)
@@ -31,14 +30,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
             if (OnceFlag)
                 return;
 
-            if (IsLastMap)
+            if (IsFirstMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("STASIS_SEQ_LazyGo", 3);
-                if (_splitTime.ChangedTo(0))
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("intro_teleport", 20);
+                if (_splitTime.ChangedFrom(0))
                 {
                     OnceFlag = true;
-                    Debug.WriteLine("entropy zero end");
-                    actions.End(EndOffsetMilliseconds);
+                    Debug.WriteLine("entropy zero 2 start");
+                    actions.Start(StartOffsetMilliseconds);
                 }
             }
 

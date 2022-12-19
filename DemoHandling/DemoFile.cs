@@ -23,7 +23,6 @@ namespace LiveSplit.SourceSplit.DemoHandling
         public long TotalTicks = 0;
         public string FilePath = "";
 
-
         public DemoFile(string filePath)
         {
             filePath = Path.GetFullPath(filePath);

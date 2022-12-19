@@ -10,21 +10,17 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: when player view entity changes
         // ending: when player has lagged movement (speedmod)
 
-        private bool _onceFlag;
-
         private int _camIndex;
         private MemoryWatcher<float> _playerLaggedMoveValue;
         private int _laggedMovementOffset = -1;
 
         public TE120()
         {
-            
             this.AddFirstMap("chapter_1");
             this.AddLastMap("chapter_4");
-             
         }
 
-        public override void OnGameAttached(GameState state, TimerActions actions)
+        protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
 
@@ -35,10 +31,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
         }
 
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (this.IsFirstMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
                 this._camIndex = state.GameEngine.GetEntIndexByName("blackout_viewcontrol");
@@ -49,16 +43,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
             {
                 _playerLaggedMoveValue = new MemoryWatcher<float>(state.PlayerEntInfo.EntityPtr + _laggedMovementOffset);
             }
-
-            _onceFlag = false;
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
-            {
+            if (OnceFlag)
                 return;
-            }
 
             if (this.IsFirstMap)
             {
@@ -66,8 +56,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     && state.PlayerViewEntityIndex.Current == GameState.ENT_INDEX_PLAYER)
                 {
                     Debug.WriteLine("te120 start");
-                    _onceFlag = true;
-                    actions.Start(StartOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.Start(StartOffsetMilliseconds);
                 }
             }
             else if (this.IsLastMap)
@@ -76,11 +66,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                 if (_playerLaggedMoveValue.Old == 1 && _playerLaggedMoveValue.Current == 0.3f)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("te120 end");
-                    actions.End(EndOffsetTicks); return;
+                    actions.End(EndOffsetMilliseconds);
                 }
             }
+
             return;
         }
     }

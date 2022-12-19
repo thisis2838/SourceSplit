@@ -9,34 +9,27 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: when player view entity changes
         // ending: when elevator button is pressed
 
-        private bool _onceFlag;
-
         private int _spriteIndex;
 
         public HL2Mods_Downfall()
         {
-            
             this.AddFirstMap("dwn01");
             this.AddLastMap("dwn01a");
-             
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
                 this._spriteIndex = state.GameEngine.GetEntIndexByName("elevator02_button_sprite");
                 //Debug.WriteLine("elevator02_button_sprite index is " + this._spriteIndex);
             }
-            _onceFlag = false;
         }
 
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap)
@@ -45,8 +38,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     && state.PlayerViewEntityIndex.Current == GameState.ENT_INDEX_PLAYER)
                 {
                     Debug.WriteLine("downfall start");
-                    _onceFlag = true;
-                    actions.Start(StartOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.Start(StartOffsetMilliseconds);
                 }
             }
             else if (this.IsLastMap && _spriteIndex != 1)
@@ -57,10 +50,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     _spriteIndex = -1;
                     Debug.WriteLine("downfall end");
-                    _onceFlag = true;
-                    actions.End(EndOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds);
                 }
             }
+
             return;
         }
     }

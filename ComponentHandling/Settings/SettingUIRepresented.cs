@@ -149,12 +149,12 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
 
     public class SettingTextBox : SettingUIRepresented<string>
     {
-        public SettingTextBox(string name, string value, TextBox box) : base
+        public SettingTextBox(string name, string value, TextBox box, bool alwaysLowerCase = false) : base
         (
             name,
             value,
-            () => { return box.Text; },
-            (e) => { box.Text = e; },
+            () => { return alwaysLowerCase ? box.Text.ToLower() : box.Text; },
+            (e) => { box.Text = alwaysLowerCase ? e.ToLower() : e; },
             box
         )
         { }

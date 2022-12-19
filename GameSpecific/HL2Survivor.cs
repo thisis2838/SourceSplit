@@ -8,7 +8,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: on loading the first map (game begins by loading a pre-made save)
         // ending: when the player's view entity switches to the final
 
-        private bool _onceFlag;
         private bool _startFlag;
         private float _splitTime;
         private const int DEFAULT_START_SAVE_TICK = 1670;
@@ -23,24 +22,21 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.TimingSpecifics.DefaultTimingMethod = new GameTimingMethod(pauses: false);
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (this.IsLastMap)
             {
                 _finalCamIndex = state.GameEngine.GetEntIndexByName("cam02");
                 //Debug.WriteLine("found final camera's entity index at " + _finalCamIndex);
             }
 
-            _onceFlag = false;
             _startFlag = false;
             _splitTime = 0f;
         }
 
-        public override void OnGenericUpdate(GameState state, TimerActions actions)
+        protected override void OnGenericUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag) 
+            if (OnceFlag) 
                 return;
 
             float splitTime = state.GameEngine.GetOutputFireTime("*", "NextScene", "", 7);
@@ -50,14 +46,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
             {
-                state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
+                state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 _splitTime = 0f;
             }
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap && !_startFlag)
@@ -68,16 +64,16 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     // can't have onceflag here as it'd negate the splitting code on this map
                     _startFlag = true;
                     Debug.WriteLine("hl2 survivor start");
-                    actions.Start(StartOffsetTicks); return;
+                    actions.Start(StartOffsetMilliseconds); return;
                 }
             }
             else if (this.IsLastMap)
             {
                 if (state.PlayerViewEntityIndex.Old == 1 && state.PlayerViewEntityIndex.Current == _finalCamIndex)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("hl2 survivor end");
-                    actions.End(EndOffsetTicks); return;
+                    actions.End(EndOffsetMilliseconds); return;
                 }
             }
 

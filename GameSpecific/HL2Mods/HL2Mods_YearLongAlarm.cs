@@ -11,7 +11,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: on first map
         // ending: when one of the 2 gunships' HP drops from 0 to lower
 
-        private bool _onceFlag;
         private int _baseEntityHealthOffset = -1;
 
         // there are 2 gunships, each of them killed will count as a timer end. one of them spawns at level start and is later deleted
@@ -31,7 +30,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddLastMap("yla_bridge");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
-        public override void OnGameAttached(GameState state, TimerActions actions)
+        protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
 
@@ -40,9 +39,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
             if (IsLastMap && _baseEntityHealthOffset != -1)
             {
                 for (int i = 0; i <= 1; i++)
@@ -60,13 +58,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 }
 
             }
-            _onceFlag = false;
         }
 
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsLastMap)
@@ -96,8 +93,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                         {
                             Debug.WriteLine("year long alarm end");
                             Debug.WriteLine(_gunshipName[i] + " died at hp " + _gunshipHP[i] + " and old hp " + _gunshipOldHP[i]);
-                            _onceFlag = true;
-                            actions.End(EndOffsetTicks); return;
+                            OnceFlag = true;
+                            actions.End(EndOffsetMilliseconds); return;
                         }
                     }
                 }

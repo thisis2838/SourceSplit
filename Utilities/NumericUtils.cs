@@ -32,5 +32,9 @@ namespace LiveSplit.SourceSplit.Utilities
             return b > c ? (a > c && b > a) : (a > b && c > a);
         }
 
+        public static T Bounded<T>(this T val, T min, T max) where T : struct, IComparable
+        {
+            return val.CompareTo(min) < 0 ? min : (val.CompareTo(max) > 0 ? max : val);
+        }
     }
 }

@@ -17,8 +17,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 {
     public partial class SourceSplitSettings : UserControl
     {
-        private readonly object _lock = new object();
-
         public SourceSplitSettings(bool isLayout)
         {
             this.InitializeComponent();
@@ -54,6 +52,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.dgvMapTransitions.CellBorderStyle = DataGridViewCellBorderStyle.SingleVertical;
             this.dgvMapTransitions.SelectionMode = DataGridViewSelectionMode.CellSelect;
 
+            this.tableCoolInfo.Invalidated += TableCoolInfo_Invalidated;
+
             // HACKHACK: due to all the data bindings shenanigans, we need to load all the tab pages when opening the settings
             // so just give in...
             this.Load += (e, f) => 
@@ -64,6 +64,23 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                     Thread.Sleep(1);
                 }
             };
+        }
+
+        private void TableCoolInfo_Invalidated(object sender, InvalidateEventArgs e)
+        {
+            var r = new Random();
+            string time = SourceSplitUtils.ActiveTime.Elapsed.ToStringCustom();
+            string text = "This SourceSplit session has been running for: ";
+
+            switch (r.Next(0, 100))
+            {
+                case 4: text = "You have been fiddling around with settings for: "; break;
+                case 7: text = "You have been resetting for: "; break;
+                case 13: text = "I have been mining crypto for: "; break;
+                case 17: text = "You haven't PB'd in at least: "; break;
+            }
+
+            labRunningFor.Text = text + time;
         }
 
         private void DmnSplitInterval_ValueChanged(object sender, EventArgs e)
@@ -82,8 +99,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
         public void SetSettings(XmlNode settings)
         {
-
-            if (settings["GameTimingMethod"] != null && 
+                if (settings["GameTimingMethod"] != null && 
                 settings[nameof(SourceSplitComponent.Settings.CountEngineTicks)] == null)
             {
                 string method = settings["GameTimingMethod"].InnerText;
@@ -132,6 +148,26 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         private void butShowSessions_Click(object sender, EventArgs e)
         {
             SessionsForm.Instance.Show();
+        }
+
+        private void butGRepo_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://github.com/thisis2838/SourceSplit");
+        }
+
+        private void butReleases_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://github.com/thisis2838/SourceSplit/releases");
+        }
+
+        private void butSetup_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://github.com/thisis2838/SourceSplit/blob/master/CONFIGURING.md");
+        }
+
+        private void butReport_Click(object sender, EventArgs e)
+        {
+            Process.Start("https://github.com/thisis2838/SourceSplit/issues");
         }
     }
 

@@ -38,7 +38,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
             _sessions.Clear();
             _sessions.Add(new Session(_currentMap, _intervalPerTick));
-            _sessions.Current.OffsetTicks = (int)Settings.SLPenalty.Value;
+            //_sessions.Current.OffsetTicks = (int)Settings.SLPenalty.Value;
 
             // assume we're holding pause
             _holdingFirstPause = Settings.HoldUntilPause.Value;

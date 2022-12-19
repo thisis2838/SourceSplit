@@ -12,91 +12,139 @@ namespace LiveSplit.SourceSplit.GameHandling
     abstract partial class GameSupport
     {
         /// <summary>
-        /// Returns the corresponding function this mod / game is based on
+        /// Returns the corresponding function this mod / game is based on.
         /// </summary>
-        /// <returns></returns>
         public virtual GameEngine GetEngine() { return new GenericEngine(); }
+
+
+        public void OnGameAttached(GameState state, TimerActions actions)
+        {
+            CommandHandler.Init(state);
+
+            OnGameAttachedInternal(state, actions);
+            AdditionalGameSupport?.ForEach(x => x.OnGameAttached(state, actions));
+        }
         /// <summary>
-        /// Actions to do when the game process is found and game-specific code is initialized. 
-        /// Called when attached to a new game process
+        /// Actions to do when SourceSplit has successfully acquired a game process.
+        /// Called at the end of TryGetGameProcess().
         /// </summary>
-        /// <param name="name">The name of the entity</param>
-        public virtual void OnGameAttached(GameState state, TimerActions actions) { }
+        protected virtual void OnGameAttachedInternal(GameState state, TimerActions actions) { }
+
+
+        public virtual void OnTimerReset(bool resetFlagTo)
+        {
+            OnTimerResetInternal(resetFlagTo);
+            AdditionalGameSupport?.ForEach(x => x.OnTimerReset(resetFlagTo));
+        }
         /// <summary>
-        /// Actions to do when the timer is manually reset
-        /// Called when the timer is reset
+        /// Actions to do when the timer is manually reset.
+        /// Called when Livesplit state's OnReset() is called .
         /// </summary>
-        /// <param name="resetFlagTo">Value of corresponding reset flag</param>
-        public virtual void OnTimerReset(bool resetFlagTo) { }
+        protected virtual void OnTimerResetInternal(bool resetFlagTo) { }
+
+
+        public void OnSessionStart(GameState state, TimerActions actions)
+        {
+            OnceFlag = false;
+
+            //UpdateOutputFireTimeWatchers(state);
+
+            string map = state.Map.Current;
+            this.IsFirstMap = FirstMaps.ConvertAll(x => x.ToLower()).Contains(map);
+            this.IsLastMap = LastMaps.ConvertAll(x => x.ToLower()).Contains(map);
+
+            OnSessionStartInternal(state, actions);
+            AdditionalGameSupport?.ForEach(x => x.OnSessionStart(state, actions));
+        }
         /// <summary>
         /// Actions to do when a new session starts and the player is fully in the game. 
-        /// Called on the first tick when player is fully in the game (according to demos)
+        /// Called when SignOnState changes to Full and HostState is Run.
         /// </summary>
-        /// <param name="state">GameState</param>
-        public virtual void OnSessionStart(GameState state, TimerActions actions)
+        protected virtual void OnSessionStartInternal(GameState state, TimerActions actions) { }
+
+
+        public void OnSessionEnd(GameState state, TimerActions actions)
         {
-            _onceFlag = false;
-
-            string map = state.Map.Current.ToLower();
-
-            this.IsFirstMap = FirstMaps.ConvertAll(x => x.ToLowerInvariant()).Contains(map);
-            this.IsLastMap = LastMaps.ConvertAll(x => x.ToLowerInvariant()).Contains(map);
+            OnSessionEndInternal(state, actions);
+            AdditionalGameSupport?.ForEach(x => x.OnSessionEnd(state, actions));
         }
         /// <summary>
         /// Actions to do when a session ends and the player is no longer fully in-game. 
-        /// Called when player no longer fully in the game (map changed, load started)
+        /// Called when HostState changes away from Run.
         /// </summary>
-        /// <param name="state">GameState</param>
-        public virtual void OnSessionEnd(GameState state, TimerActions actions) { }
-        /// <summary>
-        /// Actions to do when the timer updates, regardless of game states. 
-        /// Called every update loop, regardless if the player is fully in-game
-        /// </summary>
-        /// <param name="state">GameState</param>
-        public virtual void OnGenericUpdate(GameState state, TimerActions actions) { }
-        /// <summary>
-        /// Actions to do when the timer updates and the player is fully in the game. 
-        /// Called once per tick when player is fully in the game
-        /// </summary>
-        /// <param name="state">GameState</param>
-        public virtual void OnUpdate(GameState state, TimerActions actions)
+        protected virtual void OnSessionEndInternal(GameState state, TimerActions actions) { }
+
+
+        public void OnGenericUpdate(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
-                return;
+            CommandHandler.Update(state);
 
-            if (this.AutoStartType == AutoStart.Unfrozen
-                && !state.PlayerFlags.Current.HasFlag(FL.FROZEN)
-                && state.PlayerFlags.Old.HasFlag(FL.FROZEN))
-            {
-                Debug.WriteLine("FL_FROZEN removed from player");
-                _onceFlag = true;
-                actions.Start(StartOffsetTicks);
-            }
-            else if (this.AutoStartType == AutoStart.ViewEntityChanged
-                && state.PlayerViewEntityIndex.Old != GameState.ENT_INDEX_PLAYER
-                && state.PlayerViewEntityIndex.Current == GameState.ENT_INDEX_PLAYER)
-            {
-                Debug.WriteLine("view entity changed to player");
-                _onceFlag = true;
-                actions.Start(StartOffsetTicks);
-            }
-            else if (this.AutoStartType == AutoStart.ParentEntityChanged
-                && state.PlayerParentEntityHandle.Old != -1
-                && state.PlayerParentEntityHandle.Current == -1)
-            {
-                Debug.WriteLine("player no longer parented");
-                _onceFlag = true;
-                actions.Start(StartOffsetTicks);
-            }
-
-            return;
+            OnGenericUpdateInternal(state, actions);
+            AdditionalGameSupport?.ForEach(x => x.OnGenericUpdate(state, actions));
         }
         /// <summary>
-        /// Actions to do when a save is loaded
+        /// Actions to do on every SourceSplit internal update loop.
+        /// Called after UpdateGameState() and before CheckGameState().
         /// </summary>
-        /// <param name="state"></param>
-        /// <param name="actions"></param>
-        public virtual void OnSaveLoaded(GameState state, TimerActions actions, string saveName) { }
+        protected virtual void OnGenericUpdateInternal(GameState state, TimerActions actions) { }
 
+
+        public void OnUpdate(GameState state, TimerActions actions)
+        {
+            OnUpdateInternal(state, actions);
+            AdditionalGameSupport?.ForEach(x => x.OnUpdate(state, actions));
+        }
+        /// <summary>
+        /// Actions to do when the timer updates and the player is fully in the game. 
+        /// Called when SignOnState is Full and HostState is Run.
+        /// </summary>
+        protected virtual void OnUpdateInternal(GameState state, TimerActions actions) { }
+
+
+        public void OnSaveLoaded(GameState state, TimerActions actions, string saveName)
+        {
+            OnSaveLoadedInternal(state, actions, saveName);
+            AdditionalGameSupport?.ForEach(x => x.OnSaveLoaded(state, actions, saveName));
+        }
+        /// <summary>.
+        /// Actions to do when a save is QUEUED to be loaded.
+        /// Called when HostState changes to LoadGame.
+        /// </summary>
+        protected virtual void OnSaveLoadedInternal(GameState state, TimerActions actions, string saveName) { }
+
+
+        public bool OnNewGame(GameState state, TimerActions actions, string newMapName)
+        {
+            if (StartOnFirstLoadMaps.Contains(newMapName))
+            {
+                Debug.WriteLine(state.GameDir + " new game start on " + newMapName);
+                actions.Start();
+                return false;
+            }
+
+            if (OnNewGameInternal(state, actions, newMapName))
+                return AdditionalGameSupport.All(x => x.OnNewGame(state, actions, newMapName));
+            else return false;
+        }
+        /// <summary>
+        /// Actions to do when a New Game load is detected. 
+        /// Called when HostState changes to NewGame.
+        /// </summary>
+        /// <returns>Whether GameMemory should signal an Autosplit to the new map</returns>
+        protected virtual bool OnNewGameInternal(GameState state, TimerActions actions, string newMapName) { return true; }
+
+
+        public bool OnChangelevel(GameState state, TimerActions actions, string newMapName)
+        {
+            if (OnChangelevelInternal(state, actions, newMapName))
+                return AdditionalGameSupport.All(x => x.OnChangelevel(state, actions, newMapName));
+            else return false;
+        }
+        /// <summary>
+        /// Actions to do when a changelevel is detected. 
+        /// Called when HostState changes to ChangeLevelSP or ChangeLevelMP.
+        /// </summary>
+        /// <returns>Whether GameMemory should signal an Autosplit to the new map</returns>        
+        protected virtual bool OnChangelevelInternal(GameState state, TimerActions actions, string newMapName) { return true; }
     }
 }

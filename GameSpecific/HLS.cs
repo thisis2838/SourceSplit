@@ -13,7 +13,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: on first map
         // ending: when nihi's hp drops down to 1 or lower
 
-        private bool _onceFlag;
         private int _nihiDeadOffset = -1;
         private MemoryWatcher<bool> _nihiDead;
 
@@ -28,13 +27,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
         {
             return new HLSEngine();
         }
-        public override void OnGameAttached(GameState state, TimerActions actions)
+
+        protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
             var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
-
-            EndOffsetTicks = 0;
-
 
             IntPtr getStringPtr(string str)
             {
@@ -93,22 +90,19 @@ namespace LiveSplit.SourceSplit.GameSpecific
             Debug.WriteLine("nihi dead bool offset is 0x" + _nihiDeadOffset.ToString("x"));
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
             if (IsLastMap)
             {
                 IntPtr ptr = state.GameEngine.GetEntityByName("nihilanth");
                 _nihiDead = new MemoryWatcher<bool>(ptr + _nihiDeadOffset);
             }
-            _onceFlag = false;
-
         }
 
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsLastMap)
@@ -117,9 +111,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                 if (!_nihiDead.Old && _nihiDead.Current)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("hls end");
-                    actions.End(EndOffsetTicks); return;
+                    actions.End();
                 }
             }
 

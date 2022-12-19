@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("LiveSplit.SourceSplit")]
-[assembly: AssemblyDescription("Autosplitting Component for Livesplit which assists in handling Source Engine games")]
+[assembly: AssemblyDescription("A LiveSplit Auto-Splitter and Component which handles timing and automatic timer actions for speedruns of Source Engine games and mods, along with related features.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("LiveSplit.SourceSplit")]
@@ -31,5 +31,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("3.3.0")]
-[assembly: AssemblyFileVersion("3.3.0")]
+[assembly: AssemblyVersion("3.3.1")]
+[assembly: AssemblyFileVersion("3.3.1")]

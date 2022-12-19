@@ -11,34 +11,30 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // ending: (achieved using map transition)
 
         private int _startCamIndex;
-        private bool _onceFlag;
 
         public PortalMods_EpicEdition() : base()
         {
             this.AddFirstMap("pee_chmb_00");
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (IsFirstMap)
             {
                 _startCamIndex = state.GameEngine.GetEntIndexByName("blackout_viewcontroller");
                 Debug.WriteLine($"start cam idex is {_startCamIndex}");
             }
-            _onceFlag = false;
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsFirstMap)
             {
                 if (state.PlayerViewEntityIndex.Old == _startCamIndex && state.PlayerViewEntityIndex.Current == 1)
-                    actions.Start(StartOffsetTicks); return;
+                    actions.Start(StartOffsetMilliseconds);
             }
 
             return;

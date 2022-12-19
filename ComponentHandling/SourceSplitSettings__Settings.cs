@@ -35,7 +35,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             p.AutoResetEnabled = new("AutoResetEnabled", true, chkAutoReset);
             p.FirstMapAutoReset = new("FirstMapAutoReset", true, chkFirstMapReset);
             p.AllowAdditionalAutoStart = new("AllowAdditionalAutoStart", false, chkAllowAddAutoStart);
-            p.AddAutoStartName = new("StartMap", "", boxAddAutoStartName);
+            p.AddAutoStartName = new("StartMap", "", boxAddAutoStartName, true);
             p.AddAutoStartType = new("AddAutoStartType", AdditionalAutoStartType.NewGame, cmbAddAutoStartMode);
             
             p.ShowGameTime = new("ShowGameTime", false, chkShowGameTime);

@@ -10,7 +10,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: on first map
         // ending: when the end text model's skin code is 10 and player view entity switches to the final camera
 
-        private bool _onceFlag;
         private int _camIndex;
         private int _spriteIndex = -1;
 
@@ -19,21 +18,19 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddFirstMap("eli_final");
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
             if (IsFirstMap)
             {
                 _camIndex = state.GameEngine.GetEntIndexByName("car_view");
                 _spriteIndex = state.GameEngine.GetEntIndexByName("exit_button_sprite");
             }
-            _onceFlag = false;
         }
 
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap)
@@ -51,7 +48,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                         actions.End();
                         Debug.WriteLine($"localmotive end");
                         _spriteIndex = -1;
-                        _onceFlag = true;
+                        OnceFlag = true;
                         return;
                     }
                 }

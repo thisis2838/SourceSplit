@@ -13,7 +13,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         private MemoryWatcher<int> _tinjeGuardHP;
         private int _baseEntityHealthOffset = -1;
-        private bool _onceFlag;
 
         public HL2Mods_Tinje()
         {
@@ -21,9 +20,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnGenericUpdate(GameState state, TimerActions actions) { }
-
-        public override void OnGameAttached(GameState state, TimerActions actions)
+        protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
             Trace.Assert(server != null);
@@ -34,19 +31,16 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-            _onceFlag = false;
-
             if (IsFirstMap)
                 _tinjeGuardHP = new MemoryWatcher<int>(state.GameEngine.GetEntityByName("end") + _baseEntityHealthOffset);
 
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap)
@@ -54,9 +48,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 _tinjeGuardHP.Update(state.GameProcess);
                 if (_tinjeGuardHP.Current <= 0 && _tinjeGuardHP.Old > 0)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("tinje end");
-                    actions.End(EndOffsetTicks); return;
+                    actions.End(EndOffsetMilliseconds);
                 }
             }
             return;

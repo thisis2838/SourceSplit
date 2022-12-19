@@ -9,8 +9,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: on first map
         // ending: when the first outro credits text appear on the screen
 
-        private bool _onceFlag;
-
         private MemoryWatcher<float> _creditsYPos;
         private MemoryWatcher<int> _creditsCount;
         private MemoryWatcher<int> _yResolution;
@@ -19,15 +17,13 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_Logistique()
         {
-            this.AddFirstMap("Lg-1");
-            this.AddLastMap("Lg-4");
+            this.AddFirstMap("lg-1");
+            this.AddLastMap("lg-4");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnGameAttached(GameState state, TimerActions actions)
+        protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
-            base.OnGameAttached(state, actions);
-
             ProcessModuleWow64Safe vguimatsurface = state.GetModule("vguimatsurface.dll");
 
             // there are other cleaner pointers but vguimatsurface is most unlikely to change
@@ -39,15 +35,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _watcher = new MemoryWatcherList { _creditsYPos, _creditsCount, _yResolution };
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-            _onceFlag = false;
-        }
-
-        public override void OnUpdate(GameState state, TimerActions actions)
-        {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsLastMap)
@@ -58,9 +48,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     && _yResolution.Current / _creditsYPos.Current >= 1.0175f
                     && _yResolution.Current / _creditsYPos.Old < 1.0175f)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("logistique end");
-                    actions.End(EndOffsetTicks); return;
+                    actions.End(EndOffsetMilliseconds); 
                 }
             }
 

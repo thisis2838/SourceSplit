@@ -20,10 +20,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddFirstMap("rickychamber_intro");
         }
 
-        public override void OnSaveLoaded(GameState state, TimerActions actions, string name)
+        protected override void OnSaveLoadedInternal(GameState state, TimerActions actions, string name)
         {
-            base.OnSaveLoaded(state, actions, name);
-
             var path = Path.Combine(state.AbsoluteGameDir, "SAVE", name + ".sav");
             string md5 = FileUtils.GetMD5(path);
 

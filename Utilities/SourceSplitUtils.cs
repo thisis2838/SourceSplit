@@ -21,8 +21,12 @@ namespace LiveSplit.SourceSplit.Utilities
         {
             // http://forums.steampowered.com/forums/showthread.php?t=2465755
             // http://en.wikipedia.org/wiki/Valve_Anti-Cheat#Games_that_support_VAC
-            string[] badExes = { "csgo", "dota2", "swarm", "left4dead",
-                "left4dead2", "dinodday", "insurgency", "nucleardawn", "ship" };
+            string[] badExes = 
+            { 
+                "csgo", "dota2", "swarm", "left4dead", 
+                "left4dead2",  "dinodday",  "insurgency", 
+                "nucleardawn", "ship" 
+            };
             string[] badMods = { "cstrike", "dods", "hl2mp", "insurgency", "tf", "zps" };
             string[] badRootDirs = { "Dark Messiah of Might and Magic Multi-Player" };
             string[] hl2SurvivorDirs = { "hl2mp_japanese", "hl2_japanese" };
@@ -95,16 +99,8 @@ namespace LiveSplit.SourceSplit.Utilities
 #if DEBUG 
             // flat out doesnt work on some machines, TODO figure out a way to debug stuff
             // be careful with multiple instances, if you don't want the hassle, #if false me away
-            Task e = WriteFileAsync("sourcesplit_log.txt", message + "\r\n");
+            File.AppendAllText("sourcesplit_log.txt", message + Environment.NewLine);
 #endif
-        }
-
-        private static async Task WriteFileAsync(string file, string content)
-        {
-            using (StreamWriter outputFile = new StreamWriter(file, append: true))
-            {
-                await outputFile.WriteAsync(content);
-            }
         }
     }
 }

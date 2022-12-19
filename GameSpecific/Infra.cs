@@ -11,9 +11,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // how to match with demos:
         // start: on map load
         // endings: all on fades
-
-        private bool _onceFlag = false;
-
         public Infra()
         {
             this.AddFirstMap("infra_c1_m1_office");
@@ -31,7 +28,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             // this is how the game actually knows when a fade has finished as well
             if (state.CompareToInternalTimer(splitTime, 0.05f))
             {
-                _onceFlag = true;
+                OnceFlag = true;
                 Debug.WriteLine("infra " + ending + " ending");
                 actions.Split();
                 return true;
@@ -39,18 +36,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
             return false;
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-            _onceFlag = false;
-        }
-
-        public override void OnUpdate(GameState state, TimerActions actions)
-        {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
-            switch (state.Map.Current.ToLower())
+            switch (state.Map.Current)
             {
                 default:
                     return;

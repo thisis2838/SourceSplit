@@ -10,7 +10,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: when block brush is killed
         // end: when a dustmote entity is killed by the switch
 
-        private bool _onceFlag;
         private bool _resetFlag;
 
         private int _blockBrushIndex;
@@ -21,28 +20,24 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddFirstMap("bmg1_experimental_fuel");
         }
 
-        public override void OnTimerReset(bool resetFlagTo)
+        protected override void OnTimerResetInternal(bool resetFlagTo)
         {
             _resetFlag = resetFlagTo;
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (this.IsFirstMap)
             {
                 _blockBrushIndex = state.GameEngine.GetEntIndexByName("dontrunaway");
                 _dustmoteIndex = state.GameEngine.GetEntIndexByName("kokedepth");
             }
-
-            _onceFlag = false;
         }
 
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap)
@@ -56,15 +51,15 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     Debug.WriteLine("exp fuel start");
                     _resetFlag = true;
-                    actions.Start(StartOffsetTicks); return;
+                    actions.Start(StartOffsetMilliseconds); return;
                 }
 
                 if (newMote.EntityPtr == IntPtr.Zero)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     _dustmoteIndex = -1;
                     Debug.WriteLine("exp fuel end");
-                    actions.End(EndOffsetTicks); return;
+                    actions.End(EndOffsetMilliseconds); return;
                 }
             }
 

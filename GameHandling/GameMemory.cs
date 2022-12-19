@@ -72,7 +72,7 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             component.TimerOnReset += (s, e) => 
             {
-                _state?.AllSupport.ForEach(x => x.OnTimerReset(e.TimerStarted));
+                _state?.MainSupport?.OnTimerReset(e.TimerStarted);
             };
 
             // TODO: find better way to do this. multiple sigs instead?
@@ -95,12 +95,14 @@ namespace LiveSplit.SourceSplit.GameHandling
             _demoMonitor.DemoStopRecording += DemoRecorder_StopRecording;
         }
 
+#if DEBUG
         ~GameMemory()
         {
             // sometimes this throws a dud cannot access disposed object exception
             try { Debug.WriteLine("GameMemory finalizer"); }
             catch { }
         }
+#endif
 
         public void StartReading()
         {
@@ -197,7 +199,10 @@ namespace LiveSplit.SourceSplit.GameHandling
             }
 
             state.MainSupport = GameSupport.FromGameDir(state.GameDir);
+
             state.GameEngine = state.MainSupport.GetEngine();
+
+            state.AllSupport.Clear();
             state.AllSupport.Add(state.MainSupport);
             void add(List<GameSupport> list)
             {
@@ -208,6 +213,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 }
             }
             add(state.MainSupport.AdditionalGameSupport);
+
             return true;
         }
 
@@ -305,7 +311,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                         {
                             _hostUpdateCountPtr = (IntPtr)candidateHostFrameCount;
                             Debug.WriteLine($"host_runframe host_tickcount ptr is 0x{_hostUpdateCountPtr.ToString("X")}");
-                            goto skipTimeHooks;
+                            goto foundTimeHooks;
                         }
                     }
                 }
@@ -313,14 +319,14 @@ namespace LiveSplit.SourceSplit.GameHandling
             }
             return error("Can't find host_tickcount pointer");
 
-            skipTimeHooks:
+            foundTimeHooks:
             _hostUpdateCount = new ValueWatcher<long>(state.GameProcess.ReadValue<int>(_hostUpdateCountPtr));
             #endregion
 
             Debug.WriteLine("TryGetGameProcess took: " + sw.Elapsed);
 
             _state = state;
-            state.AllSupport.ForEach(x => x.OnGameAttached(_state, TimerActions));
+            state.MainSupport?.OnGameAttached(_state, TimerActions);
             Debug.WriteLine($"EntInfoSize = {state.GameEngine.EntInfoSize}");
 
             _settings.InvokeIfRequired(() =>
@@ -371,14 +377,11 @@ namespace LiveSplit.SourceSplit.GameHandling
                 {
                     _timesOver++;
                     _timeOverSpent += (int)profiler.ElapsedMilliseconds - TARGET_UPDATE_RATE;
-                    Debug.WriteLine($"**** PERFORAMCE WARNING: update took too long {profiler.ElapsedMilliseconds}ms");
-                    Debug.WriteLine($"**** totals: exceeded limit: {_timesOver} times, total time exceeded: {_timeOverSpent}ms");
+                    Debug.WriteLine($"**** PERFORAMCE WARNING: update took {profiler.ElapsedMilliseconds - TARGET_UPDATE_RATE}ms too long");
+                    Debug.WriteLine($"**** exceeded limit: {_timesOver} times, totalling {_timeOverSpent}ms");
                 }
 
-                //var sleep = Stopwatch.StartNew();
-                //MapTimesForm.Instance.Text = profiler.Elapsed.ToString();
                 Thread.Sleep(Math.Max(TARGET_UPDATE_RATE - (int)profiler.ElapsedMilliseconds, 1));
-                //MapTimesForm.Instance.Text = sleep.Elapsed.ToString();
                 profiler.Restart();
             }
 
@@ -484,10 +487,10 @@ namespace LiveSplit.SourceSplit.GameHandling
 
     public class TimerActionArgs : EventArgs
     {
-        public int TickOffset = 0;
-        public TimerActionArgs(int tickOffset = 0)
+        public float MillisecondOffset = 0;
+        public TimerActionArgs(float msOffset = 0)
         {
-            TickOffset = tickOffset;
+            MillisecondOffset = msOffset;
         }
     }
 
@@ -509,24 +512,24 @@ namespace LiveSplit.SourceSplit.GameHandling
         public event EventHandler<TimerActionArgs> OnPlayerLostControl;
         public event EventHandler<TimerActionArgs> ManualSplit;
 
-        public void Start(int ticksOffset = 0)
+        public void Start(float msOffset = 0)
         {
             _uiThread.Post(d => {
-                this.OnPlayerGainedControl?.Invoke(this, new TimerActionArgs(ticksOffset));
+                this.OnPlayerGainedControl?.Invoke(this, new TimerActionArgs(msOffset));
             }, null);
         }
 
-        public void End(int ticksOffset = 0)
+        public void End(float msOffset = 0)
         {
             _uiThread.Post(d => {
-                this.OnPlayerLostControl?.Invoke(this, new TimerActionArgs(ticksOffset));
+                this.OnPlayerLostControl?.Invoke(this, new TimerActionArgs(msOffset));
             }, null);
         }
 
-        public void Split(int ticksOffset = 0)
+        public void Split(float msOffset = 0)
         {
             _uiThread.Post(d => {
-                this.ManualSplit?.Invoke(this, new TimerActionArgs(ticksOffset));
+                this.ManualSplit?.Invoke(this, new TimerActionArgs(msOffset));
             }, null);
         }
     }

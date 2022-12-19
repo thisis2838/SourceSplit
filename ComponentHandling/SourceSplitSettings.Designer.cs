@@ -70,9 +70,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkUseMTL = new System.Windows.Forms.CheckBox();
             this.gMTL = new System.Windows.Forms.GroupBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.dgvMapTransitions = new LiveSplit.SourceSplit.Utilities.Forms.EditableListBox();
-            this.colFromMap = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colToMap = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.gbAutoStartEndReset = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
@@ -116,7 +113,18 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.label10 = new System.Windows.Forms.Label();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.label9 = new System.Windows.Forms.Label();
+            this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.butReport = new System.Windows.Forms.Button();
+            this.butSetup = new System.Windows.Forms.Button();
+            this.butReleases = new System.Windows.Forms.Button();
+            this.butGRepo = new System.Windows.Forms.Button();
+            this.groupBox9 = new System.Windows.Forms.GroupBox();
+            this.tableCoolInfo = new System.Windows.Forms.TableLayoutPanel();
+            this.labRunningFor = new System.Windows.Forms.Label();
             this.labVersion = new System.Windows.Forms.Label();
+            this.dgvMapTransitions = new LiveSplit.SourceSplit.Utilities.Forms.EditableListBox();
+            this.colFromMap = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colToMap = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.nudSLPenalty)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudDecimalPlaces)).BeginInit();
             this.tabCtrlMaster.SuspendLayout();
@@ -127,7 +135,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.panel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dmnSplitInterval)).BeginInit();
             this.gMTL.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvMapTransitions)).BeginInit();
             this.gbAutoStartEndReset.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.tableLayoutPanel5.SuspendLayout();
@@ -155,6 +162,10 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.tableLayoutPanel7.SuspendLayout();
             this.groupBox7.SuspendLayout();
             this.groupBox6.SuspendLayout();
+            this.groupBox8.SuspendLayout();
+            this.groupBox9.SuspendLayout();
+            this.tableCoolInfo.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvMapTransitions)).BeginInit();
             this.SuspendLayout();
             // 
             // toolTip
@@ -651,39 +662,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.label1.TabIndex = 28;
             this.label1.Text = "Enter a single asterisk (*) to signify \"any map\".";
             // 
-            // dgvMapTransitions
-            // 
-            this.dgvMapTransitions.AllowUserToResizeColumns = false;
-            this.dgvMapTransitions.AllowUserToResizeRows = false;
-            this.dgvMapTransitions.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
-            this.dgvMapTransitions.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dgvMapTransitions.BackgroundColor = System.Drawing.SystemColors.Window;
-            this.dgvMapTransitions.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.dgvMapTransitions.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.None;
-            this.dgvMapTransitions.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvMapTransitions.ColumnHeadersVisible = false;
-            this.dgvMapTransitions.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.colFromMap,
-            this.colToMap});
-            this.dgvMapTransitions.Location = new System.Drawing.Point(6, 24);
-            this.dgvMapTransitions.Name = "dgvMapTransitions";
-            this.dgvMapTransitions.RowHeadersVisible = false;
-            this.dgvMapTransitions.RowTemplate.Height = 18;
-            this.dgvMapTransitions.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvMapTransitions.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.dgvMapTransitions.Size = new System.Drawing.Size(405, 90);
-            this.dgvMapTransitions.TabIndex = 0;
-            // 
-            // colFromMap
-            // 
-            this.colFromMap.HeaderText = "From";
-            this.colFromMap.Name = "colFromMap";
-            // 
-            // colToMap
-            // 
-            this.colToMap.HeaderText = "To";
-            this.colToMap.Name = "colToMap";
-            // 
             // gbAutoStartEndReset
             // 
             this.tlpAutoStartEndReset.SetColumnSpan(this.gbAutoStartEndReset, 2);
@@ -1084,13 +1062,17 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel6.Controls.Add(this.groupBox3, 0, 0);
             this.tableLayoutPanel6.Controls.Add(this.groupBox4, 0, 1);
+            this.tableLayoutPanel6.Controls.Add(this.groupBox8, 0, 2);
+            this.tableLayoutPanel6.Controls.Add(this.groupBox9, 0, 3);
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
-            this.tableLayoutPanel6.RowCount = 3;
+            this.tableLayoutPanel6.RowCount = 5;
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 78F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 110F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 28F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 56F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 46F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 47F));
             this.tableLayoutPanel6.Size = new System.Drawing.Size(447, 494);
             this.tableLayoutPanel6.TabIndex = 0;
             // 
@@ -1207,6 +1189,96 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.label9.TabIndex = 0;
             this.label9.Text = "Fatalis (original version)\r\n2838";
             // 
+            // groupBox8
+            // 
+            this.groupBox8.Controls.Add(this.butReport);
+            this.groupBox8.Controls.Add(this.butSetup);
+            this.groupBox8.Controls.Add(this.butReleases);
+            this.groupBox8.Controls.Add(this.butGRepo);
+            this.groupBox8.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox8.Location = new System.Drawing.Point(3, 191);
+            this.groupBox8.Name = "groupBox8";
+            this.groupBox8.Size = new System.Drawing.Size(441, 50);
+            this.groupBox8.TabIndex = 2;
+            this.groupBox8.TabStop = false;
+            this.groupBox8.Text = "Links";
+            // 
+            // butReport
+            // 
+            this.butReport.Location = new System.Drawing.Point(94, 19);
+            this.butReport.Name = "butReport";
+            this.butReport.Size = new System.Drawing.Size(95, 23);
+            this.butReport.TabIndex = 3;
+            this.butReport.Text = "Report an Issue";
+            this.butReport.UseVisualStyleBackColor = true;
+            this.butReport.Click += new System.EventHandler(this.butReport_Click);
+            // 
+            // butSetup
+            // 
+            this.butSetup.Location = new System.Drawing.Point(282, 19);
+            this.butSetup.Name = "butSetup";
+            this.butSetup.Size = new System.Drawing.Size(153, 23);
+            this.butSetup.TabIndex = 2;
+            this.butSetup.Text = "Setup and Configuring Guide";
+            this.butSetup.UseVisualStyleBackColor = true;
+            this.butSetup.Click += new System.EventHandler(this.butSetup_Click);
+            // 
+            // butReleases
+            // 
+            this.butReleases.Location = new System.Drawing.Point(192, 19);
+            this.butReleases.Name = "butReleases";
+            this.butReleases.Size = new System.Drawing.Size(87, 23);
+            this.butReleases.TabIndex = 1;
+            this.butReleases.Text = "Releases Page";
+            this.butReleases.UseVisualStyleBackColor = true;
+            this.butReleases.Click += new System.EventHandler(this.butReleases_Click);
+            // 
+            // butGRepo
+            // 
+            this.butGRepo.Location = new System.Drawing.Point(6, 19);
+            this.butGRepo.Name = "butGRepo";
+            this.butGRepo.Size = new System.Drawing.Size(85, 23);
+            this.butGRepo.TabIndex = 0;
+            this.butGRepo.Text = "GitHub Repo";
+            this.butGRepo.UseVisualStyleBackColor = true;
+            this.butGRepo.Click += new System.EventHandler(this.butGRepo_Click);
+            // 
+            // groupBox9
+            // 
+            this.groupBox9.Controls.Add(this.tableCoolInfo);
+            this.groupBox9.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox9.Location = new System.Drawing.Point(3, 247);
+            this.groupBox9.Name = "groupBox9";
+            this.groupBox9.Size = new System.Drawing.Size(441, 40);
+            this.groupBox9.TabIndex = 3;
+            this.groupBox9.TabStop = false;
+            this.groupBox9.Text = "Cool Information";
+            // 
+            // tableCoolInfo
+            // 
+            this.tableCoolInfo.ColumnCount = 1;
+            this.tableCoolInfo.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableCoolInfo.Controls.Add(this.labRunningFor, 0, 0);
+            this.tableCoolInfo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableCoolInfo.Location = new System.Drawing.Point(3, 16);
+            this.tableCoolInfo.Name = "tableCoolInfo";
+            this.tableCoolInfo.RowCount = 3;
+            this.tableCoolInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableCoolInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableCoolInfo.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableCoolInfo.Size = new System.Drawing.Size(435, 21);
+            this.tableCoolInfo.TabIndex = 0;
+            // 
+            // labRunningFor
+            // 
+            this.labRunningFor.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.labRunningFor.AutoSize = true;
+            this.labRunningFor.Location = new System.Drawing.Point(3, 3);
+            this.labRunningFor.Name = "labRunningFor";
+            this.labRunningFor.Size = new System.Drawing.Size(10, 13);
+            this.labRunningFor.TabIndex = 1;
+            this.labRunningFor.Text = " ";
+            // 
             // labVersion
             // 
             this.labVersion.AutoSize = true;
@@ -1218,6 +1290,39 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.labVersion.TabIndex = 29;
             this.labVersion.Text = "v.";
             this.labVersion.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // dgvMapTransitions
+            // 
+            this.dgvMapTransitions.AllowUserToResizeColumns = false;
+            this.dgvMapTransitions.AllowUserToResizeRows = false;
+            this.dgvMapTransitions.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)));
+            this.dgvMapTransitions.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dgvMapTransitions.BackgroundColor = System.Drawing.SystemColors.Window;
+            this.dgvMapTransitions.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.dgvMapTransitions.CellBorderStyle = System.Windows.Forms.DataGridViewCellBorderStyle.None;
+            this.dgvMapTransitions.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvMapTransitions.ColumnHeadersVisible = false;
+            this.dgvMapTransitions.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colFromMap,
+            this.colToMap});
+            this.dgvMapTransitions.Location = new System.Drawing.Point(6, 24);
+            this.dgvMapTransitions.Name = "dgvMapTransitions";
+            this.dgvMapTransitions.RowHeadersVisible = false;
+            this.dgvMapTransitions.RowTemplate.Height = 18;
+            this.dgvMapTransitions.RowTemplate.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvMapTransitions.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
+            this.dgvMapTransitions.Size = new System.Drawing.Size(405, 90);
+            this.dgvMapTransitions.TabIndex = 0;
+            // 
+            // colFromMap
+            // 
+            this.colFromMap.HeaderText = "From";
+            this.colFromMap.Name = "colFromMap";
+            // 
+            // colToMap
+            // 
+            this.colToMap.HeaderText = "To";
+            this.colToMap.Name = "colToMap";
             // 
             // SourceSplitSettings
             // 
@@ -1242,7 +1347,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             ((System.ComponentModel.ISupportInitialize)(this.dmnSplitInterval)).EndInit();
             this.gMTL.ResumeLayout(false);
             this.gMTL.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvMapTransitions)).EndInit();
             this.gbAutoStartEndReset.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel5.ResumeLayout(false);
@@ -1286,6 +1390,11 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.groupBox7.PerformLayout();
             this.groupBox6.ResumeLayout(false);
             this.groupBox6.PerformLayout();
+            this.groupBox8.ResumeLayout(false);
+            this.groupBox9.ResumeLayout(false);
+            this.tableCoolInfo.ResumeLayout(false);
+            this.tableCoolInfo.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvMapTransitions)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1379,5 +1488,13 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         private System.Windows.Forms.CheckBox chkAutoSplitEnabled;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.CheckBox chkFirstMapReset;
+        private System.Windows.Forms.GroupBox groupBox8;
+        private System.Windows.Forms.Button butSetup;
+        private System.Windows.Forms.Button butReleases;
+        private System.Windows.Forms.Button butGRepo;
+        private System.Windows.Forms.Button butReport;
+        private System.Windows.Forms.GroupBox groupBox9;
+        private System.Windows.Forms.TableLayoutPanel tableCoolInfo;
+        private System.Windows.Forms.Label labRunningFor;
     }
 }

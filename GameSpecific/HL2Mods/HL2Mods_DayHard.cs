@@ -9,8 +9,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: when player view entity changes from start camera to the player
         // ending: when breen is killed
 
-        private bool _onceFlag = false;
-
         private int _camIndex;
         private int _propIndex;
 
@@ -20,9 +18,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddLastMap("breencave");
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
             if (this.IsFirstMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
                 this._camIndex = state.GameEngine.GetEntIndexByName("cutscene3");
@@ -34,13 +31,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 this._propIndex = state.GameEngine.GetEntIndexByName("Patch3");
                 //Debug.WriteLine("_propIndex index is " + this._propIndex);
             }
-            _onceFlag = false;
         }
 
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap && _camIndex != -1)
@@ -49,12 +45,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     state.PlayerViewEntityIndex.Old == _camIndex)
                 {
                     Debug.WriteLine("DayHard start");
-                    _onceFlag = true;
-                    actions.Start(StartOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.Start(StartOffsetMilliseconds);
                 }
 
             }
-
             else if (this.IsLastMap && _propIndex != -1)
             {
                 var newProp = state.GameEngine.GetEntInfoByIndex(_propIndex);
@@ -62,8 +57,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (newProp.EntityPtr == IntPtr.Zero)
                 {
                     Debug.WriteLine("DayHard end");
-                    _onceFlag = true;
-                    actions.End(EndOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds);
                 }
             }
 

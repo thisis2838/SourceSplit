@@ -10,8 +10,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: when the tram door is opening
         // end: when the flash sprites disappears
 
-        private bool _onceFlag = false;
-
         // offsets and binary sizes
         private int _baseEffectsFlagsOffset = -1;
 
@@ -22,13 +20,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public BMSMods_HazardCourse()
         {
-            
             this.AddFirstMap("hc_t0a0");
-            this.AddLastMap("hc_t0a3");
-             
+            this.AddLastMap("hc_t0a3");    
         }
 
-        public override void OnGameAttached(GameState state, TimerActions actions)
+        protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
 
@@ -38,11 +34,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CBaseEntity::m_fEffects offset = 0x" + _baseEffectsFlagsOffset.ToString("X"));
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
-        {
-            base.OnSessionStart(state, actions);
-
-            _onceFlag = false;
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
+        {;
 
             if (IsFirstMap)
             {
@@ -56,9 +49,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsFirstMap)
@@ -68,9 +61,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (_hcStartDoorPos.Old.Distance(_hcStartDoorTargPos) > 0.05f
                     && _hcStartDoorPos.Current.Distance(_hcStartDoorTargPos) <= 0.05f)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("bms hc mod start");
-                    actions.Start(StartOffsetTicks); return;
+                    actions.Start(StartOffsetMilliseconds);
                 }
             }
             else if (IsLastMap)
@@ -80,11 +73,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.TickCount.Current >= 10 && (_hcEndSpriteFlags.Old & 0x20) == 0 &&
                     (_hcEndSpriteFlags.Current & 0x20) != 0)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("bms hc mod end");
-                    actions.End(EndOffsetTicks); return;
+                    actions.End(EndOffsetMilliseconds);
                 }
             }
+
             return;
         }
     }

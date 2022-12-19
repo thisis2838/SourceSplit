@@ -188,6 +188,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         }
 
         private TimeSpan TicksToTime(long ticks) => TimeSpanUtils.TimeFromTicks(ticks, _intervalPerTick);
+        private int MillisecondsToTicks(double ms) => (int)Math.Ceiling(ms / (_intervalPerTick * 1000));
 
         public XmlNode GetSettings(XmlDocument doc)
         {

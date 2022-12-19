@@ -56,7 +56,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     state.PlayerEntInfo = state.GameEngine.GetEntInfoByIndex(GameState.ENT_INDEX_PLAYER);
 
                     // update map name
-                    state.Map.Current = state.GameProcess.ReadString(engine.CurMapPtr, ReadStringType.ASCII, 64);
+                    state.Map.Current = state.GameProcess.ReadString(engine.CurMapPtr, ReadStringType.ASCII, 64).ToLower();
                 }
                 if (state.RawTickCount.Current - state.TickBase < 0)
                 {
@@ -225,7 +225,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     _gamePausedMidDemoRec = false;
                     Debug.WriteLine("session started");
                     this.SendSessionStartedEvent(state.Map.Current);
-                    support?.ForEach(x => x.OnSessionStart(state, TimerActions));
+                    state.MainSupport?.OnSessionStart(state, TimerActions);
                 }
 
                 if (state.TickCount.Current > 0 || Settings.ServerInitialTicks.Value)
@@ -234,7 +234,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 if (state.ServerState.ChangedTo(ServerState.Paused)) this.SendMiscTimeEvent(0, MiscTimeType.StartPause);
                 if (state.ServerState.ChangedFrom(ServerState.Paused)) this.SendMiscTimeEvent(0, MiscTimeType.EndPause);
 
-                support?.ForEach(x => x.OnUpdate(state, TimerActions));
+                state.MainSupport?.OnUpdate(state, TimerActions);
 
 #if DEBUG
                 if (state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
@@ -244,8 +244,8 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             if (state.HostState.Current != state.HostState.Old)
             {
-                state.GameProcess.ReadString(engine.HostStateLevelNamePtr, ReadStringType.ASCII, 256 - 1, out string levelName);
-                state.GameProcess.ReadString(engine.HostStateSaveNamePtr, ReadStringType.ASCII, 256 - 1, out string saveName);
+                string levelName = state.GameProcess.ReadString(engine.HostStateLevelNamePtr, ReadStringType.ASCII, 256 - 1)?.ToLower() ?? "";
+                string saveName = state.GameProcess.ReadString(engine.HostStateSaveNamePtr, ReadStringType.ASCII, 256 - 1)?.ToLower() ?? "";
 
                 if (state.HostState.Old == HostState.Run)
                 {
@@ -259,7 +259,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     if (support != null && state.HostState.Current == HostState.GameShutdown)
                         state.QueueOnNextSessionEnd?.Invoke();
 
-                    support.ForEach(x => x.OnSessionEnd(state, TimerActions));
+                    state.MainSupport?.OnSessionEnd(state, TimerActions);
                 }
 
                 if (state.HostState.Current == HostState.LoadGame)
@@ -267,7 +267,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     saveName = Path.GetFileNameWithoutExtension(saveName);
                     Debug.WriteLine($"loading save: {saveName}");
 
-                    support.ForEach(x => x.OnSaveLoaded(state, TimerActions, saveName));
+                    state.MainSupport?.OnSaveLoaded(state, TimerActions, saveName);
 
                     if (Settings.AllowAdditionalAutoStart.Value && 
                         Settings.AddAutoStartType.Value == AdditionalAutoStartType.Save &&
@@ -286,53 +286,45 @@ namespace LiveSplit.SourceSplit.GameHandling
                 {
                     Debug.WriteLine("host state m_levelName changed to " + levelName);
 
-                    // only for the beginner's guide, the "restart the level" option does a changelevel back to the currentmap rather than
-                    // simply doing "restart"
-                    // if the runner uses this option to reset at the first map then restart the timer
-
-                    bool isntEmpty = !string.IsNullOrWhiteSpace(levelName);
-
-                    if (state.HostState.Current == HostState.NewGame || state.GameDir.ToLower() == "beginnersguide")
+                    if (state.HostState.Current == HostState.NewGame)
                     {
-                        if (levelName != state.Map.Current && 
-                            !string.IsNullOrWhiteSpace(levelName) && 
-                            !string.IsNullOrWhiteSpace(state.Map.Current))
-                            this.SendMapChangedEvent(levelName, state.Map.Current, true);
-
-                        foreach (var subSupport in state.AllSupport)
+                        if (!string.IsNullOrWhiteSpace(levelName) &&
+                            Path.GetFileNameWithoutExtension(Settings.AddAutoStartName.Value) == levelName &&
+                            Settings.AllowAdditionalAutoStart.Value &&
+                            Settings.AddAutoStartType.Value == AdditionalAutoStartType.NewGame)
                         {
-                            if (subSupport.FirstMaps.Contains(levelName))
-                                this.SendNewGameStartedEvent(levelName);
-
-                            bool matchesSettings =
-                                Settings.AllowAdditionalAutoStart.Value && 
-                                Settings.AddAutoStartName.Value == levelName &&
-                                Settings.AddAutoStartType.Value == AdditionalAutoStartType.NewGame;
-                            bool matchesGameSettings = 
-                                subSupport.StartOnFirstLoadMaps.ConvertAll(x => x.ToLowerInvariant())
-                                .Contains(levelName.ToLowerInvariant());
-
-                            if (isntEmpty && (matchesSettings || matchesGameSettings))
+                            Debug.WriteLine("additional autostart, new game: " + levelName);
+                            TimerActions.Start();
+                        }
+                        else
+                        {
+                            state.AllSupport.ForEach(x =>
                             {
-                                // do a debug spew of the timer start
-                                Debug.WriteLine(state.GameDir + " new game start on " + levelName);
-                                TimerActions.Start(subSupport.StartOffsetTicks);
-                                break;
+                                if (x.FirstMaps.Contains(levelName)) 
+                                    this.SendNewGameStartedEvent(levelName);
+                            });
+
+                            if (state.MainSupport?.OnNewGame(state, TimerActions, levelName) ?? true)
+                            {
+                                this.SendMapChangedEvent(levelName, state.Map.Current, true);
                             }
                         }
                     }
                     else // changelevel sp/mp
                     {
-                        // state.Map.Current.Current should still be the previous map
-                        this.SendMapChangedEvent(levelName, state.Map.Current);
-
-                        if (isntEmpty &&
-                            Settings.AllowAdditionalAutoStart.Value && 
-                            Settings.AddAutoStartName.Value == levelName && 
+                        if (!string.IsNullOrWhiteSpace(levelName) &&
+                            Settings.AllowAdditionalAutoStart.Value &&
+                            Settings.AddAutoStartName.Value == levelName &&
                             Settings.AddAutoStartType.Value == AdditionalAutoStartType.Transition)
                         {
-                            Debug.WriteLine(state.GameDir + " transition start on " + levelName);
+                            Debug.WriteLine("additional autostart, transition: " + levelName);
                             TimerActions.Start();
+                        }
+                        else
+                        {
+                            // state.Map.Current.Current should still be the previous map
+                            if (state.MainSupport?.OnChangelevel(state, TimerActions, levelName) ?? true)
+                                this.SendMapChangedEvent(levelName, state.Map.Current);
                         }
                     }
                 }

@@ -9,8 +9,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: on first map
         // ending: when the final trigger is hit
 
-        private bool _onceFlag;
-
         private int _trigIndex;
 
         public HL2Mods_DearEsther()
@@ -20,21 +18,18 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
             if (IsLastMap)
             {
                 _trigIndex = state.GameEngine.GetEntIndexByName("triggerEndSequence");
                 //Debug.WriteLine("trigger index is " + _trigIndex);
             }
-            _onceFlag = false;
         }
 
-
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsLastMap)
@@ -43,10 +38,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                 if (newTrig.EntityPtr == IntPtr.Zero)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("dearesther end");
-                    EndOffsetTicks = 7;
-                    actions.End(EndOffsetTicks); return;
+                    actions.End(0.1f);
                 }
             }
             return;

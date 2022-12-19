@@ -12,7 +12,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: when the view index switches to the player
         // ending: when the vort(s)' hp(s) go down to 0 AND all the vort spawners are exhausted
 
-        private bool _onceFlag;
         private const int _baseMaxNumNPCsOffset = 0x338;
         private const int _baseLiveChildrenOffset = 0x3a0;
         private int _baseEntityHealthOffset = -1;
@@ -49,10 +48,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddLastMap("1187d10");
         }
 
-        public override void OnGameAttached(GameState state, TimerActions actions)
+        protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
-            base.OnGameAttached(state, actions);
-
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
 
             var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
@@ -61,10 +58,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (this.IsFirstMap)
             {
                 _startCamIndex = state.GameEngine.GetEntIndexByName("introcam03");
@@ -79,13 +74,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     Debug.WriteLine(_vortsList.ElementAt(i).Value + " ptr is 0x" + _spawnersPtr[i].ToString("X"));
                 }
             }
-
-            _onceFlag = false;
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsFirstMap)
@@ -93,8 +86,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.PlayerViewEntityIndex.Old == _startCamIndex && state.PlayerViewEntityIndex.Current == 1)
                 {
                     Debug.WriteLine("1187ep1 start");
-                    _onceFlag = true;
-                    actions.Start(StartOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.Start(StartOffsetMilliseconds);
                 }
             }
             else if (IsLastMap)
@@ -126,10 +119,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (_curMaxNPCs.All(x => x == 0) && _vortHPOld.Any(x => x > 0) && _vortHP.All(x => x <= 0))
                 {
                     Debug.WriteLine("1187ep1 end");
-                    _onceFlag = true;
-                    actions.End(EndOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds);
                 }
             }
+
             return;
         }
     }

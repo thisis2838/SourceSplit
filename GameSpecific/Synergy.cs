@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
+using LiveSplit.Server;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -13,7 +14,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: on map load
 
         private CustomCommand _autosplitIL = new CustomCommand("ilstart", "0");
-        private CustomCommandHandler _cmdHandler;
         private const FL _dead = FL.ATCONTROLS | FL.NOTARGET | FL.AIMTARGET;
 
         private HL2 _hl2 = new HL2();
@@ -22,20 +22,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public Synergy()
         {
-            
-            _cmdHandler = new CustomCommandHandler(_autosplitIL);
+            CommandHandler.Commands.Add(_autosplitIL);
             this.AdditionalGameSupport.AddRange(new GameSupport[] { _hl2 , _ep1 , _ep2 });
         }
 
-        public override void OnGameAttached(GameState state, TimerActions actions)
+        protected override void OnGenericUpdateInternal(GameState state, TimerActions actions)
         {
-            _cmdHandler.Init(state);
-        }
-
-        public override void OnGenericUpdate(GameState state, TimerActions actions)
-        {
-            _cmdHandler.Update(state);
-
             // HACKHACK: when the player dies and respawn, the map is also lightly reloaded,
             // potentially causing all the entity indicies to change
             // players when killed also have these flags applied to them and removed when respawning
@@ -51,7 +43,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 }    
             }
 
-            if (_autosplitIL.BValue)
+            if (_autosplitIL.Boolean)
             {
                 if (!StartOnFirstLoadMaps.Contains(state.Map.Current))
                 {
@@ -63,10 +55,5 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 StartOnFirstLoadMaps.Clear();
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
-        {
-            _cmdHandler.Update(state);
-            return;
-        }
     }
 }

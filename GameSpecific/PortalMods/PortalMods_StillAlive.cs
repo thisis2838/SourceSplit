@@ -12,7 +12,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         private MemoryWatcher<Vector3f> _elevatorPos;
         private float _splitTime;
-        private bool _onceFlag;
 
         public PortalMods_StillAlive() : base()
         {
@@ -21,26 +20,23 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnGenericUpdate(GameState state, TimerActions actions)
+        protected override void OnGenericUpdateInternal(GameState state, TimerActions actions)
         {
             if (state.HostState.Current == HostState.GameShutdown)
                 this.OnUpdate(state, actions);
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (this.IsLastMap)
                 _elevatorPos = new MemoryWatcher<Vector3f>(state.GameEngine.GetEntityByName("a10_a11_elevator_body") + state.GameEngine.BaseEntityAbsOriginOffset);
 
             _splitTime = 0f;
-            _onceFlag = false;
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             float splitTime = 0f;
@@ -60,7 +56,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             {
                 _splitTime = 0f;
                 Debug.WriteLine("portal still alive " + (!this.IsLastMap ? "split" : "end"));
-                _onceFlag = true;
+                OnceFlag = true;
 
                 state.QueueOnNextSessionEnd = this.IsLastMap ?
                     () => actions.End() :

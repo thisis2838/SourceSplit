@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -8,45 +9,37 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: on first map
         // ending: when the gunship dies and queues final output
 
-        private bool _onceFlag;
-        private float _splitTime;
+        private ValueWatcher<float> _splitTime = new ValueWatcher<float>();
 
         public HL2Mods_TheLostCity()
         {
-            
             this.AddFirstMap("lostcity01");
             this.AddLastMap("lostcity02");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (this.IsLastMap)
-                _splitTime = state.GameEngine.GetOutputFireTime("fade1", "fade", "", 3);
-
-            _onceFlag = false;
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("fade1", "fade", "", 3);
         }
 
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsLastMap)
             {
-                float newSplitTime = state.GameEngine.GetOutputFireTime("fade1", "fade", "" , 3);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("fade1", "fade", "" , 3);
 
-                if (newSplitTime != 0 && _splitTime == 0)
+                if (_splitTime.ChangedFrom(0))
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("the lost city end");
-                    actions.End(EndOffsetTicks); return;
+                    actions.End(EndOffsetMilliseconds);
                 }
-
-                _splitTime = newSplitTime;
             }
 
             return;

@@ -1,17 +1,14 @@
-﻿using System;
+﻿using LiveSplit.ComponentUtil;
+using LiveSplit.SourceSplit.ComponentHandling;
+using LiveSplit.SourceSplit.Utilities;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Media;
 using System.Runtime.InteropServices;
-using LiveSplit.ComponentUtil;
-using LiveSplit.SourceSplit.GameSpecific;
-using System.Windows.Forms;
-using System.Collections.Generic;
-using System.Threading;
 using System.Text;
-using LiveSplit.SourceSplit.GameHandling;
-using LiveSplit.SourceSplit.ComponentHandling;
-using LiveSplit.SourceSplit.Utilities;
+using System.Text.RegularExpressions;
 
 namespace LiveSplit.SourceSplit.GameHandling
 {
@@ -19,36 +16,50 @@ namespace LiveSplit.SourceSplit.GameHandling
     // usually set through monitoring a buffer for invalid console command inputs
     class CustomCommand
     {
-        public string Name;
+        private string _name;
+        public string Name
+        {
+            get => _name;
+            set => _name = value.ToLower();
+        }
         public string Description;
+        private string _longDesc = null;
+        public string LongDescription
+        {
+            get => _longDesc ?? Description;
+            set => _longDesc = value;
+        }
+
         public bool Archived { get; set; }
 
-        public bool BValue { get; set; }
-        public string Value { get; set; }
-        public int IValue { get; set; }
-        public float FValue { get; set; }
+        public bool Boolean { get; set; }
+        public string String { get; set; }
+        public int Integer { get; set; }
+        public float Float { get; set; }
+
         private Action _callback = null;
+        private static string[] _noVars = new string[] { "0", "false", "" };
 
-        private static string[] _noVars = new string[] { "no", "0", "false" };
-
-        public CustomCommand(string name, string def, string description = "", Action callback = null, bool archived = false)
+        public CustomCommand(
+            string name, 
+            string def, string description = "", string longDescription = null, 
+            Action callback = null, 
+            bool archived = false)
         {
             Name = name;
             Parse(def);
             Description = description;
+            LongDescription = longDescription;
             _callback = callback;
             Archived = archived;
         }
 
         public bool Update(string input)
         {
-            string[] elems = input.Split(' ');
+            if (string.IsNullOrWhiteSpace(input)) return false;
 
-            if (elems.Count() == 0 || elems[0] != Name)
-                return false;
-
-            input = input.Substring(Name.Length + 1);
             Parse(input);
+
             _callback?.Invoke();
             SystemSounds.Asterisk.Play();
 
@@ -57,50 +68,35 @@ namespace LiveSplit.SourceSplit.GameHandling
 
         public void Parse(string input)
         {
-            Value = input;
-            BValue = !_noVars.Contains(input.Trim().ToLower()) && !string.IsNullOrWhiteSpace(input.Trim(' ', '\"'));
-            if (int.TryParse(input, out int tmpI))
-                IValue = tmpI;
-            else IValue = 0;
-            if (float.TryParse(input, out float tmpF))
-                FValue = tmpF;
-            else FValue = 0;
+            input = input.Trim(' ', '\"');
+
+            String = input;
+            Boolean = !_noVars.Contains(input.Trim().ToLower());
+            if (int.TryParse(input, out int tmpI)) Integer = tmpI; else Integer = 0;
+            if (float.TryParse(input, out float tmpF)) Float = tmpF; else Float = 0;
+            if (Boolean) Float = Integer = 1;
         }
 
-        public override string ToString() => this.ToString(true);
-
-        public string ToString(bool showDesc = true)
+        public override string ToString() 
         {
-            string vals = $"{Name} (archived: {Archived}) s[{Value}] b[{BValue}] i[{IValue}] f[{FValue}]";
-            string desc = "";
-            if (showDesc && !string.IsNullOrEmpty(Description))
-            {
-                var lines = Description.Split('\n');
-                for (int i = 0; i < lines.Count(); i++)
-                {
-                    if (i == 0)
-                        desc += " - " + lines[i] + "\n";
-                    else
-                        desc += "   " + lines[i] + "\n";
-                }
-            }
-
-            return $"{vals}\n{desc}\n".Replace("\n\n", "\n").Replace("\t", "\"   ").TrimEnd('\n');
+            return  $"{Name} (archived: {Archived}) (value: s[{String}] b[{Boolean}] i[{Integer}] f[{Float}])";
         }
     }
 
     class CustomCommandHandler
     {
-        public CustomCommand[] Commands { get; set; }
+        public List<CustomCommand> Commands = new List<CustomCommand>();
         private IntPtr _cmdBufferPtr = IntPtr.Zero;
+        private IntPtr _conMsgPtr = IntPtr.Zero;
         private Process _game;
         private byte[] _cmdBuffer;
         private const int BUFFER_SIZE = 512;
         private string _gameDir;
+        private bool _dontProcess = false;
 
         public CustomCommandHandler(params CustomCommand[] commands)
         {
-            Commands = commands;
+            Commands = commands.ToList();
             _cmdBuffer = new byte[BUFFER_SIZE];
         }
 
@@ -140,13 +136,18 @@ namespace LiveSplit.SourceSplit.GameHandling
             }
 
             _game = state.GameEngine.GameProcess;
+            GetExecPtr(state);
             Update(state);
-            SendConsoleMessage($@"
+            SetAliases();
+
+            if (Commands.Count() == 0) return;
+            SendConsoleMessage(
+@$"//////////////////////////////////////////////////////////////////////////////////
 
 SourceSplit Custom Commands are present, enter ""ss_list"" to list them, or ""ss_help"" for help!
 There are {Commands.Count()} command(s) available.
 
-");
+//////////////////////////////////////////////////////////////////////////////////");
             return;
 
             fail:
@@ -155,10 +156,28 @@ There are {Commands.Count()} command(s) available.
             return;
         }
 
+        private void SetAliases()
+        {
+            _game.SendMessage("alias ss_list \0");
+            _game.SendMessage("alias ss_help \0");
 
-        // allow disabling and enabling of features through monitoring specific console input
+            Commands.ForEach(x => _game.SendMessage("alias " + x.Name + "\0"));
+        }
+
+        private void GetExecPtr(GameState state)
+        {
+            var tier0 = state.GetModule("tier0.dll");
+            var tier0Symbols = WinUtils.AllSymbols(state.GameProcess, tier0);
+
+            _conMsgPtr = (IntPtr)tier0Symbols.Where(x => x.Name == "ConMsg").FirstOrDefault().Address;
+            if (_conMsgPtr != IntPtr.Zero) Debug.WriteLine($"ConMsg found at {_conMsgPtr.ToString("X")}");
+
+        }
+
         public void Update(GameState state)
         {
+            if (Commands.Count() == 0) return;
+
             if (_cmdBufferPtr == IntPtr.Zero)
                 return;
 
@@ -177,7 +196,7 @@ There are {Commands.Count()} command(s) available.
                         if (newBuffer[i] == 0x00)
                         {
                             int count = i - tmp + 1;
-                            string cmd = Encoding.Default.GetString(newBuffer.Skip(tmp).Take(count).ToArray());
+                            string cmd = Encoding.ASCII.GetString(newBuffer.Skip(tmp).Take(count).ToArray());
 
                             byte[] prevBytes = state.GameProcess.ReadBytes(_cmdBufferPtr + tmp, count);
 
@@ -208,38 +227,50 @@ There are {Commands.Count()} command(s) available.
 
         private bool ProcessCommand(string input)
         {
+            if (_dontProcess) return false;
+
             string cleanedCmd = input.ToLower().Trim(' ', '\0');
+            var match = Regex.Match(cleanedCmd, @"^(?<command>[A-z0-9-_]+)(?:$|(?: +)(?<arg>.+)$)");
+            string command = match.Groups["command"].Value.ToLower();
+            string arg = match.Groups["arg"].Value;
 
-            switch (cleanedCmd)
+            switch (command)
             {
-                case "ss_list":
-                    ListAllCommands();
-                    return true;
-                case "ss_help":
-                    PrintHelp();
-                    return true;
-
-            }
-            foreach (CustomCommand cmd in Commands)
-            {
-                if (cleanedCmd.Contains(cmd.Name))
-                {
-                    if (cleanedCmd.Length > cmd.Name.Length && cmd.Update(cleanedCmd))
+                case "ss_list": ListAllCommands(); return true;
+                case "ss_help": 
                     {
-                        if (cmd.Archived)
+                        if (string.IsNullOrWhiteSpace(arg))
                         {
-                            SourceSplitComponent.Settings.SetMiscSetting($"{_gameDir}__{cmd.Name}", cmd.Value);
+                            PrintHelp(); 
+                            return true;
                         }
 
-                        SendConsoleMessage($"{cmd.Name} set to \"{cmd.Value}\"!\n");
+                        var cmd = Commands.FirstOrDefault(x => x.Name == arg.ToLower());
+                        if (cmd != null)
+                        {
+                            SendConsoleMessage($"{cmd}\n{new string('-', cmd.ToString().Length)}\n{cmd.LongDescription}");
+                        }
+
                         return true;
                     }
-                    if (cleanedCmd == cmd.Name)
+            }
+
+            foreach (CustomCommand cmd in Commands)
+            {
+                if (command != cmd.Name)
+                    continue;
+
+                if (cmd.Update(arg))
+                {
+                    if (cmd.Archived)
                     {
-                        SendConsoleMessage(cmd.ToString());
-                        return true;
+                        SourceSplitComponent.Settings.SetMiscSetting($"{_gameDir}__{cmd.Name}", cmd.String);
                     }
+
+                    SendConsoleMessage($"{cmd.Name} set to \"{cmd.String}\"!\n");
                 }
+
+                return true;
             }
 
             return false;
@@ -247,34 +278,47 @@ There are {Commands.Count()} command(s) available.
 
         public void SendConsoleMessage(string input)
         {
-            List<string> commands = input.Split('\n').ToList();
-            if (commands.Count() == 0)
-                commands.Add(input);
+            _dontProcess = true;
 
-            foreach (string command in commands)
-                WinUtils.SendMessage(_game, $"echo " + command + "\0");
+            input = input.Replace("\r", "").Trim(' ', '\t', '\n');
+            input = "\n\n" + input + "\n\n";
+
+            if (_conMsgPtr != IntPtr.Zero)
+            {
+                input = input.Replace("%", "%%");
+                input = input.Replace("\t", "    ");
+
+                const int maxLen = 0x100;
+                for (int i = 0; i < input.Length; i += maxLen)
+                {
+                    var send = input.Substring(i, maxLen.Bounded(0, input.Length - i));
+                    _game.CallFunctionString(send, _conMsgPtr);
+                }
+            }
+            else
+            {
+                input = input.Replace('\"', '\'').Replace("\t", "    ").Replace(' ', '\"');
+                input.Split('\n').ToList().ForEach(x => _game.SendMessage("echo " + x + "\0"));
+            }
+
+            _dontProcess = false;
         }
 
         private void ListAllCommands()
         {
-            SendConsoleMessage($@"
-
-Listing {Commands.Count()} command(s):
-{Commands.Aggregate("", (a, b) => a + "\t- " + b.ToString(false) + "\n").TrimEnd('\n')}
-
-");
+            SendConsoleMessage
+            (
+                $"Listing {Commands.Count()} command(s):\n" +
+                Commands.Aggregate("", (a, b) => $"{a}\t- {b}\n\t  {b.Description}\n").TrimEnd('\n')
+            );
         }
 
         private void PrintHelp()
         {
-            SendConsoleMessage(@"
-
-SourceSplit Custom Commands help: 
-    - Enter in commands as if they are normal game commands!
-    - Type ""ss_list"" for a list of available commands!
-    - Enter a command without arguments for a description of it.
-
-");
+            SendConsoleMessage("SourceSplit Custom Commands help: \n" +
+                "\t- Enter in commands as if they are normal game commands. \n" +
+                "\t- Type \"ss_list\" for a list of available commands. \n" +
+                "\t- Enter \"ss_help <command>\" to show information about a command \n");
         }
     }
 }

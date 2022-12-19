@@ -12,25 +12,23 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: 
         // ending: the tick where velocity changes from 600.X to 0.0 AFTER the camera effects (cl_showpos 1)
 
-        private bool _onceFlag;
         private int _basePlayerLaggedMovementOffset = -1;
         private float _prevLaggedMovementValue;
 
         private HL2Mods_DarkIntervention _darkIntervention = new HL2Mods_DarkIntervention();
         private HL2Mods_HellsMines _hellsMines = new HL2Mods_HellsMines();
         private HL2Mods_UpmineStruggle _upmineStruggle = new HL2Mods_UpmineStruggle();
+        private HL2Mods_A2BTrajectory _A2BTrajectory = new HL2Mods_A2BTrajectory();
 
         public HL2Ep2()
         {
             this.AddFirstMap("ep2_outland_01");
             this.AddLastMap("ep2_outland_12a");
-            AdditionalGameSupport = new List<GameSupport>(){ _darkIntervention, _hellsMines, _upmineStruggle };
+            AdditionalGameSupport = new List<GameSupport>(){ _darkIntervention, _hellsMines, _upmineStruggle, _A2BTrajectory };
         }
 
-        public override void OnGameAttached(GameState state, TimerActions actions)
+        protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
-            base.OnGameAttached(state, actions);
-
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
             var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
 
@@ -38,19 +36,15 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Debug.WriteLine("CBasePlayer::m_flLaggedMovementValue offset = 0x" + _basePlayerLaggedMovementOffset.ToString("X"));
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (state.PlayerEntInfo.EntityPtr != IntPtr.Zero && _basePlayerLaggedMovementOffset != -1)
                 state.GameProcess.ReadValue(state.PlayerEntInfo.EntityPtr + _basePlayerLaggedMovementOffset, out _prevLaggedMovementValue);
-
-            _onceFlag = false;
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero && _basePlayerLaggedMovementOffset != -1)
@@ -64,8 +58,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (laggedMovementValue.BitEquals(1.0f) && !_prevLaggedMovementValue.BitEquals(1.0f))
                 {
                     Debug.WriteLine("ep2 start");
-                    _onceFlag = true;
-                    actions.Start(StartOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.Start(StartOffsetMilliseconds); return;
                 }
 
                 _prevLaggedMovementValue = laggedMovementValue;
@@ -78,9 +72,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     && state.PlayerParentEntityHandle.Old == -1)
                 {
                     Debug.WriteLine("ep2 end");
-                    _onceFlag = true;
-                    EndOffsetTicks = 0;
-                    actions.End(EndOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.End(); 
                 }
             }
 

@@ -15,24 +15,16 @@ namespace LiveSplit.SourceSplit.GameSpecific
 {
     class HL2Mods_Misc : GameSupport
     {
-        internal float _splitTime;
-        internal bool _onceFlag;
+        protected float _splitTime;
 
-        public override void OnGenericUpdate(GameState state, TimerActions actions)
+        protected override void OnGenericUpdateInternal(GameState state, TimerActions actions)
         {
             if (IsLastMap && state.HostState.Current == HostState.GameShutdown)
-                OnUpdate(state, actions);
+                OnUpdateInternal(state, actions);
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnUpdate(state, actions);
-        }
-
-        public override void OnSessionStart(GameState state, TimerActions actions)
-        {
-            base.OnSessionStart(state, actions);
-            _onceFlag = false;
             _splitTime = 0f;
         }
     }
@@ -50,15 +42,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-            _onceFlag = false;
-        }
-
-        public override void OnUpdate(GameState state, TimerActions actions)
-        {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsLastMap)
@@ -67,9 +53,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("think tank end");
-                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 }
             }
             return;
@@ -90,15 +76,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-            _onceFlag = false;
-        }
-
-        public override void OnUpdate(GameState state, TimerActions actions)
-        {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsLastMap)
@@ -108,8 +88,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
                     Debug.WriteLine("gnome end");
-                    _onceFlag = true;
-                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
+                    OnceFlag = true;
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 }
             }
             return;
@@ -121,7 +101,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: on first map
         public HL2Mods_BackwardsMod()
         {
-            
             this.AddFirstMap("backward_d3_breen_01");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
@@ -133,13 +112,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // end: on final output
         public HL2Mods_Reject()
         {
-            
             this.StartOnFirstLoadMaps.Add("reject");
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             float splitTime = state.GameEngine.GetOutputFireTime("komenda", 3);
@@ -147,8 +125,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
             if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
             {
                 Debug.WriteLine("hl2 reject end");
-                _onceFlag = true;
-                state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
+                OnceFlag = true;
+                state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
             }
             return;
         }
@@ -160,7 +138,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // end: on final output
         public HL2Mods_TrapVille()
         {
-            
             this.AddFirstMap("aquickdrivethrough_thc16c4");
             this.AddLastMap("makeearthgreatagain_thc16c4");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
@@ -169,9 +146,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         private Vector3f _endSector = new Vector3f(7953f, -11413f, 2515f);
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             // todo: probably should use the helicopter's position?
@@ -182,8 +159,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
                     Debug.WriteLine("trapville end");
-                    _onceFlag = true;
-                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
+                    OnceFlag = true;
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 }
             }
             return;
@@ -196,15 +173,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // end: on final output
         public HL2Mods_RTSLVille()
         {
-            
             this.AddFirstMap("from_ashes_map1_rtslv");
             this.AddLastMap("terminal_rtslv");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsLastMap && state.PlayerViewEntityIndex.Current != GameState.ENT_INDEX_PLAYER)
@@ -214,8 +190,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
                     Debug.WriteLine("rtslville end");
-                    _onceFlag = true;
-                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
+                    OnceFlag = true;
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 }
             }
             return;
@@ -228,15 +204,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // end: on final output
         public HL2Mods_Abridged()
         {
-            
             this.AddFirstMap("ml05_training_facilitea");
             this.AddLastMap("ml05_shortcut17");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsLastMap)
@@ -246,8 +221,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
                     Debug.WriteLine("hl abridged end");
-                    _onceFlag = true;
-                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
+                    OnceFlag = true;
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 }
             }
             return;
@@ -260,15 +235,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // end: on final output
         public HL2Mods_EpisodeOne()
         {
-            
             this.AddFirstMap("direwolf");
             this.AddLastMap("outland_resistance");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsLastMap)
@@ -278,8 +252,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
                     Debug.WriteLine("episode one end");
-                    _onceFlag = true;
-                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
+                    OnceFlag = true;
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 }
             }
             return;
@@ -292,7 +266,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // end: on final output
         public HL2Mods_CombinationVille()
         {
-            
             this.AddFirstMap("canal_flight_ppmc_cv");
             this.AddLastMap("cvbonus_ppmc_cv");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
@@ -301,19 +274,15 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private Vector3f _tramEndPos = new Vector3f(2624f, -1856f, 250f);
         private int _tramPtr;
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (IsLastMap)
                 _tramPtr = state.GameEngine.GetEntIndexByName("tram");
-
-            _onceFlag = false;
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsLastMap && state.GameEngine.GetEntityPos(_tramPtr).Distance(_tramEndPos) <= 100)
@@ -323,8 +292,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
                     Debug.WriteLine("combination ville end");
-                    _onceFlag = true;
-                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
+                    OnceFlag = true;
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 }
             }
             return;
@@ -337,15 +306,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // end: on final output
         public HL2Mods_PhaseVille()
         {
-            
             this.AddFirstMap("rtsl_mlc");
             this.AddLastMap("hospitalisation_tlc18_c4");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsLastMap)
@@ -355,8 +323,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
                     Debug.WriteLine("phaseville end");
-                    _onceFlag = true;
-                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
+                    OnceFlag = true;
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 }
             }
             return;
@@ -369,15 +337,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // end: on final output
         public HL2Mods_CompanionPiece()
         {
-            
             this.AddFirstMap("tg_wrd_carnival");
             this.AddLastMap("maplab_jan_cp");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsLastMap)
@@ -387,8 +354,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
                     Debug.WriteLine("companion piece end");
-                    _onceFlag = true;
-                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
+                    OnceFlag = true;
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 }
             }
             return;
@@ -413,7 +380,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_SchoolAdventures()
         {
-            
             this.AddFirstMap("sa_01");
             this.AddLastMap("sa_04");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
@@ -422,11 +388,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         private int _endCameraIndex = -1;
 
-        public override void OnGenericUpdate(GameState state, TimerActions actions) { }
-
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
             if (IsLastMap)
             {
                 _endCameraIndex = state.GameEngine.GetEntIndexByName("viewcontrol_credits");
@@ -434,9 +397,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsLastMap && _endCameraIndex != -1)
@@ -444,9 +407,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.PlayerViewEntityIndex.Old == 1 &&
                     state.PlayerViewEntityIndex.Current == _endCameraIndex)
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("school_adventures end");
-                    actions.End(EndOffsetTicks); return;
+                    actions.End(EndOffsetMilliseconds); return;
                 }
             }
             return;
@@ -461,14 +424,13 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_DarkIntervention()
         {
-            
-            this.AddFirstMap("Dark_intervention");
+            this.AddFirstMap("dark_intervention");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsFirstMap)
@@ -478,8 +440,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
                     Debug.WriteLine("dark intervention end");
-                    _onceFlag = true;
-                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
+                    OnceFlag = true;
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 }
             }
             return;
@@ -494,35 +456,30 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_HellsMines()
         {
-            
             this.AddFirstMap("hells_mines");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
             _splitTime = state.GameEngine.GetOutputFireTime("command", 3);
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsFirstMap)
             {
                 float splitTime = state.GameEngine.GetOutputFireTime("command", 3);
-                try
+                if (splitTime != 0 && _splitTime == 0)
                 {
-                    if (splitTime != 0 && _splitTime == 0)
-                    {
-                        Debug.WriteLine("hells mines end");
-                        _onceFlag = true;
-                        actions.End(EndOffsetTicks); return;
-                    }
+                    Debug.WriteLine("hells mines end");
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds);
                 }
-                finally { _splitTime = splitTime; }
+                _splitTime = splitTime;
             }
             return;
         }
@@ -536,33 +493,25 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_UpmineStruggle()
         {
-            
             this.AddFirstMap("twhl_upmine_struggle");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsFirstMap)
             {
                 float splitTime = state.GameEngine.GetOutputFireTime("no_vo", 5);
-                try
+                if (_splitTime == 0 && splitTime != 0)
                 {
-                    if (_splitTime == 0 && splitTime != 0)
-                    {
-                        Debug.WriteLine("upmine struggle end");
-                        _onceFlag = true;
-                        actions.End(EndOffsetTicks); return;
-                    }
+                    Debug.WriteLine("upmine struggle end");
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds);
                 }
-                finally
-                {
-                    _splitTime = splitTime;
-                }
-
+                _splitTime = splitTime;
             }
             return;
         }
@@ -576,21 +525,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_Offshore()
         {
-            
             this.AddFirstMap("islandescape");
             this.AddLastMap("islandcitytrain");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-            _onceFlag = false;
-        }
-
-        public override void OnUpdate(GameState state, TimerActions actions)
-        {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsLastMap)
@@ -599,8 +541,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
-                    _onceFlag = true;
-                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
+                    OnceFlag = true;
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 }
             }
             return;
@@ -615,21 +557,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Mods_VeryHardMod()
         {
-            
             this.AddFirstMap("vhm_chapter");
             this.AddLastMap("vhm_chapter");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-            _onceFlag = false;
-        }
-
-        public override void OnUpdate(GameState state, TimerActions actions)
-        {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsLastMap)
@@ -638,8 +573,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
-                    _onceFlag = true;
-                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
+                    OnceFlag = true;
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 }
             }
             return;

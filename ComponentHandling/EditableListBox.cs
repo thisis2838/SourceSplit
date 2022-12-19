@@ -11,14 +11,14 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
     /// </summary>
     class EditableListBox : DataGridView
     {
-        private ContextMenu menuRemove;
+        private ContextMenu _menuRemove;
 
         public EditableListBox()
         {
-            this.menuRemove = new ContextMenu();
+            this._menuRemove = new ContextMenu();
             var delete = new MenuItem("Remove Selected");
             delete.Click += delete_Click;
-            this.menuRemove.MenuItems.Add(delete);
+            this._menuRemove.MenuItems.Add(delete);
 
             this.AllowUserToResizeRows = false;
             this.RowHeadersVisible = false;
@@ -121,7 +121,7 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
             base.OnCellMouseUp(e);
 
             if (e.Button == MouseButtons.Right)
-                this.menuRemove.Show(this, e.Location);
+                this._menuRemove.Show(this, e.Location);
         }
     }
 }

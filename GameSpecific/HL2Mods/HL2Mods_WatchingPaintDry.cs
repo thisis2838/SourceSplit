@@ -12,7 +12,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // ending (ee): when color correction entity is disabled
         // ending (cd): when the disconnect output is processed
 
-        private bool _onceFlag;
         private float _splitTime;
 
         // todo: maybe sigscan this?
@@ -28,10 +27,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.StartOnFirstLoadMaps.AddRange(FirstMaps);
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (IsFirstMap)
             {
                 this._crashButtonPos = new MemoryWatcher<Vector3f>(state.GameEngine.GetEntityByName("bonzibutton") + state.GameEngine.BaseEntityAbsOriginOffset);
@@ -40,30 +37,28 @@ namespace LiveSplit.SourceSplit.GameSpecific
             {
                 this._colorCorrectEnabled = new MemoryWatcher<byte>(state.GameEngine.GetEntityByName("Color_Correction") + _baseColorCorrectEnabledOffset);
             }
-            _onceFlag = false;
             _splitTime = 0f;
         }
 
-        public override void OnGenericUpdate(GameState state, TimerActions actions)
+        protected override void OnGenericUpdateInternal(GameState state, TimerActions actions)
         {
-            if (state.Map.Current.ToLower() == "wpd_tp" || state.Map.Current.ToLower() == "hallway")
+            if (state.Map.Current == "wpd_tp" || state.Map.Current == "hallway")
             {
                 float splitTime = state.GameEngine.GetOutputFireTime("commands", "Command", "disconnect", 5);
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
 
-                if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true) && !_onceFlag)
+                if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true) && !OnceFlag)
                 {
                     Debug.WriteLine("wdp ce ending");
                     _splitTime = 0f;
-                    _onceFlag = true;
-                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetTicks);
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 }
             }
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap)
@@ -73,8 +68,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (_crashButtonPos.Current.X > _crashButtonPos.Old.X && _crashButtonPos.Old.X != 0)
                 {
                     Debug.WriteLine("wpd ice end");
-                    _onceFlag = true;
-                    actions.End(EndOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds); 
                 }
             }
             else if (this.IsLastMap)
@@ -84,8 +79,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (_colorCorrectEnabled.Current == 0 && _colorCorrectEnabled.Old == 1)
                 {
                     Debug.WriteLine("wpd ee end");
-                    _onceFlag = true;
-                    actions.End(EndOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds); 
                 }
             }
             return;

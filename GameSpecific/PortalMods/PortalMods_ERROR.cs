@@ -11,7 +11,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         private int _startCamIndex;
         private int _endCamIndex;
-        private bool _onceFlag;
 
         public PortalMods_ERROR() : base()
         {
@@ -19,10 +18,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddLastMap("err18");
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (IsFirstMap)
             {
                 _startCamIndex = state.GameEngine.GetEntIndexByName("blackout_viewcontroller");
@@ -33,23 +30,22 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 _endCamIndex = state.GameEngine.GetEntIndexByName("cutscene_camera");
                 //Debug.WriteLine($"start cam idex is {_endCamIndex}");
             }
-            _onceFlag = false;
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (IsFirstMap)
             {
                 if (state.PlayerViewEntityIndex.Old == _startCamIndex && state.PlayerViewEntityIndex.Current == 1)
-                    actions.Start(StartOffsetTicks); return;
+                    actions.Start(StartOffsetMilliseconds);
             }
             else if (IsLastMap)
             {
                 if (state.PlayerViewEntityIndex.Old == 1 && state.PlayerViewEntityIndex.Current == _endCamIndex)
-                    actions.End(EndOffsetTicks); return;
+                    actions.End(EndOffsetMilliseconds); 
             }
 
             return;

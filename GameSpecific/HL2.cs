@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using LiveSplit.ComponentUtil;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -12,8 +13,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: first tick when your position is at -9419 -2483 22 (cl_showpos 1)
         // ending: first tick when screen flashes white
 
-        private bool _onceFlag;
-        private float _splitTime;
+        private ValueWatcher<float> _splitTime = new ValueWatcher<float>();
 
         private Vector3f _startPos = new Vector3f(-9419f, -2483f, 22f);
 
@@ -28,19 +28,15 @@ namespace LiveSplit.SourceSplit.GameSpecific
             AdditionalGameSupport = new List<GameSupport>() { _lostCity, _tinje, _experimentalFuel };
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
-            _onceFlag = false;
-
             if (this.IsLastMap)
-                _splitTime = state.GameEngine.GetOutputFireTime("sprite_end_final_explosion_1", "ShowSprite", "", 20);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("sprite_end_final_explosion_1", "ShowSprite", "", 70);
         }
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap) 
@@ -51,25 +47,18 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.PlayerPosition.Current.DistanceXY(_startPos) <= 1.0)
                 {
                     Debug.WriteLine("hl2 start");
-                    _onceFlag = true;
-                    actions.Start(StartOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.Start(StartOffsetMilliseconds); return;
                 }
             }
             else if (this.IsLastMap)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("sprite_end_final_explosion_1", "ShowSprite", "", 20);
-                try
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("sprite_end_final_explosion_1", "ShowSprite", "", 70);
+                if (_splitTime.Current > 0 && _splitTime.Old == 0)
                 {
-                    if (splitTime > 0 && _splitTime == 0)
-                    {
-                        Debug.WriteLine("hl2 end");
-                        _onceFlag = true;
-                        actions.End(EndOffsetTicks); return;
-                    }
-                }
-                finally
-                {
-                    _splitTime = splitTime;
+                    Debug.WriteLine("hl2 end");
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds); 
                 }
             }
 

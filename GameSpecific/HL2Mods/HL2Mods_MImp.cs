@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -9,10 +10,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: when cave_giveitems_equipper is called
         // ending: when player's view entity changes
 
-        private bool _onceFlag;
-
         private int _camIndex;
-        private float _splitTime;
+        private ValueWatcher<float> _splitTime = new ValueWatcher<float>();
 
         public HL2Mods_MImp()
         {
@@ -20,46 +19,42 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddLastMap("mimp3");
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
-
             if (this.IsFirstMap)
             {
-                _splitTime = state.GameEngine.GetOutputFireTime("cave_giveitems_equipper", 5);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("cave_giveitems_equipper", 5);
             }
             else if (this.IsLastMap)
             {
                 this._camIndex = state.GameEngine.GetEntIndexByName("outro.camera");
                 //Debug.WriteLine("_camIndex index is " + this._camIndex);
             }
-            _onceFlag = false;
         }
 
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap)
             {
                 float newSplitTime = state.GameEngine.GetOutputFireTime("cave_giveitems_equipper", 5);
-                if (_splitTime != 0f && newSplitTime == 0f)
+                if (_splitTime.ChangedTo(0))
                 {
-                    _onceFlag = true;
+                    OnceFlag = true;
                     Debug.WriteLine("mimp start");
-                    actions.Start(StartOffsetTicks); return;
+                    actions.Start(StartOffsetMilliseconds);
                 }
-                _splitTime = newSplitTime;
             }
             else if (this.IsLastMap && _camIndex != -1)
             {
                 if (state.PlayerViewEntityIndex.Current == _camIndex && state.PlayerViewEntityIndex.Old != _camIndex)
                 {
                     Debug.WriteLine("mimp end");
-                    _onceFlag = true;
-                    actions.End(EndOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds); 
                 }
             }
 

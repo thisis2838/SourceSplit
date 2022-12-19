@@ -10,8 +10,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
         // start: when player's view index changes from the camera entity to the player
         // ending: when the final trigger_once is hit and the fade finishes
 
-        private bool _onceFlag = false;
-
         private int _camIndex;
 
         public HL2Mods_Exit2()
@@ -20,21 +18,19 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddLastMap("e2_07");
         }
 
-        public override void OnSessionStart(GameState state, TimerActions actions)
+        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            base.OnSessionStart(state, actions);
             if (this.IsFirstMap || this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
                 this._camIndex = state.GameEngine.GetEntIndexByName("view");
                 //Debug.WriteLine("_camIndex index is " + this._camIndex);
             }
-            _onceFlag = false;
         }
 
 
-        public override void OnUpdate(GameState state, TimerActions actions)
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
-            if (_onceFlag)
+            if (OnceFlag)
                 return;
 
             if (this.IsFirstMap && this._camIndex != -1)
@@ -43,8 +39,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     state.PlayerViewEntityIndex.Old == _camIndex)
                 {
                     Debug.WriteLine("exit2 start");
-                    _onceFlag = true;
-                    actions.Start(StartOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.Start(StartOffsetMilliseconds);
                 }
             }
             else if (this.IsLastMap)
@@ -53,8 +49,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     state.PlayerViewEntityIndex.Old == 1)
                 {
                     Debug.WriteLine("exit2 end");
-                    _onceFlag = true;
-                    actions.End(EndOffsetTicks); return;
+                    OnceFlag = true;
+                    actions.End(EndOffsetMilliseconds);
                 }
             }
 
