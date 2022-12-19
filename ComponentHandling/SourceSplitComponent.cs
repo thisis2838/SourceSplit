@@ -140,6 +140,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             _lastUpdate = SourceSplitUtils.ActiveTime.Elapsed;
 
             state.SetGameTime(this.GameTime);
+            //Debug.WriteLine(this.GameTime);
 
             // hack to prevent flicker, doesn't actually pause anything
             state.IsGameTimePaused = true;

@@ -63,7 +63,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     OnceFlag = true;
                     Debug.WriteLine("the citizen 2 end");
-                    actions.End(-state.IntervalPerTick); 
+                    actions.End(-state.IntervalPerTick * 1000); 
                 }
             }
             else if (state.Map.Current == "sp_waterplant2")

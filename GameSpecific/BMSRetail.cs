@@ -34,7 +34,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private CustomCommand _xenStartCommand = new CustomCommand(
             "xenstart",
             "1",
-            "Start upon gaining control in Xen\n\t- 0 disables this function\n\t- 1 starts the timer at 2493 ticks\n\t- 2 starts the timer with no offset.", 
+            "Start upon gaining control in Xen\n\t" +
+                "- 0 disables this function\n\t" +
+                "- 1 starts the timer at 2493 ticks\n\t" +
+                "- 2 starts the timer with no offset.", 
             archived: true);
         private CustomCommand _xenSplitCommand = new CustomCommand("xensplit", "0", "Split upon gaining control in Xen");
         private CustomCommand _nihiSplitCommand = new CustomCommand("nihisplit", "0", "Split per phases of Nihilanth's fight");

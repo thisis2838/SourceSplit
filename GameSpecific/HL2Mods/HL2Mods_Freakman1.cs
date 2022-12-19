@@ -59,7 +59,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     _trigIndex = -1;
                     OnceFlag = true;
                     Debug.WriteLine("freakman1 start");
-                    actions.Start(-0.1f);
+                    actions.Start(-0.1f * 1000);
                 }
             }
             else if (this.IsLastMap)

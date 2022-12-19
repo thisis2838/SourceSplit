@@ -44,7 +44,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (md5 == "3b3a18c32a9a9de68a178e759db80104")
                 {
                     Debug.WriteLine("tfv start");
-                    actions.Start(-3803 * 0.015f * 1000f);
+                    actions.Start(-3803 * 15);
                 }
             }
         }

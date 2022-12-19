@@ -40,7 +40,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     OnceFlag = true;
                     Debug.WriteLine("dearesther end");
-                    actions.End(0.1f);
+                    actions.End(0.1f * 1000f);
                 }
             }
             return;

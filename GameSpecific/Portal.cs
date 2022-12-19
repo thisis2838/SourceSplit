@@ -205,7 +205,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     {
                         Debug.WriteLine("portal portal open start");
                         OnceFlag = true;
-                        actions.Start(-(57015 + 0.015f));
+                        actions.Start(-(57015 + 15));
                     }
                 }
                 /*else

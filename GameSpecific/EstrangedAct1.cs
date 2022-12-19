@@ -57,7 +57,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     _trig2Index = -1;
                     Debug.WriteLine("estranged1 end");
                     OnceFlag = true;
-                    actions.End(0.1f);
+                    actions.End(0.1f * 1000f);
                 }
             }
 

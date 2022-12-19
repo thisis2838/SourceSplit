@@ -44,7 +44,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     {
                         Debug.WriteLine("robot lady boom detected");
                         OnceFlag = true;
-                        actions.End(-state.IntervalPerTick);
+                        actions.End(-state.IntervalPerTick * 1000);
                     }
                 }
             }

@@ -34,7 +34,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (md5 == "e4cd3dc7767d5b813fd753dbd868ce34")
             {
-                actions.Start(-6657);
+                actions.Start(-6657 * 15f);
                 OnceFlag = true;
                 Debug.WriteLine($"dark evening vault save start");
                 return;
