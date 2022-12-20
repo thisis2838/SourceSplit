@@ -1,6 +1,7 @@
 ## Additional custom ignores
 *.config
 !update/
+Resources/
 
 
 ## Ignore Visual Studio temporary files, build results, and
