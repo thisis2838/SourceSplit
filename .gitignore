@@ -1,12 +1,6 @@
-bin/
-obj/
-*.cache
-*.suo
-*.user
+## Additional custom ignores
 *.config
-LiveSplit.SourceSplit.sln
 !update/
-Resources/
 
 
 ## Ignore Visual Studio temporary files, build results, and
