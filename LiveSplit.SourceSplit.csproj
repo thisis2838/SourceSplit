@@ -88,6 +88,7 @@
     <Compile Include="GameHandling\GameSupport__Functions.cs" />
     <Compile Include="GameHandling\GameSupport__Cases.cs" />
     <Compile Include="ComponentHandling\Session.cs" />
+    <Compile Include="GameSpecific\HL2Mods\HL2Mods_Minerva.cs" />
     <Compile Include="GameSpecific\HL2Mods\HL2Mods_ForestTrain.cs" />
     <Compile Include="GameSpecific\HL2Mods\HL2Mods_A2BTrajectory.cs" />
     <Compile Include="GameSpecific\HL2Mods\HL2Mods_EpisodeThree.cs" />
@@ -251,6 +252,7 @@ copy "$(TargetPath)" "$(ProjectDir)update\Components\$(TargetFileName)"</PostBui
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>@echo off
+if not exist "$(ProjectDir)\Resources" md "$(ProjectDir)\Resources"
 @for /f "skip=1" %25%25x in ('wmic os get localdatetime') do if not defined t set t=%25%25x
 echo %25t:~0,4%25-%25t:~4,2%25-%25t:~6,2%25 %25t:~8,2%25:%25t:~10,2%25:%25t:~12,2%25 &gt; "$(ProjectDir)\Resources\date_time.txt"
 </PreBuildEvent>
