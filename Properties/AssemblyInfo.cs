@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("LiveSplit.SourceSplit")]
-[assembly: AssemblyDescription("A LiveSplit Auto-Splitter and Component which handles timing and automatic timer actions for speedruns of Source Engine games and mods, along with related features.")]
+[assembly: AssemblyDescription("A LiveSplit Auto-Splitter which adds automated timer function support for Source Engine games and mods; along with related features.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("LiveSplit.SourceSplit")]

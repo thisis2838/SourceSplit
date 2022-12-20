@@ -17,7 +17,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         private SourceSplitComponent _instance;
 
         public string ComponentName => "SourceSplit";
-        public string Description => "Game Time / Auto-splitting for Source engine games.";
+        public string Description => "A LiveSplit Auto-Splitter which adds automated timer function support for Source Engine games and mods; along with related features.";
         public ComponentCategory Category => ComponentCategory.Control;
 
         public IComponent Create(LiveSplitState state)
