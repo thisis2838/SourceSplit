@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using LiveSplit.SourceSplit.GameSpecific;
 using LiveSplit.SourceSplit.ComponentHandling;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace LiveSplit.SourceSplit.GameHandling
 {
@@ -201,6 +202,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new HL2Mods_EpisodeThree();
                 case "foresttrain":
                     return new HL2Mods_ForestTrain();
+                case "metastasis":
+                    return new HL2Mods_Minerva();
             }
 
             return new DefaultGame();
