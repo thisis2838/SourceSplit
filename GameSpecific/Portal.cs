@@ -36,6 +36,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         {
             "8fb11971775314ac2135013d8887f875",
             "b39051d47b23ca9bfbfc19d3366f16f3",
+            "6a4ff6f22deebb0c095218ace1a9ea19"
         };
 
         private CustomCommand _newStart = new CustomCommand("newstart", "0", "Start the timer upon portal open");
