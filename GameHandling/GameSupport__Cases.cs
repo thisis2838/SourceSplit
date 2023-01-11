@@ -158,6 +158,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new PortalMods_StillAlive();
                 case "ggefc13":
                     return new HL2Mods_GGEFC13();
+                case "evacuation":
+                    return new HL2Mods_Evacuation();
                 case "rexaura":
                     return new PortalMods_Rexaura();
                 case "pcborrr":
