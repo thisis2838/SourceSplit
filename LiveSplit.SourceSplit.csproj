@@ -88,6 +88,7 @@
     <Compile Include="GameHandling\GameSupport__Functions.cs" />
     <Compile Include="GameHandling\GameSupport__Cases.cs" />
     <Compile Include="ComponentHandling\Session.cs" />
+    <Compile Include="GameSpecific\HL2Mods\HL2Mods_Evacuation.cs" />
     <Compile Include="GameSpecific\HL2Mods\HL2Mods_Minerva.cs" />
     <Compile Include="GameSpecific\HL2Mods\HL2Mods_ForestTrain.cs" />
     <Compile Include="GameSpecific\HL2Mods\HL2Mods_A2BTrajectory.cs" />

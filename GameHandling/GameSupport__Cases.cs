@@ -204,6 +204,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new HL2Mods_ForestTrain();
                 case "metastasis":
                     return new HL2Mods_Minerva();
+                case "evacuation":
+                    return new HL2Mods_Evacuation();
             }
 
             return new DefaultGame();
