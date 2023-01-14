@@ -101,7 +101,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (_vaultHashes.Contains(md5))
             {
-                actions.Start(-53010); // don't add a tick here since this gets done on the next session start
+                actions.Start(-(53010 + 15));
                 OnceFlag = true;
                 Debug.WriteLine($"portal vault save start");
                 return;
