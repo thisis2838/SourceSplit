@@ -186,4 +186,15 @@
       <change>Internal code revisions and cleanup.</change>
     </changelog>
   </update>
+  <update version="3.3.2">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Added support for Evacuation, Minerva: METASTASIS</change>
+      <change>Added Auto-Start support for 75FOV Portal 3420 vault save</change>
+      <change>Corrected vault save timing for Portal games/mods</change>
+      <change>Internal code revisions and cleanup.</change>
+    </changelog>
+  </update>
 </updates>
