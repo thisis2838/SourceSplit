@@ -37,9 +37,9 @@ namespace LiveSplit.SourceSplit.GameHandling
         public string AbsoluteGameDir;
 
         public float IntervalPerTick;
-        public ValueWatcher<int> RawTickCount = new ValueWatcher<int>(0);
         public float FrameTime;
         public int TickBase;
+        public ValueWatcher<int> RawTickCount = new ValueWatcher<int>(0);
         public ValueWatcher<int> TickCount = new ValueWatcher<int>(0);
         public float TickTime;
 
@@ -66,18 +66,19 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <summary>
         /// Compares the inputted time to the internal timer.
         /// </summary>
-        /// <param name="splitTime">The time to compare with internal time</param>
+        /// <param name="time">The time to compare with internal time</param>
         /// <param name="epsilon">The maximum allowed distance between inputted time and internal time</param>
         /// <param name="checkBefore">Whether to check if the internal timer has just gone past inputted time</param>
         /// <param name="adjustFrameTime">Whether to account for frametime (lagginess / alt-tabbing)</param>
-        public bool CompareToInternalTimer(float splitTime, float epsilon = IO_EPSILON, bool checkBefore = false, bool adjustFrameTime = false)
+        /// <returns>Whether the inputted time is past the internal timer</returns>
+        public bool CompareToInternalTimer(float time, float epsilon = IO_EPSILON, bool checkBefore = false, bool adjustFrameTime = false)
         {
-            if (splitTime == 0f) return false;
+            if (time == 0f) return false;
 
             // adjust for lagginess for example at very low fps or if the game's alt-tabbed
             // could be exploitable but not enough to be concerning
             // max frametime without cheats should be 0.05, so leniency is ~<3 ticks
-            splitTime -= adjustFrameTime ? (FrameTime > IntervalPerTick ? FrameTime / 1.15f : 0f) : 0f;
+            time -= adjustFrameTime ? (FrameTime > IntervalPerTick ? FrameTime / 1.15f : 0f) : 0f;
 
             float curRawTime = RawTickCount.Current * IntervalPerTick;
             float oldRawTime = RawTickCount.Old * IntervalPerTick;
@@ -85,11 +86,11 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             if (epsilon == 0f)
             {
-                return curRawTime >= splitTime &&
-                    (!checkBefore || RawTickCount.Old * IntervalPerTick < splitTime);
+                return curRawTime >= time &&
+                    (!checkBefore || RawTickCount.Old * IntervalPerTick < time);
             }
-            else return Math.Abs(splitTime - curRawTime) <= epsilon && 
-                    (!checkBefore || Math.Abs(splitTime - oldRawTime) >= epsilon);
+            else return Math.Abs(time - curRawTime) <= epsilon && 
+                    (!checkBefore || Math.Abs(time - oldRawTime) >= epsilon);
         }
 
         /*
@@ -107,17 +108,12 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// Gets a module with the specified file name
         /// </summary>
         /// <param name="name">The name of the module</param>
-        /// <returns></returns>
+        /// <returns>The module with the specified file name</returns>
         public ProcessModuleWow64Safe GetModule(string name)
         {
             var proc = GameProcess.ModulesWow64SafeNoCache().FirstOrDefault(x => x.ModuleName.ToLower() == name.ToLower());
             Trace.Assert(proc != null);
             return proc;
-        }
-
-        public int Retick(int tick, float oldTickRate)
-        {
-            return (int)(tick / (IntervalPerTick / oldTickRate));
         }
     }
 }
