@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
+using System.Security.Policy;
 
 namespace LiveSplit.SourceSplit.GameHandling
 {
@@ -330,51 +332,19 @@ namespace LiveSplit.SourceSplit.GameHandling
             return ret;
         }
 
-        // ioEvents are stored in a non-contiguous list where every ioEvent contain pointers to the next or previous event 
-        // todo: add more input types and combinations to ensure the correct result
-        /// <summary>
-        /// Finds the fire time of a queued output whose targetname matches the name condition.
-        /// </summary>
-        /// <param name="targetNameCondition">The name condition</param>
-        /// <param name="clamp">The maximum number of inputs to check</param>
-        /// <returns>The fire time of a queued output whose name matches the name condition. If no such output exists, 0 will be returned.</returns>
-        public virtual float GetOutputFireTime(string targetNameCondition, int clamp = 100)
+        // ioEvents are stored in a linked list
+        public virtual IEnumerable<EventQueuePrioritizedEvent> GetQueuedOutputs()
         {
-            float ret = 0;
-
-            if (EventQueuePtr == IntPtr.Zero)
-                goto end;
+            if (EventQueuePtr == IntPtr.Zero) yield break;
 
             EventQueuePrioritizedEvent ioEvent;
             GameProcess.ReadValue(GameProcess.ReadPointer(EventQueuePtr), out ioEvent);
-
-            // clamp the number of items to go through the list to save performance
-            // the list is automatically updated once an output is fired
-            for (int i = 0; i < clamp; i++)
+            while (true)
             {
-                string tempName = GameProcess.ReadString((IntPtr)ioEvent.m_iTarget, 256) ?? "";
-                if (tempName.CompareWildcard(targetNameCondition))
-                {
-                    ret = ioEvent.m_flFireTime;
-                    goto end;
-                }
-                else
-                {
-                    IntPtr nextPtr = (IntPtr)ioEvent.m_pNext;
-                    if (nextPtr != IntPtr.Zero)
-                    {
-                        GameProcess.ReadValue(nextPtr, out ioEvent);
-                        continue;
-                    }
-                    else goto end; // end early if we've hit the end of the list
-                }
+                yield return ioEvent;
+                if (ioEvent.m_pNext == 0x0) yield break;
+                GameProcess.ReadValue((IntPtr)ioEvent.m_pNext, out ioEvent);
             }
-
-            end:
-#if false
-            Debug.WriteLine($"found output with target name \"{targetName}\" fire time : {ret}");
-#endif
-            return ret;
         }
 
         /// <summary>
@@ -385,48 +355,69 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <param name="param">The string condtion for param</param>
         /// <param name="clamp">The maximum number of inputs to check</param>
         /// <returns>Tthe fire time of a queued output whose targetname, command, and param all pass their respective string conditions. If no such output exists, 0 will be returned.</returns>
-        public virtual unsafe float GetOutputFireTime(string targetName, string command, string param, int clamp = 100)
+        public virtual float GetOutputFireTime(string targetName, string command, string param, int clamp = 100)
         {
             float ret = 0;
 
-            if (EventQueuePtr == IntPtr.Zero)
-                goto end;
-
-            EventQueuePrioritizedEvent ioEvent;
-            GameProcess.ReadValue(GameProcess.ReadPointer(EventQueuePtr), out ioEvent);
-
-            for (int i = 0; i < clamp; i++)
+#if DEBUG
+            Stopwatch sw = Stopwatch.StartNew();
+            try
             {
-                string tempName = GameProcess.ReadString((IntPtr)ioEvent.m_iTarget, 256) ?? "";
-                string tempCommand = GameProcess.ReadString((IntPtr)ioEvent.m_iTargetInput, 256) ?? "";
-                string tempParam = GameProcess.ReadString((IntPtr)ioEvent.m_VariantValue[0], 256) ?? "";
+#endif
+            if (GetQueuedOutputs().Take(clamp).Any(x =>
+            {
+                string name = x.m_iTarget != 0x0
+                    ? GameProcess.ReadString((IntPtr)x.m_iTarget, ReadStringType.ASCII, 256, null)
+                    : null;
+                string cmd = x.m_iTargetInput != 0x0 
+                    ? GameProcess.ReadString((IntPtr)x.m_iTargetInput, ReadStringType.ASCII, 256, null)
+                    : null;
+                var variant = x.m_VariantValue;
+                string p = (variant != null && variant.iszVal != 0x0)
+                    ? GameProcess.ReadString((IntPtr)variant.iszVal, ReadStringType.ASCII, 256, null)
+                    : null;
 
-                if (tempName.CompareWildcard(targetName)
-                    && tempCommand.ToLower().CompareWildcard(command.ToLower())
-                    && tempParam.CompareWildcard(param))
+                if ((name ?? "").CompareWildcard(targetName) &&
+                    (command == null ? true : (cmd ?? "").CompareWildcard(command)) &&
+                    (param == null ? true : (p ?? "").CompareWildcard(param)))
                 {
-                    ret = ioEvent.m_flFireTime;
-                    goto end;
+                    ret = x.m_flFireTime;
+                    return true;
                 }
-                else
-                {
-                    IntPtr nextPtr = (IntPtr)ioEvent.m_pNext;
-                    if (nextPtr != IntPtr.Zero)
-                    {
-                        GameProcess.ReadValue(nextPtr, out ioEvent);
-                        continue;
-                    }
-                    else goto end; // end early if we've hit the end of the list
-                }
+
+                return false;
+            }))
+            {
+#if false
+                Debug.WriteLine($"found output with target name \"{targetName}\" command \"{command}\" param \"{param}\" fire time : {ret}");
+#endif
+                return ret;
             }
 
-            end:
-#if false
-            Debug.WriteLine($"found output with target name \"{targetName}\" command \"{command}\" param \"{param}\" fire time : {ret}");
+            return 0;
+#if DEBUG
+            }
+            finally
+            {
+                sw.Stop();
+                if (sw.ElapsedMilliseconds > 5)
+                {
+                    Debug.WriteLine($"Last output search took too long : {sw.ElapsedMilliseconds}ms");
+                }
+            }
 #endif
-            return ret;
         }
-#endregion
+
+        /// <summary>
+        /// Finds the fire time of a queued output whose targetname matches the name condition.
+        /// </summary>
+        /// <param name="targetName">The name condition</param>
+        /// <param name="clamp">The maximum number of inputs to check</param>
+        /// <returns>The fire time of a queued output whose name matches the name condition. If no such output exists, 0 will be returned.</returns>
+        public virtual float GetOutputFireTime(string targetName, int clamp = 100)
+            => GetOutputFireTime(targetName, null, null, clamp);
+
+        #endregion
     }
 
 #region GAME STRUCTS
@@ -476,7 +467,7 @@ namespace LiveSplit.SourceSplit.GameHandling
 
     // todo: figure out a way to utilize ehandles
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct EventQueuePrioritizedEvent
+    public struct EventQueuePrioritizedEvent
     {
         public float m_flFireTime;
         public uint m_iTarget;
@@ -485,11 +476,11 @@ namespace LiveSplit.SourceSplit.GameHandling
         public uint m_pCaller;          // EHANDLE
         public int m_iOutputID;
         public uint m_pEntTarget;       // EHANDLE
-        // variant_t m_VariantValue, class, only relevant members
-        // most notable is v_union which stores the parameters of the i/o event
-        public fixed uint m_VariantValue[5];
+
+        public variant_t m_VariantValue;
         public uint m_pNext;
         public uint m_pPrev;
+
         /*
         // the aformentioned union has a different size for se2003, so we'll have to hack our way around
         public fixed uint m_Other[15];
@@ -497,6 +488,69 @@ namespace LiveSplit.SourceSplit.GameHandling
         public uint m_pPrev => GameMemory.IsSource2003 ? m_Other[14] : m_Other[1];
         */
     };
+
+    // maybe we don't really need all this...
+    public enum fieldtype_t : int
+    {
+        FIELD_VOID = 0,         // No type or value
+        FIELD_FLOAT,            // Any floating point value
+        FIELD_STRING,           // A string ID (return from ALLOC_STRING)
+        FIELD_VECTOR,           // Any vector, QAngle, or AngularImpulse
+        FIELD_QUATERNION,       // A quaternion
+        FIELD_INTEGER,          // Any integer or enum
+        FIELD_BOOLEAN,          // boolean, implemented as an int, I may use this as a hint for compression
+        FIELD_SHORT,            // 2 byte integer
+        FIELD_CHARACTER,        // a byte
+        FIELD_COLOR32,          // 8-bit per channel r,g,b,a (32bit color)
+        FIELD_EMBEDDED,         // an embedded object with a datadesc, recursively traverse and embedded class/structure based on an additional typedescription
+        FIELD_CUSTOM,           // special type that contains function pointers to it's read/write/parse functions
+
+        FIELD_CLASSPTR,         // CBaseEntity *
+        FIELD_EHANDLE,          // Entity handle
+        FIELD_EDICT,            // edict_t *
+
+        FIELD_POSITION_VECTOR,  // A world coordinate (these are fixed up across level transitions automagically)
+        FIELD_TIME,             // a floating point time (these are fixed up automatically too!)
+        FIELD_TICK,             // an integer tick count( fixed up similarly to time)
+        FIELD_MODELNAME,        // Engine string that is a model name (needs precache)
+        FIELD_SOUNDNAME,        // Engine string that is a sound name (needs precache)
+
+        FIELD_INPUT,            // a list of inputed data fields (all derived from CMultiInputVar)
+        FIELD_FUNCTION,         // A class function pointer (Think, Use, etc)
+
+        FIELD_VMATRIX,          // a vmatrix (output coords are NOT worldspace)
+
+        // NOTE: Use float arrays for local transformations that don't need to be fixed up.
+        FIELD_VMATRIX_WORLDSPACE,// A VMatrix that maps some local space to world space (translation is fixed up on level transitions)
+        FIELD_MATRIX3X4_WORLDSPACE, // matrix3x4_t that maps some local space to world space (translation is fixed up on level transitions)
+
+        FIELD_INTERVAL,         // a start and range floating point interval ( e.g., 3.2->3.6 == 3.2 and 0.4 )
+        FIELD_MODELINDEX,       // a model index
+        FIELD_MATERIALINDEX,    // a material index (using the material precache string table)
+
+        FIELD_VECTOR2D,         // 2 floats
+
+        FIELD_TYPECOUNT,		// MUST BE LAST
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    public class variant_t
+    {
+        [FieldOffset(0)]            public bool bVal;
+        [FieldOffset(0)]            public uint iszVal;
+        [FieldOffset(0)]            public int iVal;
+        [FieldOffset(0)]            public float flVal;
+        [FieldOffset(0)]            public Vector3f vecVal;
+        [FieldOffset(0)]            public color32 rgbaVal;
+        [FieldOffset(3 * 4)]        public uint eVal;
+        [FieldOffset(3 * 4 + 4)]    public fieldtype_t fieldtype;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct color32
+    {
+        byte r, g, b, a;
+    }
 
     public enum CEntInfoSize
     {
