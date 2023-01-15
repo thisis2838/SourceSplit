@@ -28,7 +28,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
             else if (IsLastMap)
             {
-                _endOutputFireTime.Current = state.GameEngine.GetOutputFireTime("speed_player");
+                _endOutputFireTime.Current = state.GameEngine.GetOutputFireTime("speed_player", 1000);
             }
         }
 
@@ -48,8 +48,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
             else if (IsLastMap)
             {
-                _endOutputFireTime.Current = state.GameEngine.GetOutputFireTime("speed_player");
-                if (_endOutputFireTime.Changed && _endOutputFireTime.Current == 0)
+                _endOutputFireTime.Current = state.GameEngine.GetOutputFireTime("speed_player", 1000);
+                if (_endOutputFireTime.ChangedTo(0))
                 {
                     OnceFlag = true;
                     actions.End();
