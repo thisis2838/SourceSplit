@@ -65,8 +65,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("blackout", "Kill", "", 10);
-                _splitTime2.Current = state.GameEngine.GetOutputFireTime("csystem_sound_start", "PlaySound", "", 10);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("blackout", "Kill", "");
+                _splitTime2.Current = state.GameEngine.GetOutputFireTime("csystem_sound_start", "PlaySound", "");
 
                 if (_activeWeaponOffset != -1)
                 {
@@ -137,7 +137,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             if (OnceFlag)
                 return;
 
-            _splitTime.Current = state.GameEngine.GetOutputFireTime("blackout", "Kill", "", 8);
+            _splitTime.Current = state.GameEngine.GetOutputFireTime("blackout", "Kill", "");
             if (_splitTime.ChangedFrom(0))
             {
                 Debug.WriteLine("lostcoast start");
@@ -145,7 +145,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 actions.Start(StartOffsetMilliseconds); 
             }
 
-            _splitTime2.Current = state.GameEngine.GetOutputFireTime("csystem_sound_start", "PlaySound", "", 8);
+            _splitTime2.Current = state.GameEngine.GetOutputFireTime("csystem_sound_start", "PlaySound", "");
             if (_splitTime2.ChangedFrom(0))
             {
                 Debug.WriteLine("lostcoast end");

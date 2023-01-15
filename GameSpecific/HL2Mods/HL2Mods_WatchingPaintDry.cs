@@ -44,7 +44,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         {
             if (state.Map.Current == "wpd_tp" || state.Map.Current == "hallway")
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("commands", "Command", "disconnect", 5);
+                float splitTime = state.GameEngine.GetOutputFireTime("commands", "Command", "disconnect");
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
 
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true) && !OnceFlag)

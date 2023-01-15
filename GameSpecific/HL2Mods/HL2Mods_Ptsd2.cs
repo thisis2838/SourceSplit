@@ -41,7 +41,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
             if (this.IsFirstMap)
-                _splitTime = state.GameEngine.GetOutputFireTime("scream", "PlaySound", "", 5);
+                _splitTime = state.GameEngine.GetOutputFireTime("scream", "PlaySound", "");
         }
 
         protected override void OnGenericUpdateInternal(GameState state, TimerActions actions)
@@ -66,7 +66,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsFirstMap)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("scream", "PlaySound", "", 5);
+                float splitTime = state.GameEngine.GetOutputFireTime("scream", "PlaySound", "");
 
                 if (splitTime == 0f && _splitTime != 0f)
                 {

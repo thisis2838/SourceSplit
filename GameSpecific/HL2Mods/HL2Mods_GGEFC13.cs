@@ -45,7 +45,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsFirstMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("teleport_trigger", 5);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("teleport_trigger");
                 if (_splitTime.ChangedTo(0))
                 {
                     Debug.WriteLine("ggefc13 start");

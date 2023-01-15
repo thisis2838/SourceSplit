@@ -26,7 +26,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 //Debug.WriteLine($"start cam index is {_startCamIndex}");
             }
             if (IsLastMap)
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("credits_weaponstrip", 10);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("credits_weaponstrip");
         }
 
         protected override void OnUpdateInternal(GameState state, TimerActions actions)
@@ -46,7 +46,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
             else if (this.IsLastMap)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("credits_weaponstrip", 10);
+                float splitTime = state.GameEngine.GetOutputFireTime("credits_weaponstrip");
                 if (_splitTime.ChangedTo(0f))
                 {
                     OnceFlag = true;

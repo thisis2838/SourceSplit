@@ -29,7 +29,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsLastMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("Titles_music1", 17);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("Titles_music1");
             }
         }
 
@@ -53,7 +53,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
             else if (LastMaps.Contains(state.Map.Current))
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("AlyxWakeUp1", 7);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("AlyxWakeUp1");
 
                 if (_splitTime.ChangedFrom(0))
                 {

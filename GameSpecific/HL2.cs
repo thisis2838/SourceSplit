@@ -31,7 +31,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
             if (this.IsLastMap)
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("sprite_end_final_explosion_1", "ShowSprite", "", 70);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("sprite_end_final_explosion_1", "ShowSprite", "");
         }
 
         protected override void OnUpdateInternal(GameState state, TimerActions actions)
@@ -53,7 +53,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
             else if (this.IsLastMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("sprite_end_final_explosion_1", "ShowSprite", "", 70);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("sprite_end_final_explosion_1", "ShowSprite", "");
                 if (_splitTime.Current > 0 && _splitTime.Old == 0)
                 {
                     Debug.WriteLine("hl2 end");

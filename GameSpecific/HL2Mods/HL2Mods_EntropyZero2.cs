@@ -22,7 +22,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
             if (IsFirstMap) 
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("intro_teleport", 20);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("intro_teleport");
         }
 
         protected override void OnUpdateInternal(GameState state, TimerActions actions)
@@ -32,7 +32,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsFirstMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("intro_teleport", 20);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("intro_teleport");
                 if (_splitTime.ChangedFrom(0))
                 {
                     OnceFlag = true;

@@ -21,7 +21,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
             if (IsFirstMap)
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("end_btd_sd", "PlaySound", "", 6);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("end_btd_sd", "PlaySound", "");
         }
 
         protected override void OnUpdateInternal(GameState state, TimerActions actions)
@@ -31,7 +31,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsFirstMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("end_btn_sd", "PlaySound", "", 6);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("end_btn_sd", "PlaySound", "");
                 if (_splitTime.ChangedFrom(0))
                 {
                     Debug.WriteLine("fd end");

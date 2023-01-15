@@ -49,7 +49,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsLastMap)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("servercommand", 3);
+                float splitTime = state.GameEngine.GetOutputFireTime("servercommand");
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
@@ -83,7 +83,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsLastMap)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("cmd_end", 2);
+                float splitTime = state.GameEngine.GetOutputFireTime("cmd_end");
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
@@ -120,7 +120,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             if (OnceFlag)
                 return;
 
-            float splitTime = state.GameEngine.GetOutputFireTime("komenda", 3);
+            float splitTime = state.GameEngine.GetOutputFireTime("komenda");
             _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
             if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
             {
@@ -154,7 +154,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             // todo: probably should use the helicopter's position?
             if (IsLastMap && state.PlayerPosition.Current.Distance(_endSector) <= 300f)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("game_end", 10);
+                float splitTime = state.GameEngine.GetOutputFireTime("game_end");
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
@@ -185,7 +185,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsLastMap && state.PlayerViewEntityIndex.Current != GameState.ENT_INDEX_PLAYER)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("clientcommand", 8);
+                float splitTime = state.GameEngine.GetOutputFireTime("clientcommand");
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
@@ -216,7 +216,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsLastMap)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("end_disconnect", "command", "disconnect; map_background background_ml05", 6);
+                float splitTime = state.GameEngine.GetOutputFireTime("end_disconnect", "command", "disconnect; map_background background_ml05");
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
@@ -247,7 +247,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsLastMap)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("point_clientcommand2", 4);
+                float splitTime = state.GameEngine.GetOutputFireTime("point_clientcommand2");
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
@@ -287,7 +287,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsLastMap && state.GameEngine.GetEntityPos(_tramPtr).Distance(_tramEndPos) <= 100)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("pcc", "command", "startupmenu force", 8);
+                float splitTime = state.GameEngine.GetOutputFireTime("pcc", "command", "startupmenu force");
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
@@ -318,7 +318,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsLastMap)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("clientcommand", 3);
+                float splitTime = state.GameEngine.GetOutputFireTime("clientcommand");
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
@@ -349,7 +349,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsLastMap)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("piss_off_egg_head", 4);
+                float splitTime = state.GameEngine.GetOutputFireTime("piss_off_egg_head");
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
@@ -435,7 +435,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsFirstMap)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("command_ending", 3);
+                float splitTime = state.GameEngine.GetOutputFireTime("command_ending");
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
@@ -462,7 +462,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            _splitTime = state.GameEngine.GetOutputFireTime("command", 3);
+            _splitTime = state.GameEngine.GetOutputFireTime("command");
         }
 
         protected override void OnUpdateInternal(GameState state, TimerActions actions)
@@ -472,7 +472,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsFirstMap)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("command", 3);
+                float splitTime = state.GameEngine.GetOutputFireTime("command");
                 if (splitTime != 0 && _splitTime == 0)
                 {
                     Debug.WriteLine("hells mines end");
@@ -504,7 +504,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsFirstMap)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("no_vo", 5);
+                float splitTime = state.GameEngine.GetOutputFireTime("no_vo");
                 if (_splitTime == 0 && splitTime != 0)
                 {
                     Debug.WriteLine("upmine struggle end");
@@ -537,7 +537,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsLastMap)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("launchQuit", 5);
+                float splitTime = state.GameEngine.GetOutputFireTime("launchQuit");
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
@@ -569,7 +569,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsLastMap)
             {
-                float splitTime = state.GameEngine.GetOutputFireTime("end_game", 5);
+                float splitTime = state.GameEngine.GetOutputFireTime("end_game");
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {

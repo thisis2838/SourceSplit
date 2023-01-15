@@ -22,9 +22,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
             if (this.IsFirstMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("break", "Break", "", 20);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("break", "Break", "");
             else if (this.IsLastMap)
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("sound_outro_amb_03", "PlaySound", "", 20);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("sound_outro_amb_03", "PlaySound", "");
         }
 
         protected override void OnUpdateInternal(GameState state, TimerActions actions)
@@ -34,7 +34,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsFirstMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("break", "Break", "", 20);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("break", "Break", "");
                 if (_splitTime.ChangedTo(0))
                 {
                     Debug.WriteLine("dangerous world start");
@@ -44,7 +44,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
             else if (this.IsLastMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("sound_outro_amb_03", "PlaySound", "", 20);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("sound_outro_amb_03", "PlaySound", "");
                 if (_splitTime.ChangedFrom(0))
                 {
                     OnceFlag = true;

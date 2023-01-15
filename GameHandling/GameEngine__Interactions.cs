@@ -1,4 +1,5 @@
 ﻿using LiveSplit.ComponentUtil;
+using LiveSplit.SourceSplit.GameSpecific;
 using LiveSplit.SourceSplit.Utilities;
 using System;
 using System.Collections.Generic;
@@ -243,7 +244,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <summary>
         /// Gets the position of the entity with the provided index
         /// </summary>
-        /// <param name="i">Index of the entity</param>
+        /// <param name="index">Index of the entity</param>
         /// <returns>The position of the entity with the provided index. If no such entity exists, (0, 0, 0) will be returned.</returns>
         public virtual Vector3f GetEntityPos(int index)
         {
@@ -347,45 +348,57 @@ namespace LiveSplit.SourceSplit.GameHandling
             }
         }
 
+        // clamping here doesn't actually do much because it can trundle through all of them quite quickly...
         /// <summary>
         /// Finds the fire time of a queued output whose targetname, command, and param all pass their respective string conditions
         /// </summary>
-        /// <param name="targetName">The string condtion for targetname</param>
-        /// <param name="command">The string condtion for command</param>
-        /// <param name="param">The string condtion for param</param>
+        /// <param name="targetName_">The string condtion for targetname</param>
+        /// <param name="command_">The string condtion for command</param>
+        /// <param name="param_">The string condtion for param</param>
         /// <param name="clamp">The maximum number of inputs to check</param>
         /// <returns>Tthe fire time of a queued output whose targetname, command, and param all pass their respective string conditions. If no such output exists, 0 will be returned.</returns>
-        public virtual float GetOutputFireTime(string targetName, string command, string param, int clamp = 100)
+        public virtual float GetOutputFireTime(string targetName_, string command_, string param_, int clamp = 100)
         {
             float ret = 0;
-
 #if DEBUG
             Stopwatch sw = Stopwatch.StartNew();
+            int total = 0;
             try
             {
 #endif
             if (GetQueuedOutputs().Take(clamp).Any(x =>
             {
-                string name = x.m_iTarget != 0x0
+#if DEBUG
+                total++;
+#endif
+
+                string targetName = x.m_iTarget != 0x0
                     ? GameProcess.ReadString((IntPtr)x.m_iTarget, ReadStringType.ASCII, 256, null)
                     : null;
-                string cmd = x.m_iTargetInput != 0x0 
-                    ? GameProcess.ReadString((IntPtr)x.m_iTargetInput, ReadStringType.ASCII, 256, null)
-                    : null;
-                var variant = x.m_VariantValue;
-                string p = (variant != null && variant.iszVal != 0x0)
-                    ? GameProcess.ReadString((IntPtr)variant.iszVal, ReadStringType.ASCII, 256, null)
-                    : null;
+                if (!(targetName ?? "").ToLower().CompareWildcard(targetName_.ToLower()))
+                    return false;
 
-                if ((name ?? "").CompareWildcard(targetName) &&
-                    (command == null ? true : (cmd ?? "").CompareWildcard(command)) &&
-                    (param == null ? true : (p ?? "").CompareWildcard(param)))
+                if (command_ != null)
                 {
-                    ret = x.m_flFireTime;
-                    return true;
+                    string command = x.m_iTargetInput != 0x0
+                        ? GameProcess.ReadString((IntPtr)x.m_iTargetInput, ReadStringType.ASCII, 256, null)
+                        : null;
+                    if (!(command ?? "").ToLower().CompareWildcard(command_.ToLower()))
+                        return false;
                 }
 
-                return false;
+                if (param_ != null)
+                {
+                    var variant = x.m_VariantValue;
+                    string param = (variant != null && variant.iszVal != 0x0)
+                        ? GameProcess.ReadString((IntPtr)variant.iszVal, ReadStringType.ASCII, 256, null)
+                        : null;
+                    if (!(param ?? "").ToLower().CompareWildcard(param_.ToLower()))
+                        return false;
+                }
+
+                ret = x.m_flFireTime;
+                return true;
             }))
             {
 #if false
@@ -402,7 +415,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 sw.Stop();
                 if (sw.ElapsedMilliseconds > 5)
                 {
-                    Debug.WriteLine($"Last output search took too long : {sw.ElapsedMilliseconds}ms");
+                    Debug.WriteLine($"Last output search took too long : {sw.ElapsedMilliseconds}ms, {total} outputs found");
                 }
             }
 #endif

@@ -77,14 +77,14 @@ namespace LiveSplit.SourceSplit.GameSpecific
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
             if (IsFirstMap)
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("scene_*", "PitchShift", "2.0", 50);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("scene_*", "PitchShift", "2.0");
 
             if (this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("cable_detach_04", 50);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("cable_detach_04");
 
             if (_elevSplit.Boolean)
             {
-                _elevSplitTime = state.GameEngine.GetOutputFireTime("*elev_start", 15);
+                _elevSplitTime = state.GameEngine.GetOutputFireTime("*elev_start");
                 Debug.WriteLine("Elevator split time is " + _elevSplitTime);
             }
 
@@ -170,8 +170,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                 TryMany findSplitTime = new TryMany(
                     () => splitTime == 0,
-                    () => splitTime = state.GameEngine.GetOutputFireTime("*elevator_start", 15),
-                    () => splitTime = state.GameEngine.GetOutputFireTime("*elevator_door_model_close", 15));
+                    () => splitTime = state.GameEngine.GetOutputFireTime("*elevator_start"),
+                    () => splitTime = state.GameEngine.GetOutputFireTime("*elevator_door_model_close"));
                 findSplitTime.Begin();
 
                 if (splitTime == 0 && _elevSplitTime != 0)
@@ -200,7 +200,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                 if (_newStart.Boolean)
                 {
-                    _splitTime.Current = state.GameEngine.GetOutputFireTime("relay_portal_cancel_room1", 50);
+                    _splitTime.Current = state.GameEngine.GetOutputFireTime("relay_portal_cancel_room1");
                     if (_splitTime.ChangedTo(0) && isInside)
                     {
                         Debug.WriteLine("portal portal open start");
@@ -233,7 +233,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
             else if (IsLastMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("cable_detach_04", 50);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("cable_detach_04");
                 if (_splitTime.ChangedFrom(0))
                 {
                     Debug.WriteLine("portal delayed end");

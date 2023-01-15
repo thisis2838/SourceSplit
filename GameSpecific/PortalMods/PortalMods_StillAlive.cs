@@ -44,10 +44,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
             {
                 _elevatorPos.Update(state.GameProcess);
                 if (_elevatorPos.Current.Z >= 3760)
-                    splitTime = state.GameEngine.GetOutputFireTime("client_command", 10);
+                    splitTime = state.GameEngine.GetOutputFireTime("client_command");
             }
             else
-                splitTime = state.GameEngine.GetOutputFireTime("*command*", "Command", "*map *", 10);
+                splitTime = state.GameEngine.GetOutputFireTime("*command*", "Command", "*map *");
 
             if (splitTime != 0f)
                 _splitTime = splitTime;

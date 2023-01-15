@@ -21,7 +21,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
             if (this.IsLastMap)
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("fade1", "fade", "", 3);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("fade1", "fade", "");
         }
 
 
@@ -32,7 +32,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsLastMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("fade1", "fade", "" , 3);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("fade1", "fade", "");
 
                 if (_splitTime.ChangedFrom(0))
                 {

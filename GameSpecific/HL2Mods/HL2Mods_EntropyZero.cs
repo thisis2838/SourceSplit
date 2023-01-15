@@ -23,7 +23,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
             if (IsLastMap)
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("STASIS_SEQ_LazyGo", 3);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("STASIS_SEQ_LazyGo");
         }
 
         protected override void OnUpdateInternal(GameState state, TimerActions actions)
@@ -33,7 +33,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (IsLastMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("STASIS_SEQ_LazyGo", 3);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("STASIS_SEQ_LazyGo");
                 if (_splitTime.ChangedTo(0))
                 {
                     OnceFlag = true;

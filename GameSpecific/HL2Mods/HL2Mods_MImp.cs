@@ -23,7 +23,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         {
             if (this.IsFirstMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("cave_giveitems_equipper", 5);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("cave_giveitems_equipper");
             }
             else if (this.IsLastMap)
             {
@@ -40,7 +40,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsFirstMap)
             {
-                float newSplitTime = state.GameEngine.GetOutputFireTime("cave_giveitems_equipper", 5);
+                float newSplitTime = state.GameEngine.GetOutputFireTime("cave_giveitems_equipper");
                 if (_splitTime.ChangedTo(0))
                 {
                     OnceFlag = true;

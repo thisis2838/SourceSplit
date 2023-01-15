@@ -29,7 +29,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
             else if (this.IsLastMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("OW_Dead_Relay", 2);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("OW_Dead_Relay");
             }
         }
 
@@ -50,7 +50,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
             else if (this.IsLastMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("OW_Dead_Relay", 2);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("OW_Dead_Relay");
                 if (_splitTime.ChangedTo(0))
                 {
                     Debug.WriteLine("deeper down end");

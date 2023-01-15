@@ -47,7 +47,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             if (this.IsFirstMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("commander", "Command", "give item_suit", 4);
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("commander", "Command", "give item_suit");
                 IntPtr trigPtr = state.GameEngine.GetEntInfoByIndex(_trigIndex).EntityPtr;
                 if (trigPtr != IntPtr.Zero && _splitTime.ChangedTo(0))
                 {

@@ -382,7 +382,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 // demo games
                 case "trainstation":
                     {
-                        float splitTime = state.GameEngine.GetOutputFireTime("the_end", 2);
+                        float splitTime = state.GameEngine.GetOutputFireTime("the_end");
                         DefualtOutputEnd(state, splitTime, "mod games", actions);
                         return;
                     }
@@ -555,7 +555,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                 case "incorrect": //choice ending
                     {
-                        float splitTime = state.GameEngine.GetOutputFireTime("smallnewtimerelay", 2);
+                        float splitTime = state.GameEngine.GetOutputFireTime("smallnewtimerelay");
                         DefualtOutputEnd(state, splitTime, "choice", actions);
                         return;
                     }
@@ -578,7 +578,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                 case "map_death": //museum ending
                     {
-                        float splitTime = state.GameEngine.GetOutputFireTime("cmd", "command", "stopsound", 2);
+                        float splitTime = state.GameEngine.GetOutputFireTime("cmd", "command", "stopsound");
                         DefualtOutputEnd(state, splitTime, "museum", actions);
                         return;
                     }
@@ -609,7 +609,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     }
                 case "map":
                     {
-                        float splitTime = state.GameEngine.GetOutputFireTime("cmd", 10);
+                        float splitTime = state.GameEngine.GetOutputFireTime("cmd");
                         _defOutputSplitTime = splitTime == 0f ? _defOutputSplitTime : splitTime;
                         if (state.CompareToInternalTimer(_defOutputSplitTime, GameState.IO_EPSILON, false, true))
                             state.QueueOnNextSessionEnd = () => actions.End();
