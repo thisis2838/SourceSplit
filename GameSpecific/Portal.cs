@@ -91,7 +91,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _playerHP = new MemoryWatcher<int>(state.PlayerEntInfo.EntityPtr + _baseEntityHealthOffset);
         }
 
-
         protected override void OnSaveLoadedInternal(GameState state, TimerActions actions, string name)
         {
             if (_newStart.Boolean) return;
@@ -206,7 +205,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     {
                         Debug.WriteLine("portal portal open start");
                         OnceFlag = true;
-                        actions.Start(-(57015 + 15));
+                        actions.Start(-57045);
                     }
                 }
                 /*else
