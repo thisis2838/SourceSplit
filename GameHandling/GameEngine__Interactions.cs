@@ -138,7 +138,6 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <returns>All of the indexes of the entities whose name passes the name condition</returns>
         public virtual IEnumerable<int> GetEntIndexesByName(string nameCond)
         {
-            int ret = -1;
             for (int i = 0; i < MAX_ENTITIES; i++)
             {
                 CEntInfoV2 info = this.GetEntInfoByIndex(i);
@@ -155,7 +154,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 if (n.CompareWildcard(nameCond))
                 {
 #if DEBUG
-                    Debug.WriteLine($"found entity \"{n}\" index : {ret}");
+                    Debug.WriteLine($"found entity \"{n}\" index : {i}");
 #endif
                     yield return i;
                 }

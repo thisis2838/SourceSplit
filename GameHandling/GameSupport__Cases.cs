@@ -209,6 +209,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Minerva();
                 case "evacuation":
                     return new Evacuation();
+                case "amalgam":
+                    return new Amalgam();
             }
 
             return new DefaultGame();
