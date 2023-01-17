@@ -211,6 +211,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Evacuation();
                 case "amalgam":
                     return new Amalgam();
+                case "avenueodessa":
+                    return new AvenueOdessa();
             }
 
             return new DefaultGame();
