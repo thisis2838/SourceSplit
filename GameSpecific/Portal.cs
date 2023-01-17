@@ -51,7 +51,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             this.AddFirstMap("testchmb_a_00");
             this.AddLastMap("escape_02");        
              
-            this.AdditionalGameSupport.Add(new PortalMods_TheFlashVersion());
+            this.AdditionalGameSupport.Add(new PortalMods.TheFlashVersion());
             CommandHandler.Commands.AddRange
             (
                 _newStart, 

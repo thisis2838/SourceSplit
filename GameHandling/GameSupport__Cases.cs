@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using LiveSplit.SourceSplit.GameSpecific;
+using LiveSplit.SourceSplit.GameSpecific.BMSMods;
+using LiveSplit.SourceSplit.GameSpecific.HL2Mods;
+using LiveSplit.SourceSplit.GameSpecific.PortalMods;
 using LiveSplit.SourceSplit.ComponentHandling;
 using System.Runtime.InteropServices.WindowsRuntime;
 
@@ -38,7 +41,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 case "cssmovement":
                     return new Portal();
                 case "portal_tfv":
-                    return new PortalMods_TheFlashVersion();
+                    return new TheFlashVersion();
                 case "bms":
                     return new BMSRetail();
                 case "lostcoast":
@@ -46,36 +49,36 @@ namespace LiveSplit.SourceSplit.GameHandling
                 case "estrangedact1":
                     return new EstrangedAct1();
                 case "ptsd":
-                    return new HL2Mods_Ptsd1();
+                    return new Ptsd1();
                 case "missionimprobable":
-                    return new HL2Mods_MImp();
+                    return new MImp();
                 case "downfall":
-                    return new HL2Mods_Downfall();
+                    return new Downfall();
                 case "uncertaintyprinciple":
-                    return new HL2Mods_UncertaintyPrinciple();
+                    return new UncertaintyPrinciple();
                 case "watchingpaintdry":
                 case "watchingpaintdry2":
-                    return new HL2Mods_WatchingPaintDry();
+                    return new WatchingPaintDry();
                 case "mod_episodic":
-                    return new HL2Mods_SnipersEp();
+                    return new SnipersEp();
                 case "deepdown":
-                    return new HL2Mods_DeepDown();
+                    return new DeepDown();
                 case "dank_memes":
-                    return new HL2Mods_DankMemes();
+                    return new DankMemes();
                 case "freakman":
-                    return new HL2Mods_Freakman1();
+                    return new Freakman1();
                 case "freakman-kleinerlife":
-                    return new HL2Mods_Freakman2();
+                    return new Freakman2();
                 case "crates":
-                    return new HL2Mods_TooManyCrates();
+                    return new TooManyCrates();
                 case "te120":
                     return new TE120();
                 case "dear esther":
-                    return new HL2Mods_DearEsther();
+                    return new DearEsther();
                 case "exit 2":
-                    return new HL2Mods_Exit2();
+                    return new Exit2();
                 case "dayhard":
-                    return new HL2Mods_DayHard();
+                    return new DayHard();
                 case "thestanleyparable":
                 case "thestanleyparabledemo":
                     return new TheStanleyParable();
@@ -84,128 +87,128 @@ namespace LiveSplit.SourceSplit.GameHandling
                 case "beginnersguide":
                     return new TheBeginnersGuide();
                 case "icemod":
-                    return new HL2Mods_ICE();
+                    return new ICE();
                 case "dababy":
-                    return new HL2Mods_DaBaby();
+                    return new DaBaby();
                 case "infra":
                     return new Infra();
                 case "yearlongalarm":
-                    return new HL2Mods_YearLongAlarm();
+                    return new YearLongAlarm();
                 case "killthemonk":
-                    return new HL2Mods_KillTheMonk();
+                    return new KillTheMonk();
                 case "logistique":
-                    return new HL2Mods_Logistique();
+                    return new Logistique();
                 case "hl1":
                     return new HLS();
                 case "backwardsmod":
-                    return new HL2Mods_BackwardsMod();
+                    return new BackwardsMod();
                 case "school_adventures":
                 case "school_adventures_oe":
                 case "school_adventures oe":
-                    return new HL2Mods_SchoolAdventures();
+                    return new SchoolAdventures();
                 case "the lost city":
                 case "thelostcity":
-                    return new HL2Mods_TheLostCity();
+                    return new TheLostCity();
                 case "entropyzero":
-                    return new HL2Mods_EntropyZero();
+                    return new EntropyZero();
                 case "entropyzero2":
-                    return new HL2Mods_EntropyZero2();
+                    return new EntropyZero2();
                 case "deeperdown":
-                    return new HL2Mods_DeeperDown();
+                    return new DeeperDown();
                 case "thinktank":
-                    return new HL2Mods_ThinkTank();
+                    return new ThinkTank();
                 case "gnome":
-                    return new HL2Mods_Gnome();
+                    return new Gnome();
                 case "hl2-sp-reject":
-                    return new HL2Mods_Reject();
+                    return new Reject();
                 case "thc16-trapville":
-                    return new HL2Mods_TrapVille();
+                    return new TrapVille();
                 case "runthinkshootliveville":
-                    return new HL2Mods_RTSLVille();
+                    return new RTSLVille();
                 case "abridged":
-                    return new HL2Mods_Abridged();
+                    return new Abridged();
                 case "episodeone":
-                    return new HL2Mods_EpisodeOne();
+                    return new EpisodeOne();
                 case "combinationville":
-                    return new HL2Mods_CombinationVille();
+                    return new CombinationVille();
                 case "sdk-2013-sp-tlc18-c4-phaseville":
-                    return new HL2Mods_PhaseVille();
+                    return new PhaseVille();
                 case "companionpiece":
-                    return new HL2Mods_CompanionPiece();
+                    return new CompanionPiece();
                 case "the citizen":
                 case "thecitizen":
-                    return new HL2Mods_TheCitizen();
+                    return new TheCitizen();
                 case "the citizen 2":
                 case "thecitizen2":
                 case "the citizen returns":
                 case "thecitizenreturns":
-                    return new HL2Mods_TheCitizen2AndReturns();
+                    return new TheCitizen2AndReturns();
                 case "1187":
-                    return new HL2Mods_1187Ep1();
+                    return new ElevenEightySevenEp1();
                 case "prospekt":
                     return new Prospekt();
                 case "t7":
-                    return new HL2Mods_Terminal7();
+                    return new Terminal7();
                 case "get_a_life":
-                    return new HL2Mods_GetALife();
+                    return new GetALife();
                 case "grey":
-                    return new HL2Mods_Grey();
+                    return new Grey();
                 case "precursor":
-                    return new HL2Mods_Precursor();
+                    return new Precursor();
                 case "portalreverse":
-                    return new PortalMods_PRMO();
+                    return new PRMO();
                 case "stillalive":
                 case "portal-stillalive":
-                    return new PortalMods_StillAlive();
+                    return new StillAlive();
                 case "ggefc13":
-                    return new HL2Mods_GGEFC13();
+                    return new GGEFC13();
                 case "rexaura":
-                    return new PortalMods_Rexaura();
+                    return new Rexaura();
                 case "pcborrr":
-                    return new PortalMods_PCBORRR();
+                    return new PCBORRR();
                 case "portal pro":
                 case "portalpro":
-                    return new PortalMods_PortalPro();
+                    return new PortalPro();
                 case "portal prelude":
                 case "portalprelude":
-                    return new PortalMods_PortalPrelude();
+                    return new PortalPrelude();
                 case "ptsd_2":
-                    return new HL2Mods_Ptsd2();
+                    return new Ptsd2();
                 case "survivor":
                     return new HL2Survivor();
                 case "offshore":
-                    return new HL2Mods_Offshore();
+                    return new Offshore();
                 case "hangover":
-                    return new HL2Mods_Hangover();
+                    return new Hangover();
                 case "synergy":
                     return new Synergy();
                 case "portal epic edition":
-                    return new PortalMods_EpicEdition();
+                    return new EpicEdition();
                 case "error":
-                    return new PortalMods_ERROR();
+                    return new ERROR();
                 case "dangerousworld":
-                    return new HL2Mods_DangerousWorld();
+                    return new DangerousWorld();
                 case "se1":
                     return new SiNEpisodes();
                 case "southernmost":
                 case "southernmostcombine":
-                    return new HL2Mods_SouthernmostCombine();
+                    return new SouthernmostCombine();
                 case "veryhardmod":
-                    return new HL2Mods_VeryHardMod();
+                    return new VeryHardMod();
                 case "localmotive":
-                    return new HL2Mods_Localmotive();
+                    return new Localmotive();
                 case "crumbsoftruth":
-                    return new PortalMods_CrumbsOfTruth();
+                    return new CrumbsOfTruth();
                 case "darkevening": 
-                    return new HL2Mods_DarkEvening();
+                    return new DarkEvening();
                 case "halflife2-episode3":
-                    return new HL2Mods_EpisodeThree();
+                    return new EpisodeThree();
                 case "foresttrain":
-                    return new HL2Mods_ForestTrain();
+                    return new ForestTrain();
                 case "metastasis":
-                    return new HL2Mods_Minerva();
+                    return new Minerva();
                 case "evacuation":
-                    return new HL2Mods_Evacuation();
+                    return new Evacuation();
             }
 
             return new DefaultGame();

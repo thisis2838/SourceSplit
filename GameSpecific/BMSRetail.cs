@@ -50,8 +50,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         private MemoryWatcher<int> _susNextThink = null;
 
-        private BMSMods_HazardCourse _hazardCourse = new BMSMods_HazardCourse();
-        private BMSMods_FurtherData _furtherData = new BMSMods_FurtherData();
+        private BMSMods.HazardCourse _hazardCourse = new BMSMods.HazardCourse();
+        private BMSMods.FurtherData _furtherData = new BMSMods.FurtherData();
 
         public BMSRetail()
         {  

@@ -17,9 +17,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         private Vector3f _startPos = new Vector3f(-9419f, -2483f, 22f);
 
-        private HL2Mods_TheLostCity _lostCity = new HL2Mods_TheLostCity();
-        private HL2Mods_Tinje _tinje = new HL2Mods_Tinje();
-        private HL2Mods_ExperimentalFuel _experimentalFuel = new HL2Mods_ExperimentalFuel();
+        private HL2Mods.TheLostCity _lostCity = new HL2Mods.TheLostCity();
+        private HL2Mods.Tinje _tinje = new HL2Mods.Tinje();
+        private HL2Mods.ExperimentalFuel _experimentalFuel = new HL2Mods.ExperimentalFuel();
 
         public HL2()
         {

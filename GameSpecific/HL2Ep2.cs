@@ -15,10 +15,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private int _basePlayerLaggedMovementOffset = -1;
         private float _prevLaggedMovementValue;
 
-        private HL2Mods_DarkIntervention _darkIntervention = new HL2Mods_DarkIntervention();
-        private HL2Mods_HellsMines _hellsMines = new HL2Mods_HellsMines();
-        private HL2Mods_UpmineStruggle _upmineStruggle = new HL2Mods_UpmineStruggle();
-        private HL2Mods_A2BTrajectory _A2BTrajectory = new HL2Mods_A2BTrajectory();
+        private HL2Mods.DarkIntervention _darkIntervention = new HL2Mods.DarkIntervention();
+        private HL2Mods.HellsMines _hellsMines = new HL2Mods.HellsMines();
+        private HL2Mods.UpmineStruggle _upmineStruggle = new HL2Mods.UpmineStruggle();
+        private HL2Mods.A2BTrajectory _A2BTrajectory = new HL2Mods.A2BTrajectory();
 
         public HL2Ep2()
         {
