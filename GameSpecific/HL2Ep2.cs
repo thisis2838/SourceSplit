@@ -15,16 +15,18 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private int _basePlayerLaggedMovementOffset = -1;
         private float _prevLaggedMovementValue;
 
-        private HL2Mods.DarkIntervention _darkIntervention = new HL2Mods.DarkIntervention();
-        private HL2Mods.HellsMines _hellsMines = new HL2Mods.HellsMines();
-        private HL2Mods.UpmineStruggle _upmineStruggle = new HL2Mods.UpmineStruggle();
-        private HL2Mods.A2BTrajectory _A2BTrajectory = new HL2Mods.A2BTrajectory();
-
         public HL2Ep2()
         {
             this.AddFirstMap("ep2_outland_01");
             this.AddLastMap("ep2_outland_12a");
-            AdditionalGameSupport = new List<GameSupport>(){ _darkIntervention, _hellsMines, _upmineStruggle, _A2BTrajectory };
+            AdditionalGameSupport = new List<GameSupport>()
+            {
+                new HL2Mods.DarkIntervention(),
+                new HL2Mods.HellsMines(),
+                new HL2Mods.UpmineStruggle(),
+                new HL2Mods.City17IsFarAway(),
+                new HL2Mods.A2BTrajectory()
+            };
         }
 
         protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
