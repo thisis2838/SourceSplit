@@ -4,7 +4,7 @@
 
 // mods included: think tank, gnome, hl2 backwards mod, hl2 reject, trapville, rtslville, 
 // hl abridged, episode one, combination ville, phaseville, companion piece, school adventures, the citizen 1
-// hells mines, dark intervention, upmine struggle, offshore, very hard mod
+// hells mines, dark intervention, upmine struggle, offshore, very hard mod, clone machine
 
 using LiveSplit.ComponentUtil;
 using System.Diagnostics;
@@ -570,6 +570,38 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             if (this.IsLastMap)
             {
                 float splitTime = state.GameEngine.GetOutputFireTime("end_game");
+                _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
+                if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
+                {
+                    OnceFlag = true;
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
+                }
+            }
+            return;
+        }
+    }
+
+    class CloneMachine : Misc
+    {
+        // how to match with demos:
+        // start: on map load
+        // ending: on game disconnect after final output has been fired.
+
+        public CloneMachine()
+        {
+            this.AddFirstMap("the2");
+            this.AddLastMap("the5");
+            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
+        }
+
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
+        {
+            if (OnceFlag)
+                return;
+
+            if (this.IsLastMap)
+            {
+                float splitTime = state.GameEngine.GetOutputFireTime("cmd", "Command", "disconnect");
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {

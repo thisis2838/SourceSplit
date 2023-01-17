@@ -213,6 +213,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Amalgam();
                 case "avenueodessa":
                     return new AvenueOdessa();
+                case "clonemachine":
+                    return new CloneMachine();
             }
 
             return new DefaultGame();
