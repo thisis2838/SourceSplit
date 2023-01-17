@@ -53,7 +53,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     Debug.WriteLine("rebasing ticks from " + state.TickBase);
 
                     // player was just spawned, get it's ptr
-                    state.PlayerEntInfo = state.GameEngine.GetEntInfoByIndex(GameState.ENT_INDEX_PLAYER);
+                    state.PlayerEntInfo = state.GameEngine.GetEntityInfoByIndex(GameState.ENT_INDEX_PLAYER);
 
                     // update map name
                     state.Map.Current = state.GameProcess.ReadString(engine.CurMapPtr, ReadStringType.ASCII, 64).ToLower();

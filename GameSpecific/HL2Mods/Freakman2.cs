@@ -40,9 +40,9 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
             if (this.IsFirstMap && _trainIndex != -1)
             {
-                var newTrig = state.GameEngine.GetEntInfoByIndex(_trainIndex);
+                var newTrig = state.GameEngine.GetEntityByIndex(_trainIndex);
 
-                if (newTrig.EntityPtr == IntPtr.Zero)
+                if (newTrig == IntPtr.Zero)
                 {
                     _trainIndex = -1;
                     OnceFlag = true;

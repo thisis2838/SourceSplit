@@ -52,9 +52,9 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             }
             else if (this.IsLastMap && _propIndex != -1)
             {
-                var newProp = state.GameEngine.GetEntInfoByIndex(_propIndex);
+                var newProp = state.GameEngine.GetEntityByIndex(_propIndex);
 
-                if (newProp.EntityPtr == IntPtr.Zero)
+                if (newProp == IntPtr.Zero)
                 {
                     Debug.WriteLine("DayHard end");
                     OnceFlag = true;

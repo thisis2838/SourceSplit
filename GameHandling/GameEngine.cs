@@ -271,12 +271,12 @@ namespace LiveSplit.SourceSplit.GameHandling
             }
         }
 
-        public override IEnumerable<IntPtr> GetEntitiesByName(string name)
+        public override IEnumerable<CEntInfoV2> GetEntitiesInfo()
         {
             if (_isBeta)
-                return GetEntIndexesByName(name).Select(x => base.GetEntInfoByIndex(x).EntityPtr);
+                return GetEntityListEntries().Select(x => x.Info);
 
-            return base.GetEntitiesByName(name);
+            return base.GetEntitiesInfo();
         }
     }
 

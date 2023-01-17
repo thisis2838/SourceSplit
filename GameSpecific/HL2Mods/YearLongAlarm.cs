@@ -50,7 +50,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
                     // and decide their hp
                     if (_gunshipIndex[i] != -1)
-                        _gunshipHP[i] = state.GameProcess.ReadValue<int>(state.GameEngine.GetEntInfoByIndex(_gunshipIndex[i]).EntityPtr + _baseEntityHealthOffset);
+                        _gunshipHP[i] = state.GameProcess.ReadValue<int>(state.GameEngine.GetEntityByIndex(_gunshipIndex[i]) + _baseEntityHealthOffset);
                     else 
                         _gunshipHP[i] = -1;
 
@@ -77,7 +77,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                     // store the old hp
                     _gunshipOldHP[i] = _gunshipHP[i];
                     // get the gunship's pointer
-                    IntPtr ptr = state.GameEngine.GetEntInfoByIndex(_gunshipIndex[i]).EntityPtr;
+                    IntPtr ptr = state.GameEngine.GetEntityByIndex(_gunshipIndex[i]);
                     // if the gunship hasn't spawned in yet or they're deleted, exit early and reset its old index
                     if (_gunshipIndex[i] == -1 || ptr == IntPtr.Zero)
                     {

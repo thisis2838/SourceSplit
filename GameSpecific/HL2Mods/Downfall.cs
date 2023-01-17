@@ -44,9 +44,9 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             }
             else if (this.IsLastMap && _spriteIndex != 1)
             {
-                var newBlack = state.GameEngine.GetEntInfoByIndex(_spriteIndex);
+                var newBlack = state.GameEngine.GetEntityByIndex(_spriteIndex);
 
-                if (newBlack.EntityPtr == IntPtr.Zero)
+                if (newBlack == IntPtr.Zero)
                 {
                     _spriteIndex = -1;
                     Debug.WriteLine("downfall end");

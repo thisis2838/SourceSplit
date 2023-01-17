@@ -74,7 +74,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     _activeWeaponIndex.OnChanged += (s, e) =>
                     {
                         var ind = _activeWeaponIndex.Current & 0xfff;
-                        var ptr = state.GameEngine.GetEntInfoByIndex(ind).EntityPtr;
+                        var ptr = state.GameEngine.GetEntityByIndex(ind);
                         var type = state.GameProcess.ReadValue<int>(ptr + _weaponAmmoTypeOffset);
                         Debug.WriteLine
                         (

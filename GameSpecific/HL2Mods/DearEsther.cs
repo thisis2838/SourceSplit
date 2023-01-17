@@ -34,9 +34,9 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
             if (this.IsLastMap)
             {
-                var newTrig = state.GameEngine.GetEntInfoByIndex(_trigIndex);
+                var newTrig = state.GameEngine.GetEntityByIndex(_trigIndex);
 
-                if (newTrig.EntityPtr == IntPtr.Zero)
+                if (newTrig == IntPtr.Zero)
                 {
                     OnceFlag = true;
                     Debug.WriteLine("dearesther end");

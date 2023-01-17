@@ -471,9 +471,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                         if (buttonPresses >= 4)
                         {
-                            var newbr = state.GameEngine.GetEntInfoByIndex(_endingHeavenBrIndex);
+                            var newbr = state.GameEngine.GetEntityByIndex(_endingHeavenBrIndex);
 
-                            if (newbr.EntityPtr == IntPtr.Zero && (buttonPresses > _endingHeavenBPass1))
+                            if (newbr == IntPtr.Zero && (buttonPresses > _endingHeavenBPass1))
                             {
                                 DefaultEnd("heaven", actions, 1);
                                 return;

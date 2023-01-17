@@ -41,9 +41,9 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
             if (FirstMaps.Contains(state.Map.Current) && this._introIndex != -1)
             {
-                var newIntro = state.GameEngine.GetEntInfoByIndex(_introIndex);
+                var newIntro = state.GameEngine.GetEntityByIndex(_introIndex);
 
-                if (newIntro.EntityPtr == IntPtr.Zero)
+                if (newIntro == IntPtr.Zero)
                 {
                     _introIndex = -1;
                     OnceFlag = true;

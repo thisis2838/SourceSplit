@@ -13,7 +13,7 @@ namespace LiveSplit.SourceSplit.GameHandling
 {
     public abstract partial class GameEngine
     {
-        #region RETRIEVAL FUNCTIONS
+        #region STATE RETRIEVAL FUNCTIONS
 
         /// <summary>
         /// Gets the current Host State
@@ -41,79 +41,115 @@ namespace LiveSplit.SourceSplit.GameHandling
         {
             return (ServerState)GameProcess.ReadValue<int>(ServerStatePtr);
         }
+        #endregion
 
+        // we have 2 ways of enumerating through entities in a session,
+        // through the linked entity list or through the global entity list.
+        // -    the linked entity list returns all loaded entities, including ones which aren't
+        //      networked to the client and don't have an entity index.
+        // -    the global entity list allows us to use entity indexes
+
+        // for each method of enumeration, we'll have
+        // -    one function for direct enumeration
+        // -    functions for searching by name condition 
+        // -    functions for searching by position
+
+        #region GLOBAL ENTITY LIST INDEXING AND ENUMERATION
+        
         protected const int MAX_ENTITIES = 2048;
 
         /// <summary>
-        /// Gets the entity info of the entity with the specified index
+        /// Gets the info of the entity with the specified index
         /// </summary>
-        /// <param name="index">The index of the entity</param>
-        /// <returns>The info of the entity with the specified index. If there is no such entity, a new CEntInfoV2 will be returned</returns>
-        public virtual CEntInfoV2 GetEntInfoByIndex(int index)
+        /// <param name="index">The entity's index</param>
+        /// <returns>The info of the entity with the specified index. If no entity exists with a matching index, an empty info object will be returned.</returns>
+        public virtual CEntInfoV2 GetEntityInfoByIndex(int index)
         {
-            Debug.Assert(EntInfoSize > 0);
+            if (EntInfoSize <= 0)
+            {
+                throw new Exception("Tried to get entity's info when the entity info size is less than or equal to 0!"); ;
+            }
 
             if (index < 0)
                 return new CEntInfoV2();
 
             IntPtr addr = GlobalEntityListPtr + ((int)EntInfoSize * index);
-
             this.GameProcess.ReadValue(addr, out CEntInfoV1 v1);
             return CEntInfoV2.FromV1(v1);
         }
 
-        // warning: expensive -  7ms on i5
-        // do not call frequently!
         /// <summary>
-        /// Gets the entity pointer to the first entity whose name passes the name condition
+        /// Gets the pointer of the entity with the specified index
         /// </summary>
-        /// <param name="nameCond">The name condition</param>
-        /// <returns>The first entity whose name passes the name condition. If there is no such entity, IntPtr.Zero will be returned</returns>
-        public IntPtr GetEntityByName(string nameCond)
+        /// <param name="index">The index of the entity</param>
+        /// <returns>The pointer of the entity with the specified index. If there is no such entity, IntPtr.Zero will be returned</returns>
+        public virtual IntPtr GetEntityByIndex(int index)
+            => GetEntityInfoByIndex(index).EntityPtr;
+
+        /// <summary>
+        /// A structure which describes the position and value of an entry in the global entity list.
+        /// </summary>
+        public struct GlobalEntityListEntry
         {
-            IntPtr ret = IntPtr.Zero;
-            GetEntitiesByName(nameCond).Any(x =>
-            {
-                ret = x;
-                return true;
-            });
-            return ret;
+            public int Index;
+            public CEntInfoV2 Info;
+            public IntPtr Entity;
         }
 
         /// <summary>
-        /// Gets all of the pointers to entities whose name passes the name condition
+        /// Enumerates through the global entity list and returns entries whose entity pointer is valid
         /// </summary>
-        /// <param name="nameCond">The name condition to compare against</param>
-        /// <returns>All of the pointers to entities whose name passes the name condition</returns>
-        public virtual IEnumerable<IntPtr> GetEntitiesByName(string nameCond)
+        /// <returns>The entries whose entity pointer is valid</returns>
+        public virtual IEnumerable<GlobalEntityListEntry> GetEntityListEntries()
         {
-            CEntInfoV2 nextPtr = this.GetEntInfoByIndex(0);
-            var ret = IntPtr.Zero;
+            for (int i = 0; i < MAX_ENTITIES; i++)
+            {
+                CEntInfoV2 info = this.GetEntityInfoByIndex(i);
+                if (info.EntityPtr == IntPtr.Zero)
+                    continue;
+
+                yield return new GlobalEntityListEntry()
+                {
+                    Index = i,
+                    Info = info,
+                    Entity = info.EntityPtr
+                };
+            }
+        }
+
+        #endregion
+
+        #region LINKED ENTITY LIST ENUMERATION
+
+        /// <summary>
+        /// Enumerates through the linked entity list 
+        /// </summary>
+        /// <returns>The entities' infos</returns>
+        public virtual IEnumerable<CEntInfoV2> GetEntitiesInfo()
+        {
+            CEntInfoV2 nextEnt = this.GetEntityInfoByIndex(0);
             do
             {
-                if (nextPtr.EntityPtr == IntPtr.Zero)
+                if (nextEnt.EntityPtr == IntPtr.Zero)
                 {
                     yield break;
                 }
 
-                IntPtr namePtr;
-                this.GameProcess.ReadPointer(nextPtr.EntityPtr + BaseEntityTargetNameOffset, false, out namePtr);
-                if (namePtr != IntPtr.Zero)
-                {
-                    this.GameProcess.ReadString(namePtr, ReadStringType.ASCII, 32, out string n);  // TODO: find real max len
-                    if (n.CompareWildcard(nameCond))
-                    {
-#if DEBUG
-                        Debug.WriteLine($"found entity \"{n}\" ptr : {ret.ToString("X")}");
-#endif
-                        yield return nextPtr.EntityPtr;
-                    }
-                }
-                nextPtr = GameProcess.ReadValue<CEntInfoV2>((IntPtr)nextPtr.m_pNext);
+                yield return nextEnt;
+                nextEnt = GameProcess.ReadValue<CEntInfoV2>((IntPtr)nextEnt.m_pNext);
             }
-            while (nextPtr.EntityPtr != IntPtr.Zero);
-
+            while (nextEnt.EntityPtr != IntPtr.Zero);
         }
+
+        /// <summary>
+        /// Enumerates through the linked entity list and returns the entities
+        /// </summary>
+        /// <returns>The entities</returns>
+        public IEnumerable<IntPtr> GetEntities() => GetEntitiesInfo().Select(x => x.EntityPtr);
+
+        #endregion
+
+        #region GLOBAL ENTITY LIST SEARCHING
 
         /// <summary>
         /// Gets the index of the first entity whose name passes the name condition
@@ -121,93 +157,54 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <param name="nameCond">The name condition</param>
         /// <returns>The index of the first entity whose name passes the name condition. If no such entity exists, -1 will be returned.</returns>
         public int GetEntIndexByName(string nameCond)
-        {
-            int ret = -1;
-            GetEntIndexesByName(nameCond).Any(x =>
-            {
-                ret = x;
-                return true;
-            });
-            return ret;
-        }
+            => GetEntIndexesByName(nameCond).FirstOrSpecified(-1);
 
         /// <summary>
-        /// Gets all of the indexes of the entities whose name passes the name condition
+        /// Enumerates through the global entity list and returns the indexes of entities whose name passes the name condition
         /// </summary>
         /// <param name="nameCond">The name condition</param>
-        /// <returns>All of the indexes of the entities whose name passes the name condition</returns>
+        /// <returns>The indexes of entities whose name passes the name condition. If no such entity exists, -1 will be returned.</returns>
         public virtual IEnumerable<int> GetEntIndexesByName(string nameCond)
         {
-            for (int i = 0; i < MAX_ENTITIES; i++)
+            foreach (var ent in GetEntityListEntries())
             {
-                CEntInfoV2 info = this.GetEntInfoByIndex(i);
-                if (info.EntityPtr == IntPtr.Zero)
-                    continue;
+                var n = GetEntityTargetName(ent.Entity);
+                if (n is null) continue;
 
-                IntPtr namePtr;
-                this.GameProcess.ReadPointer(info.EntityPtr + BaseEntityTargetNameOffset, false, out namePtr);
-                if (namePtr == IntPtr.Zero)
-                    continue;
-
-                string n;
-                this.GameProcess.ReadString(namePtr, ReadStringType.ASCII, 32, out n);  // TODO: find real max len
                 if (n.CompareWildcard(nameCond))
                 {
 #if DEBUG
-                    Debug.WriteLine($"found entity \"{n}\" index : {i}");
+                    Debug.WriteLine($"found entity \"{n}\" index : {ent.Index}");
 #endif
-                    yield return i;
+                    yield return ent.Index;
                 }
             }
         }
 
         /// <summary>
-        /// Gets the index of the first entity whose position is near or exactly at a given location
+        /// Enumerates through the global entity list and returns the indexes of entities whose position is near or exactly at the target location
         /// </summary>
         /// <param name="x">Target X coordinate</param>
         /// <param name="y">Target Y coordinate</param>
         /// <param name="z">Target Z coordinate</param>
-        /// <param name="d">Distance to the target location</param>
-        /// <param name="xy">Whether to ignore the Z coordinate</param>
-        /// <returns>The index of the first entity whose position is near or exactly at a given location. If no such entity exists, -1 will be returned.</returns>
-        public int GetEntIndexByPos(float x, float y, float z, float d = 0f, bool xy = false)
-        {
-            int ret = -1;
-            GetEntIndexesByPos(x, y, z, d, xy).Any(x =>
-            {
-                ret = x;
-                return true;
-            });
-            return ret;
-        }
-
-        /// <summary>
-        /// Gets all of the indexes of the entities whose position is near or exactly at a given location
-        /// </summary>
-        /// <param name="x">Target X coordinate</param>
-        /// <param name="y">Target Y coordinate</param>
-        /// <param name="z">Target Z coordinate</param>
-        /// <param name="d">Distance to the target location</param>
-        /// <param name="xy">Whether to ignore the Z coordinate</param>
-        /// <returns>All of the indexes of the entities whose position is near or exactly at the given location</returns>
+        /// <param name="d">Maximum distance to the target location</param>
+        /// <param name="xy">Whether to only consider the X and Y coordinates</param>
+        /// <returns>The indexes of entities whose position is near or exactly at the target location</returns>
         public virtual IEnumerable<int> GetEntIndexesByPos(float x, float y, float z, float d = 0f, bool xy = false)
         {
             Vector3f pos = new Vector3f(x, y, z);
 
-            for (int i = 0; i < MAX_ENTITIES; i++)
+            foreach (var ent in GetEntityListEntries())
             {
-                CEntInfoV2 info = this.GetEntInfoByIndex(i);
-                if (info.EntityPtr == IntPtr.Zero)
-                    continue;
+                var entPos = GetEntityPos(ent.Entity);
+                var i = ent.Index;
 
-                Vector3f newpos;
-                if (!this.GameProcess.ReadValue(info.EntityPtr + BaseEntityAbsOriginOffset, out newpos))
-                    continue;
+                if (i == 1) continue;
 
                 if (d == 0f)
                 {
                     // not equal 1 becase the player might be in the same exact position
-                    if (newpos.BitEquals(pos) && i != 1)
+                    if (entPos.BitEquals(pos))
                     {
 #if DEBUG
                         Debug.WriteLine($"found entity with pos = {pos} @ {i}");
@@ -217,7 +214,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 }
                 else // check for distance if it's a non-static entity like an npc or a prop
                 {
-                    if (xy && newpos.DistanceXY(pos) <= d && i != 1)
+                    if (xy && entPos.DistanceXY(pos) <= d)
                     {
 #if DEBUG
                         Debug.WriteLine($"found entity with pos xy dist <= {d} from {pos} @ {i}");
@@ -225,7 +222,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                         yield return i;
 
                     }
-                    else if (newpos.Distance(pos) <= d && i != 1)
+                    else if (entPos.Distance(pos) <= d)
                     {
 #if DEBUG
                         Debug.WriteLine($"found entity with pos dist <= {d} from {pos} @ {i}");
@@ -235,23 +232,227 @@ namespace LiveSplit.SourceSplit.GameHandling
                     }
                 }
             }
-        }
 
-        public int GetEntIndexByPos(Vector3f vec, float d = 0f, bool xy = false) => GetEntIndexByPos(vec.X, vec.Y, vec.Z, d, xy);
-        public IEnumerable<int> GetEntIndexesByPos(Vector3f vec, float d = 0f, bool xy = false) => GetEntIndexesByPos(vec.X, vec.Y, vec.Z, d, xy);
+        }
 
         /// <summary>
-        /// Gets the position of the entity with the provided index
+        /// Enumerates through the global entity list and returns the indexes of entities whose position is near or exactly at the target location
+        /// </summary>
+        /// <param name="vec">Target vector</param>
+        /// <param name="d">Maximum distance to the target location</param>
+        /// <param name="xy">Whether to only consider the X and Y coordinates</param>
+        /// <returns>The indexes of entities whose position is near or exactly at the target location</returns>
+        public IEnumerable<int> GetEntIndexesByPos(Vector3f vec, float d = 0f, bool xy = false) 
+            => GetEntIndexesByPos(vec.X, vec.Y, vec.Z, d, xy);
+
+        /// <summary>
+        /// Finds the index of the first entity whose position is near or exactly at the target location
+        /// </summary>
+        /// <param name="x">Target X coordinate</param>
+        /// <param name="y">Target Y coordinate</param>
+        /// <param name="z">Target Z coordinate</param>
+        /// <param name="d">Maximum distance to the target location</param>
+        /// <param name="xy">Whether to only consider the X and Y coordinates</param>
+        /// <returns>The index of the first entity whose position is near or exactly at the target location</returns>
+        public int GetEntIndexByPos(float x, float y, float z, float d = 0f, bool xy = false)
+            => GetEntIndexesByPos(x, y, z, d, xy).FirstOrSpecified(-1);
+
+        /// <summary>
+        /// Finds the index of the first entity whose position is near or exactly at the target location
+        /// </summary>
+        /// <param name="vec">Target vector</param>
+        /// <param name="d">Maximum distance to the target location</param>
+        /// <param name="xy">Whether to only consider the X and Y coordinates</param>
+        /// <returns>The index of the first entity whose position is near or exactly at the target location</returns>
+        public int GetEntIndexByPos(Vector3f vec, float d = 0f, bool xy = false)
+            => GetEntIndexByPos(vec.X, vec.Y, vec.Z, d, xy);
+
+        #endregion
+
+        #region LINKED ENTITY LIST SEARCHING
+
+        /// <summary>
+        /// Enumerates through the linked entity list and returns ones whose targetname passes the specified name condition
+        /// </summary>
+        /// <param name="nameCond">The name condition to compare against</param>
+        /// <returns>The entities with passing targetnames</returns>
+        public IEnumerable<IntPtr> GetEntitiesByName(string nameCond)
+        {
+            foreach (var ent in GetEntities())
+            {
+                var n = GetEntityTargetName(ent);
+                if (n is null) continue;
+
+                if (n.CompareWildcard(nameCond))
+                {
+#if DEBUG
+                    Debug.WriteLine($"found entity \"{n}\" ptr : {ent.ToString("X")}");
+#endif
+                    yield return ent;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finds the first entity whose targetname passes the name condition
+        /// </summary>
+        /// <param name="nameCond">The name condition</param>
+        /// <returns>The first entity whose targetname passes the name condition. If there is no such entity, IntPtr.Zero will be returned</returns>
+        public IntPtr GetEntityByName(string nameCond)
+            => GetEntitiesByName(nameCond).FirstOrSpecified(IntPtr.Zero);
+
+        /// <summary>
+        /// Enumerates through the linked entity list and returns ones whose position is near or exactly at the target location
+        /// </summary>
+        /// <param name="x">Target X coordinate</param>
+        /// <param name="y">Target Y coordinate</param>
+        /// <param name="z">Target Z coordinate</param>
+        /// <param name="d">Maximum distance from the target</param>
+        /// <param name="xy">Whether to only consider the X and Y coordinates</param>
+        /// <returns>The entities whose position  is near or exactly at the target location</returns>
+        public IEnumerable<IntPtr> GetEntitiesByPos(float x, float y, float z, float d = 0, bool xy = false)
+        {
+            var pos = new Vector3f(x, y, z);
+            var player = GetEntityByIndex(1);
+
+            foreach (var ent in GetEntities())
+            {
+                if (ent == player) continue;
+
+                var entPos = GetEntityPos(ent);
+
+                if (d == 0f)
+                {
+                    if (entPos.BitEquals(pos))
+                    {
+#if DEBUG
+                        Debug.WriteLine($"found entity with pos = {pos} @ {ent.ToString("X")}");
+#endif
+                        yield return ent;
+                    }
+                }
+                else // check for distance if it's a non-static entity like an npc or a prop
+                {
+                    if (xy && entPos.DistanceXY(pos) <= d)
+                    {
+#if DEBUG
+                        Debug.WriteLine($"found entity with pos xy dist <= {d} from {pos} @ {ent.ToString("X")}");
+#endif
+                        yield return ent;
+
+                    }
+                    else if (entPos.Distance(pos) <= d)
+                    {
+#if DEBUG
+                        Debug.WriteLine($"found entity with pos dist <= {d} from {pos} @ {ent.ToString("X")}");
+#endif
+                        yield return ent;
+
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Enumerates through the linked entity list and returns ones whose position is near or exactly at the target location
+        /// </summary>
+        /// <param name="vec">Target vector</param>
+        /// <param name="d">Maximum distance from the target</param>
+        /// <param name="xy">Whether to only consider the X and Y coordinates</param>
+        /// <returns>The entities whose position  is near or exactly at the target location</returns>
+        public IEnumerable<IntPtr> GetEntitiesByPos(Vector3f vec, float d = 0, bool xy = false)
+            => GetEntitiesByPos(vec.X, vec.Y, vec.Z, d, xy);
+
+        /// <summary>
+        /// Finds the first entity whose position is near or exactly at the target location
+        /// </summary>
+        /// <param name="x">Target X coordinate</param>
+        /// <param name="y">Target Y coordinate</param>
+        /// <param name="z">Target Z coordinate</param>
+        /// <param name="d">Maximum distance from the target</param>
+        /// <param name="xy">Whether to only consider the X and Y coordinates</param>
+        /// <returns>The first entity whose position  is near or exactly at the target location. If no such entity exists, IntPtr.Zero will be returned</returns>
+        public IntPtr GetEntityByPos(float x, float y, float z, float d = 0, bool xy = false)
+            => GetEntitiesByPos(x, y, z, d, xy).FirstOrSpecified(IntPtr.Zero);
+
+        /// <summary>
+        /// Finds the first entity whose position is near or exactly at the target location
+        /// </summary>
+        /// <param name="vec">Target vector</param>
+        /// <param name="d">Maximum distance from the target</param>
+        /// <param name="xy">Whether to only consider the X and Y coordinates</param>
+        /// <returns>The first entity whose position  is near or exactly at the target location. If no such entity exists, IntPtr.Zero will be returned</returns>
+        public IntPtr GetEntityByPos(Vector3f vec, float d = 0, bool xy = false)
+            => GetEntitiesByPos(vec, d, xy).FirstOrSpecified(IntPtr.Zero);
+
+        #endregion
+
+        #region ENTITY INFO RETRIEVAL
+
+        /// <summary>
+        /// Gets the position of the entity with the specified index
         /// </summary>
         /// <param name="index">Index of the entity</param>
-        /// <returns>The position of the entity with the provided index. If no such entity exists, (0, 0, 0) will be returned.</returns>
+        /// <returns>The position of the entity with the specified index. If no such entity exists, (0, 0, 0) will be returned.</returns>
         public virtual Vector3f GetEntityPos(int index)
         {
+            return GetEntityPos(GetEntityByIndex(index));
+        }
+
+        /// <summary>
+        /// Gets the position of the specified entity
+        /// </summary>
+        /// <param name="ent">The entity</param>
+        /// <returns>The position of the specified entity. If the entity is invalid, (0, 0, 0) will be returned.</returns>
+        public virtual Vector3f GetEntityPos(IntPtr ent)
+        {
+            if (BaseEntityAbsOriginOffset < 0)
+                throw new Exception("Tried to get entity's position when required offset isn't found!");
+
+            if (ent == IntPtr.Zero)
+                return new Vector3f(0, 0, 0);
+
             Vector3f pos;
-            var ent = GetEntInfoByIndex(index);
-            GameProcess.ReadValue(ent.EntityPtr + BaseEntityAbsOriginOffset, out pos);
+            GameProcess.ReadValue(ent + BaseEntityAbsOriginOffset, out pos);
             return pos;
         }
+
+        /// <summary>
+        /// Gets the targetname of the entity with the specified index
+        /// </summary>
+        /// <param name="index">The index of the entity</param>
+        /// <returns>The targetname of the entity with the specified index</returns>
+        public virtual string GetEntityTargetName(int index)
+        {
+            return GetEntityTargetName(GetEntityByIndex(index));
+        }
+
+        /// <summary>
+        /// Gets the targetname of the specified entity
+        /// </summary>
+        /// <param name="entity">The entity</param>
+        /// <returns>The targetname of the specified entity. If the specified entity is invalid, null will be returned.</returns>
+        public virtual string GetEntityTargetName(IntPtr entity)
+        {
+            if (BaseEntityTargetNameOffset < 0)
+                throw new Exception("Tried to get entity's targetname when required offset isn't found!");
+
+            if (entity == IntPtr.Zero)
+                return null;
+
+            IntPtr namePtr;
+            this.GameProcess.ReadPointer(entity + BaseEntityTargetNameOffset, false, out namePtr);
+            if (namePtr == IntPtr.Zero)
+                return null;
+
+            string n;
+            this.GameProcess.ReadString(namePtr, ReadStringType.ASCII, 32, out n);// TODO: find real max len
+            return n; 
+        }
+
+        #endregion
+
+        #region FADE INFO RETRIEVAL
 
         // env_fades don't hold any live fade information and instead they network over fade infos to the client which add it to a list
         /// <summary>
@@ -332,7 +533,15 @@ namespace LiveSplit.SourceSplit.GameHandling
             return ret;
         }
 
+        #endregion
+
+        #region IO EVENT RETRIEVAL
+
         // ioEvents are stored in a linked list
+        /// <summary>
+        /// Enumerates through the linked list of queued I/O events
+        /// </summary>
+        /// <returns>The queued I/O events</returns>
         public virtual IEnumerable<EventQueuePrioritizedEvent> GetQueuedOutputs()
         {
             if (EventQueuePtr == IntPtr.Zero) yield break;

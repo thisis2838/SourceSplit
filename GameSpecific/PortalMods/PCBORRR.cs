@@ -38,9 +38,9 @@ namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
             {
                 if (this._gladosIndex != -1)
                 {
-                    var newglados = state.GameEngine.GetEntInfoByIndex(_gladosIndex);
+                    var newglados = state.GameEngine.GetEntityByIndex(_gladosIndex);
 
-                    if (newglados.EntityPtr == IntPtr.Zero)
+                    if (newglados == IntPtr.Zero)
                     {
                         Debug.WriteLine("robot lady boom detected");
                         OnceFlag = true;

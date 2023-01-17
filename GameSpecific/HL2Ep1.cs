@@ -42,7 +42,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             {
                 // "PlayerOff" "ghostanim_DogIntro,Kill,,0,-1" (start)
                 // "OnTrigger" "razortrain1,Kill,,0,-1" (end)
-                var newEntity = state.GameEngine.GetEntInfoByIndex(_entityIndex).EntityPtr;
+                var newEntity = state.GameEngine.GetEntityByIndex(_entityIndex);
                 if (newEntity == IntPtr.Zero)
                 {
                     Debug.WriteLine($"ep1 {(this.IsFirstMap ? "start" : "end")}");

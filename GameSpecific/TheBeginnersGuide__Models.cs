@@ -122,9 +122,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 _split = false;
 
                 if (_index == -1) return;
-                var ent = state.GameEngine.GetEntInfoByIndex(_index);
+                var ent = state.GameEngine.GetEntityByIndex(_index);
 
-                if (ent.EntityPtr == IntPtr.Zero)
+                if (ent == IntPtr.Zero)
                 {
                     _index = -1;
                     _split = true;
@@ -178,7 +178,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state != null)
                     base.Reset(state);
 
-                Func<GameState, bool> act = (s) => s.GameProcess.ReadValue<bool>(state.GameEngine.GetEntInfoByIndex(_index).EntityPtr + _offset);
+                Func<GameState, bool> act = (s) => s.GameProcess.ReadValue<bool>(state.GameEngine.GetEntityByIndex(_index) + _offset);
                 switch (_type)
                 {
                     case TBGEntityStateChangeType.Enabled:

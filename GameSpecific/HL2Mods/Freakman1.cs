@@ -40,7 +40,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             }
             if (this.IsLastMap)
             {
-                _kleinerHP = new MemoryWatcher<int>(state.GameEngine.GetEntInfoByIndex(state.GameEngine.GetEntIndexByPos(0f, 0f, 1888f, 1f)).EntityPtr + _baseEntityHealthOffset);
+                _kleinerHP = new MemoryWatcher<int>(state.GameEngine.GetEntityByPos(0f, 0f, 1888f, 1f) + _baseEntityHealthOffset);
             }
         }
 
@@ -52,9 +52,9 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
             if (this.IsFirstMap && _trigIndex != -1)
             {
-                var newTrig = state.GameEngine.GetEntInfoByIndex(_trigIndex);
+                var newTrig = state.GameEngine.GetEntityByIndex(_trigIndex);
 
-                if (newTrig.EntityPtr == IntPtr.Zero)
+                if (newTrig == IntPtr.Zero)
                 {
                     _trigIndex = -1;
                     OnceFlag = true;

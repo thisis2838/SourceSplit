@@ -43,7 +43,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                 }
                 if (_spriteIndex != -1)
                 {
-                    if (state.GameEngine.GetEntInfoByIndex(_spriteIndex).EntityPtr == System.IntPtr.Zero)
+                    if (state.GameEngine.GetEntityByIndex(_spriteIndex) == System.IntPtr.Zero)
                     {
                         actions.End();
                         Debug.WriteLine($"localmotive end");

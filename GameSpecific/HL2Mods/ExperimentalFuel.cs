@@ -12,6 +12,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
         private bool _resetFlag;
 
+        private Vector3f _startPos = new Vector3f(7784.5f, 7284f, -15107f);
         private int _blockBrushIndex;
         private int _dustmoteIndex;
 
@@ -42,19 +43,19 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
             if (this.IsFirstMap)
             {
-                var newMote = state.GameEngine.GetEntInfoByIndex(_dustmoteIndex);
-                var newBrush = state.GameEngine.GetEntInfoByIndex(_blockBrushIndex);
+                var newMote = state.GameEngine.GetEntityByIndex(_dustmoteIndex);
+                var newBrush = state.GameEngine.GetEntityByIndex(_blockBrushIndex);
 
-                if (state.PlayerPosition.Current.DistanceXY(new Vector3f(7784.5f, 7284f, -15107f)) >= 2
-                    && state.PlayerPosition.Old.DistanceXY(new Vector3f(7784.5f, 7284f, -15107f)) < 2
-                    && newBrush.EntityPtr == IntPtr.Zero && !_resetFlag)
+                if (state.PlayerPosition.Current.DistanceXY(_startPos) >= 2
+                    && state.PlayerPosition.Old.DistanceXY(_startPos) < 2
+                    && newBrush == IntPtr.Zero && !_resetFlag)
                 {
                     Debug.WriteLine("exp fuel start");
                     _resetFlag = true;
                     actions.Start(StartOffsetMilliseconds); return;
                 }
 
-                if (newMote.EntityPtr == IntPtr.Zero)
+                if (newMote == IntPtr.Zero)
                 {
                     OnceFlag = true;
                     _dustmoteIndex = -1;

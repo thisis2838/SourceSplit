@@ -52,9 +52,9 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             }
             else if (this.IsLastMap && this._breenIndex != -1)
             {
-                var newBlack = state.GameEngine.GetEntInfoByIndex(_breenIndex);
+                var newBlack = state.GameEngine.GetEntityByIndex(_breenIndex);
 
-                if (newBlack.EntityPtr == IntPtr.Zero)
+                if (newBlack == IntPtr.Zero)
                 {
                     _breenIndex = -1;
                     Debug.WriteLine("ptsd end");

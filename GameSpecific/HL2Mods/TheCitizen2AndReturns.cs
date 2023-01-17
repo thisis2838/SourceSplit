@@ -48,7 +48,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             if (this.IsFirstMap)
             {
                 _splitTime.Current = state.GameEngine.GetOutputFireTime("commander", "Command", "give item_suit");
-                IntPtr trigPtr = state.GameEngine.GetEntInfoByIndex(_trigIndex).EntityPtr;
+                IntPtr trigPtr = state.GameEngine.GetEntityByIndex(_trigIndex);
                 if (trigPtr != IntPtr.Zero && _splitTime.ChangedTo(0))
                 {
                     OnceFlag = true;

@@ -106,7 +106,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     actions.Start(StartOffsetMilliseconds); return;
                 }
 
-                IntPtr blockerNew = state.GameEngine.GetEntInfoByIndex(_blockerIndex).EntityPtr;
+                IntPtr blockerNew = state.GameEngine.GetEntityByIndex(_blockerIndex);
                 if (blockerNew == IntPtr.Zero && _blockerIndex != -1)
                 {
                     OnceFlag = true;
