@@ -88,6 +88,8 @@
     <Compile Include="GameHandling\GameSupport__Functions.cs" />
     <Compile Include="GameHandling\GameSupport__Cases.cs" />
     <Compile Include="ComponentHandling\Session.cs" />
+    <Compile Include="GameSpecific\HL2Mods\NightmareHouse.cs" />
+    <Compile Include="GameSpecific\HL2Mods\NightmareHouse2.cs" />
     <Compile Include="GameSpecific\HL2Mods\Grouped\ViewIndexChange.cs" />
     <Compile Include="GameSpecific\HL2Mods\Dark17.cs" />
     <Compile Include="GameSpecific\HL2Mods\AvenueOdessa.cs" />

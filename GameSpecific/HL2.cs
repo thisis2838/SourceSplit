@@ -17,15 +17,17 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         private Vector3f _startPos = new Vector3f(-9419f, -2483f, 22f);
 
-        private HL2Mods.TheLostCity _lostCity = new HL2Mods.TheLostCity();
-        private HL2Mods.Tinje _tinje = new HL2Mods.Tinje();
-        private HL2Mods.ExperimentalFuel _experimentalFuel = new HL2Mods.ExperimentalFuel();
-
         public HL2()
         {
             this.AddFirstMap("d1_trainstation_01");
             this.AddLastMap("d3_breen_01");
-            AdditionalGameSupport = new List<GameSupport>() { _lostCity, _tinje, _experimentalFuel };
+            AdditionalGameSupport = new List<GameSupport>()
+            {
+                new HL2Mods.TheLostCity(),
+                new HL2Mods.Tinje(),
+                new HL2Mods.ExperimentalFuel(),
+                new HL2Mods.NightmareHouse()
+            };
         }
 
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)

@@ -223,6 +223,9 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Sebastian();
                 case "hl2-ep2-sp-the-72-second-emc":
                     return new The72SecondExperiment();
+                case "nh":
+                case "nh2":
+                    return new NightmareHouse2();
             }
 
             return new DefaultGame();
