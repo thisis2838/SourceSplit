@@ -216,7 +216,9 @@ namespace LiveSplit.SourceSplit.GameHandling
                 case "clonemachine":
                     return new CloneMachine();
                 case "dark17":
-                    return new Dark17();
+                    return new Dark17();                
+                case "jollyhardcore":
+                    return new JollysHardcoreMod();
             }
 
             return new DefaultGame();

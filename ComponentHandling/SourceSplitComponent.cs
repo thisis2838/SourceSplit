@@ -145,8 +145,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             // hack to prevent flicker, doesn't actually pause anything
             state.IsGameTimePaused = true;
 
-            // Update is called every 25ms, so up to 25ms IGT can be lost if using delay and no auto-start
-
             UpdateInternalComponents(invalidator, state , width, height, mode);
         }
 

@@ -612,4 +612,35 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             return;
         }
     }
+
+    class JollysHardcoreMod : Misc
+    {
+        // how to match with demos:
+        // start: on map load
+        // ending: on game disconnect after final output has been fired.
+
+        public JollysHardcoreMod()
+        {
+            this.AddFirstMap("hardcore_01");
+            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
+        }
+
+        protected override void OnUpdateInternal(GameState state, TimerActions actions)
+        {
+            if (OnceFlag)
+                return;
+
+            if (this.IsFirstMap)
+            {
+                float splitTime = state.GameEngine.GetOutputFireTime("clientcommand", "Command", "disconnect; startupmenu");
+                _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
+                if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
+                {
+                    OnceFlag = true;
+                    state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
+                }
+            }
+            return;
+        }
+    }
 }
