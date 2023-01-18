@@ -54,6 +54,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
             this.tableCoolInfo.Invalidated += TableCoolInfo_Invalidated;
 
+            SetCurrentGame(null);
+
             // HACKHACK: due to all the data bindings shenanigans, we need to load all the tab pages when opening the settings
             // so just give in...
             this.Load += (e, f) => 
@@ -117,6 +119,12 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             }
 
             UpdateDisabledControls(null, null);
+        }
+
+        public void SetCurrentGame(Type game)
+        {
+            if (game is null) labCurrentGame.Text = "No game/mod detected!";
+            else labCurrentGame.Text = $"Detected game/mod: {game.Name}";
         }
 
         void UpdateDisabledControls(object sender, EventArgs e)

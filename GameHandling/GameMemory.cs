@@ -393,12 +393,14 @@ namespace LiveSplit.SourceSplit.GameHandling
                 this.SendSessionEndedEvent();
 
             this.SendGameStatusEvent(false);
+            this.SendGameAttachedEvent(null);
         }
         void InitGameState(GameState state)
         {
             state.Map.Current = (String.Empty);
             Debug.WriteLine($"running game-specific code for: {state.GameDir} : {state.MainSupport}");
             this.SendSetTimingSpecificsEvent(state.MainSupport.TimingSpecifics);
+            this.SendGameAttachedEvent(state.MainSupport.GetType());
         }
 
         // also works for anything derived from CBaseEntity (player etc) (no multiple inheritance)
