@@ -135,9 +135,10 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
     class Sebastian : ViewIndexChange
     {
-        public Sebastian() : base("sebastian_1_1", null)
+        public Sebastian() : base("sebastian_1_1", "sebastian_2_1")
         {
             StartCameraName = "viewcon";
+            EndCameraName = "viewcon";
         }
     }
 
