@@ -88,6 +88,7 @@
     <Compile Include="GameHandling\GameSupport__Functions.cs" />
     <Compile Include="GameHandling\GameSupport__Cases.cs" />
     <Compile Include="ComponentHandling\Session.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Dark17.cs" />
     <Compile Include="GameSpecific\HL2Mods\CIty17IsFarAway.cs" />
     <Compile Include="GameSpecific\HL2Mods\AvenueOdessa.cs" />
     <Compile Include="GameSpecific\HL2Mods\Amalgam.cs" />

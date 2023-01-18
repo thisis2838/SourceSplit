@@ -215,6 +215,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new AvenueOdessa();
                 case "clonemachine":
                     return new CloneMachine();
+                case "dark17":
+                    return new Dark17();
             }
 
             return new DefaultGame();
