@@ -340,4 +340,18 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             Param = "disconnect; startupmenu";
         }
     }
+
+    class The72SecondExperiment : DisconnectAutoEnd
+    {
+        // how to match with demos:
+        // start: on map load
+        // ending: on game disconnect after final output has been fired.
+
+        public The72SecondExperiment() : base("prison_break_72s-emc", "INEVITABLE_72s-emc")
+        {
+            TargetName = "pointcc";
+            Command = "Command";
+            Param = "disconnect";
+        }
+    }
 }

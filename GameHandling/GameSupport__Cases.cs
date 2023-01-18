@@ -221,6 +221,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new JollysHardcoreMod();
                 case "sebastian":
                     return new Sebastian();
+                case "hl2-ep2-sp-the-72-second-emc":
+                    return new The72SecondExperiment();
             }
 
             return new DefaultGame();
