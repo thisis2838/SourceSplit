@@ -32,7 +32,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             }
         }
 
-
         protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
             if (OnceFlag)

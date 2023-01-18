@@ -28,7 +28,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         public List<string> LastMaps { get; protected set; } = new List<string>();
         protected void AddLastMap(params string[] maps)
         {
-            LastMaps.AddRange(maps);
+            LastMaps.AddRange(maps.Select(x => x.ToLower()));
         }
         /// <summary>
         /// The list of maps on a new session of which the timer should auto-start

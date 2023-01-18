@@ -219,6 +219,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Dark17();                
                 case "jollyhardcore":
                     return new JollysHardcoreMod();
+                case "sebastian":
+                    return new Sebastian();
             }
 
             return new DefaultGame();

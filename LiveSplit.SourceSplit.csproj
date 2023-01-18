@@ -88,15 +88,14 @@
     <Compile Include="GameHandling\GameSupport__Functions.cs" />
     <Compile Include="GameHandling\GameSupport__Cases.cs" />
     <Compile Include="ComponentHandling\Session.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Grouped\ViewIndexChange.cs" />
     <Compile Include="GameSpecific\HL2Mods\Dark17.cs" />
-    <Compile Include="GameSpecific\HL2Mods\CIty17IsFarAway.cs" />
     <Compile Include="GameSpecific\HL2Mods\AvenueOdessa.cs" />
     <Compile Include="GameSpecific\HL2Mods\Amalgam.cs" />
     <Compile Include="GameSpecific\HL2Mods\Evacuation.cs" />
     <Compile Include="GameSpecific\HL2Mods\Minerva.cs" />
     <Compile Include="GameSpecific\HL2Mods\ForestTrain.cs" />
     <Compile Include="GameSpecific\HL2Mods\A2BTrajectory.cs" />
-    <Compile Include="GameSpecific\HL2Mods\EpisodeThree.cs" />
     <Compile Include="GameSpecific\HL2Mods\DarkEvening.cs" />
     <Compile Include="GameSpecific\HL2Mods\EntropyZero2.cs" />
     <Compile Include="GameSpecific\HL2Mods\Localmotive.cs" />
@@ -118,7 +117,6 @@
     <Compile Include="ComponentHandling\DetailedListView.Designer.cs">
       <DependentUpon>DetailedListView.cs</DependentUpon>
     </Compile>
-    <Compile Include="GameSpecific\HL2Mods\SouthernmostCombine.cs" />
     <Compile Include="GameHandling\CustomCommand.cs" />
     <Compile Include="GameSpecific\BMSMods\FurtherData.cs" />
     <Compile Include="GameSpecific\BMSMods\HazardCourse.cs" />
@@ -137,15 +135,12 @@
     <Compile Include="GameSpecific\HL2Mods\1187Ep1.cs" />
     <Compile Include="GameSpecific\HL2Mods\Hangover.cs" />
     <Compile Include="GameSpecific\HL2Mods\GGEFC13.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Precursor.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Grey.cs" />
-    <Compile Include="GameSpecific\HL2Mods\GetALife.cs" />
     <Compile Include="GameSpecific\HL2Mods\Ptsd2.cs" />
     <Compile Include="GameSpecific\HL2Mods\Terminal7.cs" />
     <Compile Include="GameSpecific\HL2Mods\TheCitizen2AndReturns.cs" />
     <Compile Include="GameSpecific\HL2Mods\EntropyZero.cs" />
     <Compile Include="GameSpecific\HL2Mods\DeeperDown.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Others.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Grouped\FirstMapLoadAndFinalOutput.cs" />
     <Compile Include="GameSpecific\HL2Mods\ExperimentalFuel.cs" />
     <Compile Include="GameSpecific\HL2Mods\Tinje.cs" />
     <Compile Include="GameSpecific\HL2Mods\TheLostCity.cs" />
@@ -154,11 +149,9 @@
     <Compile Include="GameSpecific\HL2Mods\Logistique.cs" />
     <Compile Include="GameSpecific\HL2Mods\KillTheMonk.cs" />
     <Compile Include="GameSpecific\HL2Mods\YearLongAlarm.cs" />
-    <Compile Include="GameSpecific\HL2Mods\DaBaby.cs" />
     <Compile Include="GameSpecific\HL2Mods\ICE.cs" />
     <Compile Include="GameSpecific\HL2Mods\DearEsther.cs" />
     <Compile Include="GameSpecific\HL2Mods\Crates.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Exit2.cs" />
     <Compile Include="GameSpecific\HL2Mods\DayHard.cs" />
     <Compile Include="GameSpecific\PortalMods\PortalPrelude.cs" />
     <Compile Include="GameSpecific\PortalMods\PortalPro.cs" />
