@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
-    class Dark17 : GameSupport
+    class TrapVille : GameSupport
     {
-        public Dark17()
+        public TrapVille()
         {
-            AddFirstMap("dark17");
+            AddFirstMap("aquickdrivethrough_thc16c4");
             StartOnFirstLoadMaps.AddRange(FirstMaps);
-            AddLastMap("dark17");
+            AddLastMap("makeearthgreatagain_thc16c4");
 
-            WhenOutputIsQueued(ActionType.AutoEnd, "client", "Command", "disconnect ");
+            WhenDisconnectOutputFires(ActionType.AutoEnd, "game_end");
         }
     }
 }

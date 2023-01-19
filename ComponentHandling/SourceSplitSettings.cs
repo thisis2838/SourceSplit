@@ -17,6 +17,9 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 {
     public partial class SourceSplitSettings : UserControl
     {
+        private System.Windows.Forms.Timer _updater = new System.Windows.Forms.Timer();
+        private string _runningForSplash = "";
+
         public SourceSplitSettings(bool isLayout)
         {
             this.InitializeComponent();
@@ -52,7 +55,13 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.dgvMapTransitions.CellBorderStyle = DataGridViewCellBorderStyle.SingleVertical;
             this.dgvMapTransitions.SelectionMode = DataGridViewSelectionMode.CellSelect;
 
-            this.tableCoolInfo.Invalidated += TableCoolInfo_Invalidated;
+            this.tabCtrlMaster.SelectedIndexChanged += (s, e) =>
+            {
+                if (tabCtrlMaster.SelectedIndex == tabCtrlMaster.TabCount - 1)
+                {
+                    UpdateRunningForSplash();
+                }
+            };
 
             SetCurrentGame(null);
 
@@ -66,9 +75,25 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                     Thread.Sleep(1);
                 }
             };
+
+            _updater.Interval = 20;
+            _updater.Tick += (s, e) =>
+            {
+                this.InvokeIfRequired(() => labRunningFor.Text = _runningForSplash + " " + SourceSplitUtils.ActiveTime.Elapsed.ToStringCustom());
+            };
+            _updater.Start();
+
+            this.Disposed += (s, e) =>
+            {
+                try
+                {
+                    _updater.Stop();
+                }
+                catch { } 
+            };
         }
 
-        private void TableCoolInfo_Invalidated(object sender, InvalidateEventArgs e)
+        private void UpdateRunningForSplash()
         {
             var r = new Random();
             string time = SourceSplitUtils.ActiveTime.Elapsed.ToStringCustom();
@@ -82,7 +107,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                 case 17: text = "You haven't PB'd in at least: "; break;
             }
 
-            labRunningFor.Text = text + time;
+            _runningForSplash = text;
         }
 
         private void DmnSplitInterval_ValueChanged(object sender, EventArgs e)

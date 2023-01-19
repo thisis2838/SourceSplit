@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
-    class Dark17 : GameSupport
+    class Abridged : GameSupport
     {
-        public Dark17()
+        public Abridged()
         {
-            AddFirstMap("dark17");
+            AddFirstMap("ml05_training_facilitea");
             StartOnFirstLoadMaps.AddRange(FirstMaps);
-            AddLastMap("dark17");
+            AddLastMap("ml05_shortcut17");
 
-            WhenOutputIsQueued(ActionType.AutoEnd, "client", "Command", "disconnect ");
+            WhenDisconnectOutputFires(ActionType.AutoEnd, "end_disconnect", "command", "disconnect; map_background background_ml05");
         }
     }
 }

@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
-    class Dark17 : GameSupport
+    class CompanionPiece : GameSupport
     {
-        public Dark17()
+        public CompanionPiece()
         {
-            AddFirstMap("dark17");
+            AddFirstMap("tg_wrd_carnival");
             StartOnFirstLoadMaps.AddRange(FirstMaps);
-            AddLastMap("dark17");
+            AddLastMap("maplab_jan_cp");
 
-            WhenOutputIsQueued(ActionType.AutoEnd, "client", "Command", "disconnect ");
+            WhenDisconnectOutputFires(ActionType.AutoEnd, "piss_off_egg_head");
         }
     }
 }

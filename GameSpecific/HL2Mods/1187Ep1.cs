@@ -16,8 +16,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
         private const int _baseLiveChildrenOffset = 0x3a0;
         private int _baseEntityHealthOffset = -1;
 
-        private int _startCamIndex;
-        
         // the run ends on final blow to the final vortigaunt, the latter we can't track precisely since there are multiple
         // and they can be killed in any order. so we'll have to track the hp of every one of them.
         // vorts' hp
@@ -46,6 +44,8 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
         {
             this.AddFirstMap("1187d1");
             this.AddLastMap("1187d10");
+
+            WhenCameraSwitchesToPlayer(ActionType.AutoStart, "introcam03");
         }
 
         protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
@@ -60,12 +60,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
-            if (this.IsFirstMap)
-            {
-                _startCamIndex = state.GameEngine.GetEntIndexByName("introcam03");
-                //Debug.WriteLine("found start cam index at " + _startCamIndex);
-            }
-            else if (this.IsLastMap)
+            if (this.IsLastMap)
             {
                 for (int i = 0; i < 4; i++)
                 {
@@ -81,16 +76,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             if (OnceFlag)
                 return;
 
-            if (IsFirstMap)
-            {
-                if (state.PlayerViewEntityIndex.Old == _startCamIndex && state.PlayerViewEntityIndex.Current == 1)
-                {
-                    Debug.WriteLine("1187ep1 start");
-                    OnceFlag = true;
-                    actions.Start(StartOffsetMilliseconds);
-                }
-            }
-            else if (IsLastMap)
+            if (IsLastMap)
             {
                 // performance seems to be fine
                 for (int i = 0; i < 4; i++)

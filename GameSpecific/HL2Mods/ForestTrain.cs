@@ -13,11 +13,13 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
         private int _laggedMovementOffset = -1;
         private MemoryWatcher<float> _playerLaggedMoveValue;
-        private ValueWatcher<float> _endSplit = new ValueWatcher<float>();
 
         public ForestTrain()
         {
             AddFirstMap("foresttrain");
+            AddLastMap("foresttrain");
+
+            WhenOutputIsQueued(ActionType.AutoEnd, "cred");
         }
 
         protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
@@ -40,8 +42,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             {
                 _playerLaggedMoveValue = new MemoryWatcher<float>(state.PlayerEntInfo.EntityPtr + _laggedMovementOffset);
                 _playerLaggedMoveValue.Update(state.GameProcess);
-
-                _endSplit.Current = state.GameEngine.GetOutputFireTime("cred");
             }
         }
 
@@ -59,14 +59,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                 {
                     Debug.WriteLine("forest train start");
                     actions.Start();
-                }
-
-                _endSplit.Current = state.GameEngine.GetOutputFireTime("cred");
-                if (_endSplit.ChangedFrom(0))
-                {
-                    Debug.WriteLine("forest train end");
-                    actions.End();
-                    OnceFlag = true;
                 }
             }
         }

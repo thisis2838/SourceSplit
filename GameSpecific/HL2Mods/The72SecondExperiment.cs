@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
-    class Dark17 : GameSupport
+    class The72SecondExperiment : GameSupport
     {
-        public Dark17()
+        public The72SecondExperiment()
         {
-            AddFirstMap("dark17");
+            AddFirstMap("prison_break_72s-emc");
             StartOnFirstLoadMaps.AddRange(FirstMaps);
-            AddLastMap("dark17");
+            AddLastMap("INEVITABLE_72s-emc");
 
-            WhenOutputIsQueued(ActionType.AutoEnd, "client", "Command", "disconnect ");
+            WhenDisconnectOutputFires(ActionType.AutoEnd, "pointcc", "Command", "disconnect");
         }
     }
 }

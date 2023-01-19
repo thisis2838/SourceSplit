@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
-    class Dark17 : GameSupport
+    class EpisodeOne : GameSupport
     {
-        public Dark17()
+        public EpisodeOne()
         {
-            AddFirstMap("dark17");
+            AddFirstMap("direwolf");
             StartOnFirstLoadMaps.AddRange(FirstMaps);
-            AddLastMap("dark17");
+            AddLastMap("outland_resistance");
 
-            WhenOutputIsQueued(ActionType.AutoEnd, "client", "Command", "disconnect ");
+            WhenDisconnectOutputFires(ActionType.AutoEnd, "point_clientcommand2");
         }
     }
 }

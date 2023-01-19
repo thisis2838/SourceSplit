@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
-    class Dark17 : GameSupport
+    class UpmineStruggle : GameSupport
     {
-        public Dark17()
+        public UpmineStruggle()
         {
-            AddFirstMap("dark17");
+            AddFirstMap("twhl_upmine_struggle");
             StartOnFirstLoadMaps.AddRange(FirstMaps);
-            AddLastMap("dark17");
+            AddLastMap("twhl_upmine_struggle");
 
-            WhenOutputIsQueued(ActionType.AutoEnd, "client", "Command", "disconnect ");
+            WhenOutputIsQueued(ActionType.AutoEnd, "no_vo");
         }
     }
 }

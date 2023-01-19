@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
-    class Dark17 : GameSupport
+    class PhaseVille : GameSupport
     {
-        public Dark17()
+        public PhaseVille()
         {
-            AddFirstMap("dark17");
+            AddFirstMap("rtsl_mlc");
             StartOnFirstLoadMaps.AddRange(FirstMaps);
-            AddLastMap("dark17");
+            AddLastMap("hospitalisation_tlc18_c4");
 
-            WhenOutputIsQueued(ActionType.AutoEnd, "client", "Command", "disconnect ");
+            WhenDisconnectOutputFires(ActionType.AutoEnd, "clientcommand");
         }
     }
 }

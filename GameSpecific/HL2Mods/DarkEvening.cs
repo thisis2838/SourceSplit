@@ -3,6 +3,7 @@ using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
 using System.IO;
+using System.Windows.Forms;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
@@ -17,14 +18,9 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
         {
             AddFirstMap("dark_evening");
             AddLastMap("dark_evening_hospital");
-        }
 
-        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
-        {
-            if (IsFirstMap)
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("Opening_Player_Lock", "Break", "");
-            if (IsLastMap)
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("rooftop_unconscious_sudden_teleport");
+            WhenOutputIsFired(ActionType.AutoStart, "Opening_Player_Lock", "Break", "");
+            WhenOutputIsFired(ActionType.AutoEnd, "rooftop_unconscious_sudden_teleport");
         }
 
         protected override void OnSaveLoadedInternal(GameState state, TimerActions actions, string name)
@@ -38,34 +34,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                 OnceFlag = true;
                 Debug.WriteLine($"dark evening vault save start");
                 return;
-            }
-        }
-
-        protected override void OnUpdateInternal(GameState state, TimerActions actions)
-        {
-            if (OnceFlag) 
-                return;
-
-            if (IsFirstMap)
-            {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("Opening_Player_Lock", "Break", "");
-                if (_splitTime.ChangedTo(0))
-                {
-                    actions.Start();
-                    OnceFlag = true;
-                    Debug.WriteLine($"dark evening vault save start");
-                    return;
-                }
-            }
-            else if (IsLastMap)
-            {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("rooftop_unconscious_sudden_teleport");
-                if (_splitTime.ChangedTo(0))
-                {
-                    OnceFlag = true;
-                    Debug.WriteLine("dark evening end");
-                    actions.End();
-                }
             }
         }
     }

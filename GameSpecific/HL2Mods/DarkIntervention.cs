@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
-    class Dark17 : GameSupport
+    class DarkIntervention : GameSupport
     {
-        public Dark17()
+        public DarkIntervention()
         {
-            AddFirstMap("dark17");
+            AddFirstMap("dark_intervention");
             StartOnFirstLoadMaps.AddRange(FirstMaps);
-            AddLastMap("dark17");
+            AddLastMap("dark_intervention");
 
-            WhenOutputIsQueued(ActionType.AutoEnd, "client", "Command", "disconnect ");
+            WhenDisconnectOutputFires(ActionType.AutoEnd, "command_ending");
         }
     }
 }

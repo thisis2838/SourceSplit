@@ -18,6 +18,10 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// The first maps of the mod / game
         /// </summary>
         public List<string> FirstMaps { get; protected set; } = new List<string>();
+        /// <summary>
+        /// Adds the specified map to FirstMaps
+        /// </summary>
+        /// <param name="maps">The maps to be added</param>
         protected void AddFirstMap(params string[] maps)
         {
             FirstMaps.AddRange(maps.Select(x => x.ToLower()));
@@ -26,34 +30,46 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// The last maps of the mod / game
         /// </summary>
         public List<string> LastMaps { get; protected set; } = new List<string>();
+        /// <summary>
+        /// Adds the specified map to LastMaps
+        /// </summary>
+        /// <param name="maps">The maps to be added</param>
         protected void AddLastMap(params string[] maps)
         {
             LastMaps.AddRange(maps.Select(x => x.ToLower()));
         }
         /// <summary>
-        /// The list of maps on a new session of which the timer should auto-start
+        /// Maps on which starting a new game will Auto-Start the timer
         /// </summary>
-        public List<string> StartOnFirstLoadMaps { get; internal set; } = new List<string>();
+        public List<string> StartOnFirstLoadMaps { get; protected set; } = new List<string>();
         /// <summary>
-        /// The list of additional games and mods to do checks for
+        /// The list of additional games/mods to run checks for
         /// </summary>
-        public List<GameSupport> AdditionalGameSupport { get; internal set; } = new List<GameSupport>();
-        // ticks to subtract
+        public List<GameSupport> AdditionalGameSupport { get; protected set; } = new List<GameSupport>();
         /// <summary>
-        /// Millisecond offset when starting the timer
+        /// Millisecond offset when starting the timer. This offset is added onto existing time.
         /// </summary>
         public float StartOffsetMilliseconds { get; protected set; }
         /// <summary>
-        /// Millisecond offset when ending the timer
+        /// Millisecond offset when ending the timer. This offset is subtracted from existing time.
         /// </summary>
         public float EndOffsetMilliseconds { get; protected set; }
         /// <summary>
-        /// Info about the game's timing methods and etc...
+        /// Info about the game's timing methods and etc.
         /// </summary>
         public TimingSpecifics TimingSpecifics { get; protected set; } = new TimingSpecifics();
 
+        /// <summary>
+        /// Is the current map defined in FirstMaps?
+        /// </summary>
         protected bool IsFirstMap { get; private set; }
+        /// <summary>
+        /// Is the current map defined in LastMaps?
+        /// </summary>
         protected bool IsLastMap { get; private set; }
+        /// <summary>
+        /// Flag to prevent repeated splitting. It is set to false when OnSessionStart runs
+        /// </summary>
         protected bool OnceFlag;
 
         /// <summary>

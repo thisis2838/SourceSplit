@@ -14,11 +14,13 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
         private Vector3f _startPos = new Vector3f(7784.5f, 7284f, -15107f);
         private int _blockBrushIndex;
-        private int _dustmoteIndex;
 
         public ExperimentalFuel()
         {
             this.AddFirstMap("bmg1_experimental_fuel");
+            this.AddLastMap("bmg1_experimental_fuel");
+
+            WhenEntityIsKilled(ActionType.AutoEnd, "kokedepth");
         }
 
         protected override void OnTimerResetInternal(bool resetFlagTo)
@@ -31,7 +33,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             if (this.IsFirstMap)
             {
                 _blockBrushIndex = state.GameEngine.GetEntIndexByName("dontrunaway");
-                _dustmoteIndex = state.GameEngine.GetEntIndexByName("kokedepth");
             }
         }
 
@@ -43,7 +44,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
             if (this.IsFirstMap)
             {
-                var newMote = state.GameEngine.GetEntityByIndex(_dustmoteIndex);
                 var newBrush = state.GameEngine.GetEntityByIndex(_blockBrushIndex);
 
                 if (state.PlayerPosition.Current.DistanceXY(_startPos) >= 2
@@ -53,14 +53,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                     Debug.WriteLine("exp fuel start");
                     _resetFlag = true;
                     actions.Start(StartOffsetMilliseconds); return;
-                }
-
-                if (newMote == IntPtr.Zero)
-                {
-                    OnceFlag = true;
-                    _dustmoteIndex = -1;
-                    Debug.WriteLine("exp fuel end");
-                    actions.End(EndOffsetMilliseconds); return;
                 }
             }
 

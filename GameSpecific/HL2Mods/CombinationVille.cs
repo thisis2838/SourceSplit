@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
-    class Dark17 : GameSupport
+    class CombinationVille : GameSupport
     {
-        public Dark17()
+        public CombinationVille()
         {
-            AddFirstMap("dark17");
+            AddFirstMap("canal_flight_ppmc_cv");
             StartOnFirstLoadMaps.AddRange(FirstMaps);
-            AddLastMap("dark17");
+            AddLastMap("cvbonus_ppmc_cv");
 
-            WhenOutputIsQueued(ActionType.AutoEnd, "client", "Command", "disconnect ");
+            WhenDisconnectOutputFires(ActionType.AutoEnd, "pcc", "command", "startupmenu force");
         }
     }
 }

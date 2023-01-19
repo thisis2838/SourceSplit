@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
-    class Dark17 : GameSupport
+    class RTSLVille : GameSupport
     {
-        public Dark17()
+        public RTSLVille()
         {
-            AddFirstMap("dark17");
+            AddFirstMap("from_ashes_map1_rtslv");
             StartOnFirstLoadMaps.AddRange(FirstMaps);
-            AddLastMap("dark17");
+            AddLastMap("terminal_rtslv");
 
-            WhenOutputIsQueued(ActionType.AutoEnd, "client", "Command", "disconnect ");
+            WhenDisconnectOutputFires(ActionType.AutoEnd, "clientcommand", "command", "disconnect");
         }
     }
 }

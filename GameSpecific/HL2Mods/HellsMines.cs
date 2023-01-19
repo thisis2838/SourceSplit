@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
-    class Dark17 : GameSupport
+    class HellsMines : GameSupport
     {
-        public Dark17()
+        public HellsMines()
         {
-            AddFirstMap("dark17");
+            AddFirstMap("hells_mines");
             StartOnFirstLoadMaps.AddRange(FirstMaps);
-            AddLastMap("dark17");
+            AddLastMap("hells_mines");
 
-            WhenOutputIsQueued(ActionType.AutoEnd, "client", "Command", "disconnect ");
+            WhenOutputIsQueued(ActionType.AutoEnd, "command");
         }
     }
 }

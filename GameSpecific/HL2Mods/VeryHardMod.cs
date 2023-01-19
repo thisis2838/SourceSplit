@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
-    class Dark17 : GameSupport
+    class VeryHardMod : GameSupport
     {
-        public Dark17()
+        public VeryHardMod()
         {
-            AddFirstMap("dark17");
+            AddFirstMap("vhm_chapter");
             StartOnFirstLoadMaps.AddRange(FirstMaps);
-            AddLastMap("dark17");
+            AddLastMap("vhm_chapter");
 
-            WhenOutputIsQueued(ActionType.AutoEnd, "client", "Command", "disconnect ");
+            WhenDisconnectOutputFires(ActionType.AutoEnd, "end_game");
         }
     }
 }

@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
-    class Dark17 : GameSupport
+    class JollysHardcoreMod : GameSupport
     {
-        public Dark17()
+        public JollysHardcoreMod()
         {
-            AddFirstMap("dark17");
+            AddFirstMap("hardcore_01");
             StartOnFirstLoadMaps.AddRange(FirstMaps);
-            AddLastMap("dark17");
+            AddLastMap("hardcore_01");
 
-            WhenOutputIsQueued(ActionType.AutoEnd, "client", "Command", "disconnect ");
+            WhenDisconnectOutputFires(ActionType.AutoEnd, "clientcommand", "Command", "disconnect; startupmenu");
         }
     }
 }
