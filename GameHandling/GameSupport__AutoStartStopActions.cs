@@ -47,11 +47,11 @@ namespace LiveSplit.SourceSplit.GameHandling
                 {
                     case ActionType.AutoStart:
                         timer.Start(Parent.StartOffsetMilliseconds);
-                        Debug.WriteLine($"{Parent.GetType().Name} start");
+                        Debug.WriteLine($"{Parent.GetType().Name} start (triggered by {this.GetType().Name})");
                         break;
                     case ActionType.AutoEnd:
                         timer.End(Parent.EndOffsetMilliseconds);
-                        Debug.WriteLine($"{Parent.GetType().Name} end");
+                        Debug.WriteLine($"{Parent.GetType().Name} end (triggered by {this.GetType().Name})");
                         break;
                 }
             }
