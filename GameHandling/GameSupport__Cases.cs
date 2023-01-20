@@ -228,6 +228,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new NightmareHouse2();
                 case "aberration":
                     return new Aberration();
+                case "awakening":
+                    return new Awakening();
             }
 
             return new DefaultGame();
