@@ -226,6 +226,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                 case "nh":
                 case "nh2":
                     return new NightmareHouse2();
+                case "aberration":
+                    return new Aberration();
             }
 
             return new DefaultGame();
