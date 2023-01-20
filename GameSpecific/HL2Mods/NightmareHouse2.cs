@@ -31,38 +31,14 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
     class NightmareHouse1_Remake : GameSupport
     {
-        private int _startCamIndex = -1;
-        private ValueWatcher<float> _endSplitTime = new ValueWatcher<float>();
-
         public NightmareHouse1_Remake()
         {
             AddFirstMap("nh1remake1_v2");
             AddFirstMap("nh1remake1_fixed");
-
             AddLastMap(FirstMaps.ToArray());
 
             WhenCameraSwitchesToPlayer(ActionType.AutoStart, "blackout_viewcontroller");
-        }
-
-        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
-        {
-            if (IsLastMap)
-            {
-                _endSplitTime.Current = state.GameEngine.GetOutputFireTime("teleport2");
-            }
-        }
-
-        protected override void OnUpdateInternal(GameState state, TimerActions actions)
-        {
-            if (IsLastMap)
-            {
-                _endSplitTime.Current = state.GameEngine.GetOutputFireTime("teleport2");
-                if (_endSplitTime.ChangedTo(0))
-                {
-                    actions.End();
-                    Debug.WriteLine("nightmare house 1 (remake) end");
-                }
-            }
+            WhenOutputIsFired(ActionType.AutoEnd, "teleport2");
         }
     }
 }

@@ -20,6 +20,8 @@ namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
             this.AddFirstMap("escape_02_d");
             this.AddLastMap("testchmb_a_00_d");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
+
+            WhenCameraSwitchesToPlayer(ActionType.AutoStart);
         }
 
         protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
@@ -43,16 +45,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
             if (OnceFlag)
                 return;
 
-            if (this.IsFirstMap)
-            {
-                if (state.PlayerViewEntityIndex.ChangedTo(1))
-                {
-                    OnceFlag = true;
-                    Debug.WriteLine("prmo start");
-                    actions.End(StartOffsetMilliseconds);
-                }
-            }
-            else if (this.IsLastMap)
+            if (this.IsLastMap)
             {
                 _crosshairSuppressed.Update(state.GameProcess);
 
