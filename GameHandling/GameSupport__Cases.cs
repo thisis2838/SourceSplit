@@ -9,6 +9,7 @@ using LiveSplit.SourceSplit.GameSpecific.HL2Mods;
 using LiveSplit.SourceSplit.GameSpecific.PortalMods;
 using LiveSplit.SourceSplit.ComponentHandling;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.IO;
 
 namespace LiveSplit.SourceSplit.GameHandling
 {
@@ -18,9 +19,9 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <summary>
         /// Get the game-specific code from specified game directory
         /// </summary>
-        public static GameSupport FromGameDir(string gameDir)
+        public static GameSupport Get(GameState state)
         {
-            switch (gameDir.ToLower().Trim())
+            switch (state.GameDir.ToLower().Trim())
             {
                 case "hl2oe":
                 case "hl2":
@@ -115,26 +116,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new EntropyZero2();
                 case "deeperdown":
                     return new DeeperDown();
-                case "thinktank":
-                    return new ThinkTank();
-                case "gnome":
-                    return new Gnome();
                 case "hl2-sp-reject":
                     return new Reject();
-                case "thc16-trapville":
-                    return new TrapVille();
-                case "runthinkshootliveville":
-                    return new RTSLVille();
-                case "abridged":
-                    return new Abridged();
-                case "episodeone":
-                    return new EpisodeOne();
-                case "combinationville":
-                    return new CombinationVille();
-                case "sdk-2013-sp-tlc18-c4-phaseville":
-                    return new PhaseVille();
-                case "companionpiece":
-                    return new CompanionPiece();
                 case "the citizen":
                 case "thecitizen":
                     return new TheCitizen();
@@ -221,8 +204,6 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new JollysHardcoreMod();
                 case "sebastian":
                     return new Sebastian();
-                case "hl2-ep2-sp-the-72-second-emc":
-                    return new The72SecondExperiment();
                 case "nh":
                 case "nh2":
                     return new NightmareHouse2();
@@ -232,7 +213,59 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Awakening();
             }
 
+            var rtsl = IsRTSLMapPack(state);
+            if (rtsl != null) return rtsl;
+
             return new DefaultGame();
+        }
+
+        // mapping challenges as hosted and/or published by RunThinkShootLive
+        // each entry is given a chapter slot and is required to end with a game disconnect or main menu load (not always followed)
+        // they all auto-start on first map and split and auto-end with disconnect
+        private static GameSupport IsRTSLMapPack(GameState state)
+        {
+            switch (state.GameDir.ToLower())
+            {
+                // rtsl hosted and exclusive competitions
+                case "thc16-chasmville":
+                case "hl2-ep2-sp-the-72-second-emc":
+                case "thc16-trapville":
+                case "runthinkshootliveville":
+                case "combinationville":
+                case "sdk-2013-sp-tlc18-c4-phaseville":
+
+                // map lab competitions
+                case "abridged":
+                case "episodeone":
+                case "companionpiece":
+                case "thinktank":
+                case "gnome":
+                case "escapeville":
+                    return new RTSLPack();
+            }
+
+            if (File.Exists(Path.Combine(state.AbsoluteGameDir, "maplab.fgd")))
+            {
+                Debug.WriteLine("maplab fgd file found");
+                return new RTSLPack();
+            }
+
+            var gameInfoPath = Path.Combine(state.AbsoluteGameDir, "gameinfo.txt");
+            if (File.Exists(gameInfoPath))
+            {
+                var gameinfo = File.ReadAllText(gameInfoPath);
+                List<string> targets = new()
+                {
+                    "mapping challenge", "hammer cup"
+                };
+                if (targets.Any(x => gameinfo.ToLower().Contains(x)))
+                {
+                    Debug.WriteLine("gameinfo.txt contains strings related to RTSL map challeneges");
+                    return new RTSLPack();
+                }
+            }
+
+            return null;
         }
     }
 

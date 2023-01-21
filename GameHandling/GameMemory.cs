@@ -198,7 +198,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 state.AbsoluteGameDir = absoluteGameDir;
             }
 
-            state.MainSupport = GameSupport.FromGameDir(state.GameDir);
+            state.MainSupport = GameSupport.Get(state);
 
             state.GameEngine = state.MainSupport.GetEngine();
 

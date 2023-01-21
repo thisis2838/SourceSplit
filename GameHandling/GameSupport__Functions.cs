@@ -23,7 +23,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             CommandHandler.Init(state);
 
             OnGameAttachedInternal(state, actions);
-            Actions?.ForEach(x => x.OnGameAttached(state, actions));
+            Templates?.ForEach(x => x.OnGameAttached(state, actions));
             AdditionalGameSupport?.ForEach(x => x.OnGameAttached(state, actions));
         }
         /// <summary>
@@ -36,7 +36,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         public virtual void OnTimerReset(bool resetFlagTo)
         {
             OnTimerResetInternal(resetFlagTo);
-            Actions?.ForEach(x => x.OnTimerReset(resetFlagTo));
+            Templates?.ForEach(x => x.OnTimerReset(resetFlagTo));
             AdditionalGameSupport?.ForEach(x => x.OnTimerReset(resetFlagTo));
         }
         /// <summary>
@@ -55,7 +55,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             this.IsLastMap = LastMaps.ConvertAll(x => x.ToLower()).Contains(map);
 
             OnSessionStartInternal(state, actions);
-            Actions?.ForEach(x => x.OnSessionStart(state, actions));
+            Templates?.ForEach(x => x.OnSessionStart(state, actions));
             AdditionalGameSupport?.ForEach(x => x.OnSessionStart(state, actions));
         }
         /// <summary>
@@ -68,7 +68,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         public void OnSessionEnd(GameState state, TimerActions actions)
         {
             OnSessionEndInternal(state, actions);
-            Actions?.ForEach(x => x.OnSessionEnd(state, actions));
+            Templates?.ForEach(x => x.OnSessionEnd(state, actions));
             AdditionalGameSupport?.ForEach(x => x.OnSessionEnd(state, actions));
         }
         /// <summary>
@@ -83,7 +83,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             CommandHandler.Update(state);
 
             OnGenericUpdateInternal(state, actions);
-            Actions?.ForEach(x => x.OnGenericUpdate(state, actions));
+            Templates?.ForEach(x => x.OnGenericUpdate(state, actions));
             AdditionalGameSupport?.ForEach(x => x.OnGenericUpdate(state, actions));
         }
         /// <summary>
@@ -96,7 +96,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         public void OnUpdate(GameState state, TimerActions actions)
         {
             OnUpdateInternal(state, actions);
-            Actions?.ForEach(x => x.OnUpdate(state, actions));
+            Templates?.ForEach(x => x.OnUpdate(state, actions));
             AdditionalGameSupport?.ForEach(x => x.OnUpdate(state, actions));
         }
         /// <summary>
@@ -109,7 +109,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         public void OnSaveLoaded(GameState state, TimerActions actions, string saveName)
         {
             OnSaveLoadedInternal(state, actions, saveName);
-            Actions?.ForEach(x => x.OnSaveLoaded(state, actions, saveName));
+            Templates?.ForEach(x => x.OnSaveLoaded(state, actions, saveName));
             AdditionalGameSupport?.ForEach(x => x.OnSaveLoaded(state, actions, saveName));
         }
         /// <summary>.
@@ -129,7 +129,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             }
 
             if (OnNewGameInternal(state, actions, newMapName) &&
-                Actions.All(x => x.OnNewGame(state, actions, newMapName)) &&
+                Templates.All(x => x.OnNewGame(state, actions, newMapName)) &&
                 AdditionalGameSupport.All(x => x.OnNewGame(state, actions, newMapName)))
             {
                 return true;
@@ -147,7 +147,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         public bool OnChangelevel(GameState state, TimerActions actions, string newMapName)
         {
             if (OnChangelevelInternal(state, actions, newMapName) &&
-                Actions.All(x => x.OnChangelevel(state, actions, newMapName)) &&
+                Templates.All(x => x.OnChangelevel(state, actions, newMapName)) &&
                 AdditionalGameSupport.All(x => x.OnChangelevel(state, actions, newMapName)))
             {
                 return true;
