@@ -225,6 +225,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new RiotAct();
                 case "siren":
                     return new Siren();
+                case "missile strike imminent":
+                    return new MissileStrikeImminent();
             }
 
             var rtsl = IsRTSLMapPack(state);
