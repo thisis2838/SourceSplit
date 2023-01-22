@@ -227,6 +227,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Siren();
                 case "missile strike imminent":
                     return new MissileStrikeImminent();
+                case "overawe":
+                    return new Overawe();
             }
 
             var rtsl = IsRTSLMapPack(state);
