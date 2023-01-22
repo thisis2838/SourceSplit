@@ -231,6 +231,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Overawe();
                 case "penetration":
                     return new Penetration();
+                case "half-life2personof interest":
+                    return new PersonOfInterest();
             }
 
             var rtsl = IsRTSLMapPack(state);
