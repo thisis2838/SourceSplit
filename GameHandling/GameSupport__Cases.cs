@@ -229,6 +229,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new MissileStrikeImminent();
                 case "overawe":
                     return new Overawe();
+                case "penetration":
+                    return new Penetration();
             }
 
             var rtsl = IsRTSLMapPack(state);
