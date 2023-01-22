@@ -223,6 +223,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Depot();
                 case "half-life 2 riot act":
                     return new RiotAct();
+                case "siren":
+                    return new Siren();
             }
 
             var rtsl = IsRTSLMapPack(state);
