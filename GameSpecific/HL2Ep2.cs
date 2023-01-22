@@ -26,7 +26,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 new HL2Mods.UpmineStruggle(),
                 new HL2Mods.City17IsFarAway(),
                 new HL2Mods.Uzvara(),
-                new HL2Mods.A2BTrajectory()
+                new HL2Mods.A2BTrajectory(),
+                new HL2Mods.MountainCaves()
             };
         }
 
