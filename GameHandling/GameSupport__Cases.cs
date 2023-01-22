@@ -213,6 +213,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Awakening();
                 case "call-in":
                     return new CallIn();
+                case "combinedestiny":
+                    return new CombineDestiny();
             }
 
             var rtsl = IsRTSLMapPack(state);
