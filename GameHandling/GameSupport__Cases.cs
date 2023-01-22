@@ -217,6 +217,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new CombineDestiny();
                 case "daylight":
                     return new Daylight();
+                case "expectation":
+                    return new Expectation();
             }
 
             var rtsl = IsRTSLMapPack(state);
