@@ -89,6 +89,7 @@
     <Compile Include="GameHandling\GameSupport__Functions.cs" />
     <Compile Include="GameHandling\GameSupport__Cases.cs" />
     <Compile Include="ComponentHandling\Session.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Daylight.cs" />
     <Compile Include="GameSpecific\HL2Mods\CombineDestiny.cs" />
     <Compile Include="GameSpecific\HL2Mods\CallIn.cs" />
     <Compile Include="GameSpecific\HL2Mods\RTSLPacks.cs" />
