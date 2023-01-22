@@ -211,6 +211,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Aberration();
                 case "awakening":
                     return new Awakening();
+                case "call-in":
+                    return new CallIn();
             }
 
             var rtsl = IsRTSLMapPack(state);
