@@ -89,6 +89,7 @@
     <Compile Include="GameHandling\GameSupport__Functions.cs" />
     <Compile Include="GameHandling\GameSupport__Cases.cs" />
     <Compile Include="ComponentHandling\Session.cs" />
+    <Compile Include="GameSpecific\HL2Mods\SphericalNightmares.cs" />
     <Compile Include="GameSpecific\HL2Mods\TheRoadToAbyss.cs" />
     <Compile Include="GameSpecific\HL2Mods\ResearchAndDevelopment.cs" />
     <Compile Include="GameSpecific\HL2Mods\PersonOfInterest.cs" />

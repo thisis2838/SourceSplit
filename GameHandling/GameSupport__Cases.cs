@@ -239,6 +239,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new ResearchAndDevelopment();
                 case "abyss":
                     return new TheRoadToAbyss();
+                case "spherical nightmares":
+                    return new SphericalNightmares();
             }
 
             var rtsl = IsRTSLMapPack(state);
