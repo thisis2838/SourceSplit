@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Threading.Tasks;
+using LiveSplit.TimeFormatters;
+using System.Security.AccessControl;
 
 namespace LiveSplit.SourceSplit.GameHandling
 {
@@ -15,7 +17,15 @@ namespace LiveSplit.SourceSplit.GameHandling
     {
         protected enum ActionType
         {
+            /// <summary>
+            /// This Action tells the template to only do its checks when the current map is included in FirstMaps.
+            /// If those checks pass, the timer will Auto-Start
+            /// </summary>
             AutoStart,
+            /// <summary>
+            /// This Action tells the template to only do its checks when the current map is included in LastMaps.
+            /// If those checks pass, the timer will Auto-End
+            /// </summary>
             AutoEnd,
         }
 
@@ -78,7 +88,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 _getToIndex = getToIndex;
             }
 
-            protected override void OnSessionStartInternal(GameState state, TimerActions templates)
+            protected override void OnSessionStartInternal(GameState state, TimerActions actions)
             {
                 if (IsMapCorrect())
                 {
@@ -87,18 +97,24 @@ namespace LiveSplit.SourceSplit.GameHandling
                 }
             }
 
-            protected override void OnUpdateInternal(GameState state, TimerActions templates)
+            protected override void OnUpdateInternal(GameState state, TimerActions actions)
             {
                 if (IsMapCorrect())
                 {
-                    if (_curFromIndex == -1 && _curToIndex == -1)
+                    if (!state.PlayerViewEntityIndex.Changed)
                         return;
 
-                    if ((_curFromIndex == -1 && state.PlayerViewEntityIndex.ChangedTo(_curToIndex)) ||
-                        (_curToIndex == -1 && state.PlayerViewEntityIndex.ChangedFrom(_curFromIndex)) ||
+                    if (_getFromIndex is null && _getToIndex is null)
+                    {
+                        Enact(actions);
+                        return;
+                    }
+
+                    if ((_getFromIndex is null && state.PlayerViewEntityIndex.ChangedTo(_curToIndex)) ||
+                        (_getToIndex is null && state.PlayerViewEntityIndex.ChangedFrom(_curFromIndex)) ||
                         (state.PlayerViewEntityIndex.ChangedFromTo(_curFromIndex, _curToIndex)))
                     {
-                        Enact(templates);
+                        Enact(actions);
                     }
                 }
             }
@@ -115,7 +131,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             (
                 this,
                 action,
-                (s) => fromCamera is null ? -1 : s.GameEngine.GetEntIndexByName(fromCamera),
+                fromCamera is null ? null : (s) => s.GameEngine.GetEntIndexByName(fromCamera),
                 (s) => 1
             ));
         }
@@ -132,7 +148,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 this,
                 action,
                 (s) => 1,
-                (s) => toCamera is null ? -1 : s.GameEngine.GetEntIndexByName(toCamera)
+                toCamera is null ? null : (s) => s.GameEngine.GetEntIndexByName(toCamera)
             ));
         }
 
@@ -157,7 +173,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 DetectionType = detectionType;
             }
 
-            protected override void OnSessionStartInternal(GameState state, TimerActions templates)
+            protected override void OnSessionStartInternal(GameState state, TimerActions actions)
             {
                 if (IsMapCorrect())
                 {
@@ -165,7 +181,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 }
             }
 
-            protected override void OnUpdateInternal(GameState state, TimerActions templates)
+            protected override void OnUpdateInternal(GameState state, TimerActions actions)
             {
                 if (IsMapCorrect())
                 {
@@ -173,7 +189,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     if ((DetectionType == OutputDetectionType.Queued && FireTime.ChangedFrom(0) || 
                         DetectionType == OutputDetectionType.Fired && FireTime.ChangedTo(0)))
                     {
-                        Enact(templates);
+                        Enact(actions);
                     }
                 }
             }
@@ -215,7 +231,6 @@ namespace LiveSplit.SourceSplit.GameHandling
             ));
         }
 
-
         class DisconnectOutputFiredTemplate : OutputDetectedTemplate
         {
             public DisconnectOutputFiredTemplate
@@ -230,13 +245,13 @@ namespace LiveSplit.SourceSplit.GameHandling
             )
             { }
 
-            protected override void OnGenericUpdateInternal(GameState state, TimerActions templates)
+            protected override void OnGenericUpdateInternal(GameState state, TimerActions actions)
             {
                 if (IsMapCorrect() && state.HostState.Current == HostState.GameShutdown)
-                    OnUpdateInternal(state, templates);
+                    OnUpdateInternal(state, actions);
             }
 
-            protected override void OnUpdateInternal(GameState state, TimerActions templates)
+            protected override void OnUpdateInternal(GameState state, TimerActions actions)
             {
                 if (IsMapCorrect())
                 {
@@ -245,7 +260,7 @@ namespace LiveSplit.SourceSplit.GameHandling
 
                     if (state.CompareToInternalTimer(FireTime.Current, GameState.IO_EPSILON, false, true))
                     {
-                        state.QueueOnNextSessionEnd = () => Enact(templates);
+                        state.QueueOnNextSessionEnd = () => Enact(actions);
                     }
                 }
             }
@@ -277,7 +292,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 this.getEntity = getEntity;
             }
 
-            protected override void OnGameAttachedInternal(GameState state, TimerActions templates)
+            protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
             {
                 ProcessModuleWow64Safe server = state.GetModule("server.dll");
                 var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
@@ -285,7 +300,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
             }
 
-            protected override void OnSessionStartInternal(GameState state, TimerActions templates)
+            protected override void OnSessionStartInternal(GameState state, TimerActions actions)
             {
                 if (IsMapCorrect())
                 {
@@ -301,7 +316,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 }
             }
 
-            protected override void OnUpdateInternal(GameState state, TimerActions templates)
+            protected override void OnUpdateInternal(GameState state, TimerActions actions)
             {
                 if (IsMapCorrect())
                 {
@@ -311,7 +326,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     _health.Update(state.GameProcess);
                     if (_health.Current <= 0 && _health.Old > 0)
                     {
-                        Enact(templates);
+                        Enact(actions);
                     }
                 }
             }
@@ -341,7 +356,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 _getEntityIndex = getEntityIndex;
             }
 
-            protected override void OnSessionStartInternal(GameState state, TimerActions templates)
+            protected override void OnSessionStartInternal(GameState state, TimerActions actions)
             {
                 if (IsMapCorrect())
                 {
@@ -349,7 +364,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 }
             }
 
-            protected override void OnUpdateInternal(GameState state, TimerActions templates)
+            protected override void OnUpdateInternal(GameState state, TimerActions actions)
             {
                 if (IsMapCorrect() && _curEntityIndex != -1)
                 {
@@ -357,7 +372,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     if (ent == IntPtr.Zero)
                     {
                         _curEntityIndex = -1;
-                        Enact(templates);
+                        Enact(actions);
                     }
                 }
             }
@@ -398,7 +413,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 _mapName = mapName;
             }
 
-            protected override void OnSessionStartInternal(GameState state, TimerActions templates)
+            protected override void OnSessionStartInternal(GameState state, TimerActions actions)
             {
                 _currentIOs = null;
 
@@ -494,13 +509,13 @@ namespace LiveSplit.SourceSplit.GameHandling
                 });
             }
 
-            protected override void OnGenericUpdateInternal(GameState state, TimerActions templates)
+            protected override void OnGenericUpdateInternal(GameState state, TimerActions actions)
             {
                 if (IsMapCorrect() && state.HostState.Current == HostState.GameShutdown)
-                    OnUpdateInternal(state, templates);
+                    OnUpdateInternal(state, actions);
             }
 
-            protected override void OnUpdateInternal(GameState state, TimerActions templates)
+            protected override void OnUpdateInternal(GameState state, TimerActions actions)
             {
                 if (IsMapCorrect())
                 {
@@ -515,7 +530,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                         {
                             if (state.CompareToInternalTimer(time, GameState.IO_EPSILON, false, true))
                             {
-                                state.QueueOnNextSessionEnd = () => Enact(templates);
+                                state.QueueOnNextSessionEnd = () => Enact(actions);
                                 return;
                             }
                         }
@@ -613,7 +628,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             {
             }
 
-            protected override void OnGameAttachedInternal(GameState state, TimerActions templates)
+            protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
             {
                 var maps = new List<string>();
 
@@ -654,11 +669,11 @@ namespace LiveSplit.SourceSplit.GameHandling
                 _maps.AddRange(maps.Select(x => x.ToLower()).Distinct());
             }
 
-            protected override bool OnNewGameInternal(GameState state, TimerActions templates, string newMapName)
+            protected override bool OnNewGameInternal(GameState state, TimerActions actions, string newMapName)
             {
                 if (_maps.Contains(newMapName))
                 {
-                    Enact(templates);
+                    Enact(actions);
                     return false;
                 }
 
@@ -666,7 +681,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             }
         }
         /// <summary>
-        /// Defines and activates an Auto-Start or Stop template when a new game is started on a map 
+        /// Defines and activates a template which triggers an action when a new game is started on a map 
         /// which is loaded upon clicking on the first option of any present chapter select or bonus maps screen.
         /// <para />WARNING: If the action is an Auto-Start (or Stop), it will only trigger when IsFirstMap (or IsLastMap) is true
         /// </summary>
@@ -676,6 +691,91 @@ namespace LiveSplit.SourceSplit.GameHandling
             Templates.Add(new NewGameOnFirstChapter
             (
                 this, action
+            ));
+        }
+
+        protected class ParentEntitySwitchTemplate : AutoStartStopTemplate
+        {
+            private Func<GameState, int> _getFromIndex = null;
+            private Func<GameState, int> _getToIndex = null;
+
+            private int _curFromIndex = -1;
+            private int _curToIndex = -1;
+
+            public ParentEntitySwitchTemplate
+            (
+                GameSupport parent, ActionType type,
+                Func<GameState, int> getFromIndex = null,
+                Func<GameState, int> getToIndex = null
+            ) : base(parent, type)
+            {
+                _getFromIndex = getFromIndex;
+                _getToIndex = getToIndex;
+            }
+
+            protected override void OnSessionStartInternal(GameState state, TimerActions actions)
+            {
+                if (IsMapCorrect())
+                {
+                    _curFromIndex = _getFromIndex?.Invoke(state) ?? -1;
+                    _curToIndex = _getToIndex?.Invoke(state) ?? -1;
+                }
+            }
+
+            protected override void OnUpdateInternal(GameState state, TimerActions actions)
+            {
+                if (IsMapCorrect())
+                {
+                    if (!state.PlayerParentEntityHandle.Changed)
+                        return;
+
+                    if (_getFromIndex is null && _getFromIndex is null)
+                    {
+                        if (state.PlayerParentEntityHandle.Changed)
+                            Enact(actions);
+                        return;
+                    }
+
+                    int curParentIndex = state.GameEngine.GetEntIndexFromHandle(state.PlayerParentEntityHandle.Current);
+                    int oldParentIndex = state.GameEngine.GetEntIndexFromHandle(state.PlayerParentEntityHandle.Old);
+
+                    if ((_getToIndex is null && oldParentIndex == _curFromIndex) ||
+                        (_getFromIndex is null && curParentIndex == _curToIndex) ||
+                        (oldParentIndex == _curFromIndex && curParentIndex == _curToIndex))
+                    {
+                        Enact(actions);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Defines and activates a template which triggers an action when the player begins entering a vehicle
+        /// <para />WARNING: If the action is an Auto-Start (or Stop), it will only trigger when IsFirstMap (or IsLastMap) is true
+        /// </summary>
+        /// <param name="action">Whether the template should Auto-Start or Auto-Stop the timer when its condition has passed.</param>
+        /// <param name="vehicleName">The name of the vehicle. If left as null, the game will check for if the player enters any vehicle.</param>
+        protected void WhenBeginEnteringVehicle(ActionType action, string vehicleName = null)
+        {
+            Templates.Add(new ParentEntitySwitchTemplate
+            (
+                this, action,
+                (s) => -1,
+                vehicleName is null ? null : (s) => s.GameEngine.GetEntIndexByName(vehicleName)
+            ));
+        }
+        /// <summary>
+        /// Defines and activates a template which triggers an action when the player finishes exiting a vehicle
+        /// <para />WARNING: If the action is an Auto-Start (or Stop), it will only trigger when IsFirstMap (or IsLastMap) is true
+        /// </summary>
+        /// <param name="action">Whether the template should Auto-Start or Auto-Stop the timer when its condition has passed.</param>
+        /// <param name="vehicleName">The name of the vehicle. If left as null, the game will check for if the player exits any vehicle.</param>
+        protected void WhenBeginExitingVehicle(ActionType action, string vehicleName = null)
+        {
+            Templates.Add(new ParentEntitySwitchTemplate
+            (
+                this, action,
+                vehicleName is null ? null : (s) => s.GameEngine.GetEntIndexByName(vehicleName),
+                (s) => -1
             ));
         }
     }

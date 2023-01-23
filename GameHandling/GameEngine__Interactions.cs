@@ -13,6 +13,9 @@ namespace LiveSplit.SourceSplit.GameHandling
 {
     public abstract partial class GameEngine
     {
+        protected const uint INVALID_ENT_HANDLE = 0xFFFFFFFF;
+        public int GetEntIndexFromHandle(uint handle) => handle == INVALID_ENT_HANDLE ? -1 : (int)(handle & EntIndexMask);
+
         #region STATE RETRIEVAL FUNCTIONS
 
         /// <summary>
