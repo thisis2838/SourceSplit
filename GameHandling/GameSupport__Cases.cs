@@ -243,6 +243,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new SphericalNightmares();
                 case "station51":
                     return new Station51();
+                case "thelighthouse":
+                    return new TheLighthouse();
             }
 
             var rtsl = IsRTSLMapPack(state);
