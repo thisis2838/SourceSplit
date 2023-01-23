@@ -233,6 +233,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Penetration();
                 case "half-life2personof interest":
                     return new PersonOfInterest();
+                case "ravenholm- the lost chapter":
+                    return new RavenholmTheLostChapter();
             }
 
             var rtsl = IsRTSLMapPack(state);
