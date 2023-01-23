@@ -247,6 +247,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new TheLighthouse();
                 case "tr1p":
                     return new Tr1p();
+                case "obs":
+                    return new Whoopservatory();
             }
 
             var rtsl = IsRTSLMapPack(state);
