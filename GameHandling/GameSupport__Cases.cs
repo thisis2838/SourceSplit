@@ -245,6 +245,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Station51();
                 case "thelighthouse":
                     return new TheLighthouse();
+                case "tr1p":
+                    return new Tr1p();
             }
 
             var rtsl = IsRTSLMapPack(state);
