@@ -235,6 +235,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new PersonOfInterest();
                 case "ravenholm- the lost chapter":
                     return new RavenholmTheLostChapter();
+                case "research and development":
+                    return new ResearchAndDevelopment();
             }
 
             var rtsl = IsRTSLMapPack(state);

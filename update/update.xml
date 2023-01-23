@@ -202,7 +202,7 @@
       <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
     </files>
     <changelog>
-      <change>Added support for Amalgam, Avenue Odessa, City 17 Is Far Away, Dark 17, Jolly's Hardcore Mod, Sebastian, Nightmare House 1 &amp; 2, NEOTOKYO° Kshatriya, Uzvara, Abberation, Awakening, Call-In, Combine Destiny, Daylight, Expectation, Depot, Riot Act, Siren, Mountain Caves, Missile strike imminent, Overawe, Penetration, Person of Interest, Ravenholm: The Lost Chapter</change>
+      <change>Added support for Amalgam, Avenue Odessa, City 17 Is Far Away, Dark 17, Jolly's Hardcore Mod, Sebastian, Nightmare House 1 &amp; 2, NEOTOKYO° Kshatriya, Uzvara, Abberation, Awakening, Call-In, Combine Destiny, Daylight, Expectation, Depot, Riot Act, Siren, Mountain Caves, Missile strike imminent, Overawe, Penetration, Person of Interest, Ravenholm: The Lost Chapter, Research and Development</change>
       <change>Added support for (hopefully) all RTSL and Map Labs mapping competition compilations.</change>
       <change>Added text to show the currently detected game/mod under the Abouts page</change>
       <change>Fixed Evacuation's Auto-End not always working</change>

@@ -89,8 +89,9 @@
     <Compile Include="GameHandling\GameSupport__Functions.cs" />
     <Compile Include="GameHandling\GameSupport__Cases.cs" />
     <Compile Include="ComponentHandling\Session.cs" />
-    <Compile Include="GameSpecific\HL2Mods\RavenholmTheLostChapter.cs" />
+    <Compile Include="GameSpecific\HL2Mods\ResearchAndDevelopment.cs" />
     <Compile Include="GameSpecific\HL2Mods\PersonOfInterest.cs" />
+    <Compile Include="GameSpecific\HL2Mods\RavenholmTheLostChapter.cs" />
     <Compile Include="GameSpecific\HL2Mods\Penetration.cs" />
     <Compile Include="GameSpecific\HL2Mods\Overawe.cs" />
     <Compile Include="GameSpecific\HL2Mods\MissileStrikeImminent.cs" />
