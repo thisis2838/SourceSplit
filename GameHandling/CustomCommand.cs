@@ -30,7 +30,8 @@ namespace LiveSplit.SourceSplit.GameHandling
             set => _longDesc = value;
         }
 
-        public bool Archived { get; set; }
+        public bool Archived { get; set; } = true;
+        public bool Hidden { get; set; } = false;
 
         public bool Boolean { get; set; }
         public string String { get; set; }
@@ -140,7 +141,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             Update(state);
             SetAliases();
 
-            if (Commands.Count() == 0) return;
+            if (Commands.Where(x => !x.Hidden).Count() == 0) return;
             SendConsoleMessage(
 @$"//////////////////////////////////////////////////////////////////////////////////
 
