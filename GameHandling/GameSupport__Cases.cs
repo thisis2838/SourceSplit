@@ -241,6 +241,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new TheRoadToAbyss();
                 case "spherical nightmares":
                     return new SphericalNightmares();
+                case "station51":
+                    return new Station51();
             }
 
             var rtsl = IsRTSLMapPack(state);
@@ -286,7 +288,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 var gameinfo = File.ReadAllText(gameInfoPath);
                 List<string> targets = new()
                 {
-                    "mapping challenge", "hammer cup"
+                    "mapping challenge", "hammer cup", "mapping competition"
                 };
                 if (targets.Any(x => gameinfo.ToLower().Contains(x)))
                 {

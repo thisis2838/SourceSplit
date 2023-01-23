@@ -38,13 +38,13 @@ namespace LiveSplit.SourceSplit.GameHandling
         public int Integer { get; set; }
         public float Float { get; set; }
 
-        private Action _callback = null;
+        private Action<string> _callback = null;
         private static string[] _noVars = new string[] { "0", "false", "" };
 
         public CustomCommand(
             string name, 
             string def, string description = "", string longDescription = null, 
-            Action callback = null, 
+            Action<string> callback = null, 
             bool archived = false)
         {
             Name = name;
@@ -57,13 +57,13 @@ namespace LiveSplit.SourceSplit.GameHandling
 
         public bool Update(string input)
         {
-            if (string.IsNullOrWhiteSpace(input)) return false;
+            if (string.IsNullOrWhiteSpace(input)) 
+                return false;
 
+            _callback?.Invoke(input);
             Parse(input);
 
-            _callback?.Invoke();
-            SystemSounds.Asterisk.Play();
-
+            if (!Hidden) SystemSounds.Asterisk.Play();
             return true;
         }
 
@@ -309,8 +309,8 @@ There are {Commands.Count()} command(s) available.
         {
             SendConsoleMessage
             (
-                $"Listing {Commands.Count()} command(s):\n" +
-                Commands.Aggregate("", (a, b) => $"{a}\t- {b}\n\t  {b.Description}\n").TrimEnd('\n')
+                $"Listing {Commands.Where(x => !x.Hidden).Count()} command(s):\n" +
+                Commands.Where(x => !x.Hidden).Aggregate("", (a, b) => $"{a}\t- {b}\n\t  {b.Description}\n").TrimEnd('\n')
             );
         }
 
