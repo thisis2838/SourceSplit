@@ -20,8 +20,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
             this.AddFirstMap("escape_02_d");
             this.AddLastMap("testchmb_a_00_d");
             this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
-
-            WhenCameraSwitchesToPlayer(ActionType.AutoStart);
         }
 
         protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
