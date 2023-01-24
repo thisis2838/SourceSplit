@@ -160,19 +160,19 @@ namespace LiveSplit.SourceSplit.GameHandling
                 }
                 catch (Exception ex) when (ex is InvalidOperationException || ex is Win32Exception)
                 {
-                    Trace.WriteLine(ex.ToString());
+                    Debug.WriteLine(ex.ToString());
                     Thread.Sleep(1000);
                 }
-#if DEBUG
-#else
+
                 catch (Exception ex)
                 {
-                    Trace.WriteLine(ex.ToString());
+                    Debug.WriteLine(ex.ToString());
+#if DEBUG
+#else
                     new ErrorDialog($"Main:\n{ex}\n\nInner:\n{ex.InnerException?.ToString()}");
-
+#endif
                     Thread.Sleep(1000);
                 }
-#endif
 
                 SendGameStatusEvent(false);
             }
@@ -232,9 +232,12 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             string[] procs = _targetProccesNames.Select(x => x.ToLower().Replace(".exe", "")).ToArray();
             var p = Process.GetProcesses().FirstOrDefault(x =>
-                Utilities.WinUtils.FindWindow("Valve001", x.MainWindowTitle) != IntPtr.Zero ||
-                procs.Contains(x.ProcessName.ToLower()) // todo: test on edge cases like hl2 survivor to see if this is still needed
-            );
+            {
+                return
+                    Utilities.WinUtils.FindWindow("Valve001", x.MainWindowTitle) != IntPtr.Zero ||
+                    // todo: test on edge cases like hl2 survivor to see if this is still needed
+                    procs.Contains(x.ProcessName.ToLower()); 
+            });
             if (p == null || p.HasExited || SourceSplitUtils.IsVACProtectedProcess(p))
                 return false;
 

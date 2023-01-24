@@ -167,12 +167,21 @@ There are {Commands.Count()} command(s) available.
 
         private void GetExecPtr(GameState state)
         {
-            var tier0 = state.GetModule("tier0.dll");
-            var tier0Symbols = WinUtils.AllSymbols(state.GameProcess, tier0);
+            try
+            {
+                var tier0 = state.GetModule("tier0.dll");
+                var tier0Symbols = WinUtils.AllSymbols(state.GameProcess, tier0);
 
-            _conMsgPtr = (IntPtr)tier0Symbols.Where(x => x.Name == "ConMsg").FirstOrDefault().Address;
-            if (_conMsgPtr != IntPtr.Zero) Debug.WriteLine($"ConMsg found at {_conMsgPtr.ToString("X")}");
+                _conMsgPtr = (IntPtr)tier0Symbols.Where(x => x.Name == "ConMsg").FirstOrDefault().Address;
+            } 
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Couldn't find ConMsg pointer: {ex}");
+                _conMsgPtr = IntPtr.Zero;   
+            }
 
+            if (_conMsgPtr != IntPtr.Zero) 
+                Debug.WriteLine($"ConMsg found at {_conMsgPtr.ToString("X")}");
         }
 
         public void Update(GameState state)
@@ -268,7 +277,10 @@ There are {Commands.Count()} command(s) available.
                         SourceSplitComponent.Settings.SetMiscSetting($"{_gameDir}__{cmd.Name}", cmd.String);
                     }
 
-                    SendConsoleMessage($"{cmd.Name} set to \"{cmd.String}\"!\n");
+                    if (!cmd.Hidden)
+                    {
+                        SendConsoleMessage($"{cmd.Name} set to \"{cmd.String}\"!\n");
+                    }
                 }
 
                 return true;
