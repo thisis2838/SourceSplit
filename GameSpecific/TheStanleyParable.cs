@@ -531,8 +531,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                 case "freedom": //freedom ending
                     {
-                        if (state.PlayerParentEntityHandle.Current != -1
-                            && state.PlayerParentEntityHandle.Old == -1)
+                        if (state.PlayerParentEntityHandle.Current != 0xFFFFFFFF && state.PlayerParentEntityHandle.Old == 0xFFFFFFFF)
                         {
                             DefaultEnd("freedom", actions, 2);
                             return;
