@@ -77,8 +77,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             _getGlobalNameFuncPtr = scanner.Scan(new SigScanTarget("55 8B EC 51 FF 75 ?? 8D 45 ??"));
 
-            if (GameMemory.GetBaseEntityMemberOffset("m_iHealth", state.GameProcess, scanner, out _baseEntityHealthOffset))
-                Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
+            GameMemory.GetBaseEntityMemberOffset("m_iHealth", state.GameProcess, scanner, out _baseEntityHealthOffset);
 
             if (server.ModuleMemorySize < _serverModernModuleSize)
             {

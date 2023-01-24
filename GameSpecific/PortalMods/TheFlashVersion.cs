@@ -26,13 +26,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
 
         protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
-            ProcessModuleWow64Safe server = state.GameProcess.ModulesWow64SafeNoCache().FirstOrDefault(x => x.ModuleName.ToLower() == "server.dll");
-            Trace.Assert(server != null);
-
-            var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
-
-            if (GameMemory.GetBaseEntityMemberOffset("m_flLaggedMovementValue", state.GameProcess, scanner, out _laggedMovementOffset))
-                Debug.WriteLine("CBasePlayer::m_flLaggedMovementValue offset = 0x" + _laggedMovementOffset.ToString("X"));
+            GameMemory.GetBaseEntityMemberOffset("m_flLaggedMovementValue", state, state.GameEngine.ServerModule, out _laggedMovementOffset);
         }
 
         protected override void OnSaveLoadedInternal(GameState state, TimerActions actions, string saveName)

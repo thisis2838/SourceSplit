@@ -33,15 +33,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
         }
         protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
-            ProcessModuleWow64Safe server = state.GetModule("server.dll");
             ProcessModuleWow64Safe bink = state.GetModule("video_bink.dll");
 
-            var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
-
-            if (GameMemory.GetBaseEntityMemberOffset("m_iHealth", state.GameProcess, scanner, out _baseEntityHealthOffset))
-                Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
-            if (GameMemory.GetBaseEntityMemberOffset("m_flLaggedMovementValue", state.GameProcess, scanner, out _basePlayerLaggedMovementOffset))
-                Debug.WriteLine("CBasePlayer::m_flLaggedMovementValue offset = 0x" + _basePlayerLaggedMovementOffset.ToString("X"));
+            GameMemory.GetBaseEntityMemberOffset("m_iHealth", state, state.GameEngine.ServerModule, out _baseEntityHealthOffset);
+            GameMemory.GetBaseEntityMemberOffset("m_flLaggedMovementValue", state, state.GameEngine.ServerModule, out _basePlayerLaggedMovementOffset);
 
             _watcher.ResetAll();
 

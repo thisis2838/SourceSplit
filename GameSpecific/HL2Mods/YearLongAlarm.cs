@@ -32,11 +32,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
         }
         protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
-            ProcessModuleWow64Safe server = state.GetModule("server.dll");
-
-            var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
-            if (GameMemory.GetBaseEntityMemberOffset("m_iHealth", state.GameProcess, scanner, out _baseEntityHealthOffset))
-                Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
+            GameMemory.GetBaseEntityMemberOffset("m_iHealth", state, state.GameEngine.ServerModule, out _baseEntityHealthOffset);
         }
 
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)

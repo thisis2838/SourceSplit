@@ -26,12 +26,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.BMSMods
 
         protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
-            ProcessModuleWow64Safe server = state.GetModule("server.dll");
-
-            var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
-
-            if (GameMemory.GetBaseEntityMemberOffset("m_fEffects", state.GameProcess, scanner, out _baseEffectsFlagsOffset))
-                Debug.WriteLine("CBaseEntity::m_fEffects offset = 0x" + _baseEffectsFlagsOffset.ToString("X"));
+            GameMemory.GetBaseEntityMemberOffset("m_fEffects", state, state.GameEngine.ServerModule, out _baseEffectsFlagsOffset);
         }
 
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)

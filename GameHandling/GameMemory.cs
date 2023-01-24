@@ -413,9 +413,9 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// </summary>
         /// <param name="member">The name of the member</param>
         /// <param name="game">The game process</param>
-        /// <param name="scanner">The scanner which encompasses the module that contains this class</param>
-        /// <param name="offset">Output offset value</param>
-        /// <returns></returns>
+        /// <param name="scanner">The scanner which encompasses the module that contains instances of this class</param>
+        /// <param name="offset">The offset value</param>
+        /// <returns>Whether the operation was successful</returns>
         public static bool GetBaseEntityMemberOffset(string member, Process game, SignatureScanner scanner, out int offset)
         {
             offset = -1;
@@ -423,7 +423,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             IntPtr stringPtr = scanner.Scan(new SigScanTarget(0, Encoding.ASCII.GetBytes(member)));
 
             if (stringPtr == IntPtr.Zero)
-                return false;
+                goto end;
 
             var target = new SigScanTarget(10,
                 $"C7 05 ?? ?? ?? ?? {stringPtr.GetByteString()}"); // mov     dword_15E2BF1C, offset aM_fflags ; "m_fFlags"
@@ -444,10 +444,39 @@ namespace LiveSplit.SourceSplit.GameHandling
                 addr = scanner.Scan(target2);
 
                 if (addr == IntPtr.Zero)
-                    return false;
+                    goto end;
             }
 
-            return game.ReadValue(addr, out offset);
+            offset = game.ReadValue<int>(addr);
+
+            end:
+
+            if (offset == -1)
+            {
+                Debug.WriteLine($"Couldn't find {member} offset.");
+                return false;
+            }
+            else
+            {
+                Debug.WriteLine($"{member} offset is 0x{offset.ToString("X")}");
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Gets the offset of a member from the base address of the entity's class
+        /// </summary>
+        /// <param name="member">The name of the member</param>
+        /// <param name="state">The game's state</param>
+        /// <param name="module">The module that contains instances of this class</param>
+        /// <param name="offset">The offset value</param>
+        /// <returns>Whether the operation was successful</returns>
+        public static bool GetBaseEntityMemberOffset(string member, GameState state, ProcessModuleWow64Safe module, out int offset)
+        {
+            Trace.Assert(module != null);
+            var scanner = new SignatureScanner(state.GameProcess, module.BaseAddress, module.ModuleMemorySize);
+
+            return GetBaseEntityMemberOffset(member, state.GameProcess, scanner, out offset);
         }
 
 #if DEBUG

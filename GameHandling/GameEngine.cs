@@ -71,12 +71,6 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             GetOtherOffsets();
 
-            Debug.WriteLine("CBaseEntity::m_fFlags offset = 0x" + BaseEntityFlagsOffset.ToString("X"));
-            Debug.WriteLine("CBaseEntity::m_vecAbsOrigin offset = 0x" + BaseEntityAbsOriginOffset.ToString("X"));
-            Debug.WriteLine("CBaseEntity::m_iName offset = 0x" + BaseEntityTargetNameOffset.ToString("X"));
-            Debug.WriteLine("CBaseEntity::m_pParent offset = 0x" + BaseEntityParentHandleOffset.ToString("X"));
-            Debug.WriteLine("CBasePlayer::m_hViewEntity offset = 0x" + BasePlayerViewEntityOffset.ToString("X"));
-
             return true;
         }
 

@@ -196,11 +196,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
             var serverScanner = new SignatureScanner(state.GameProcess, _server.BaseAddress, _server.ModuleMemorySize);
 
-            if (GameMemory.GetBaseEntityMemberOffset("m_angAbsRotation", state.GameProcess, serverScanner, out _baseEntityAngleOffset))
-                Debug.WriteLine("CBaseEntity::m_angAbsRotation offset = 0x" + _baseEntityAngleOffset.ToString("X"));
-
-            if (GameMemory.GetBaseEntityMemberOffset("m_vecAngVelocity", state.GameProcess, serverScanner, out _baseEntityAngleVelOffset))
-                Debug.WriteLine("CBaseEntity::m_vecAngVelocity offset = 0x" + _baseEntityAngleVelOffset.ToString("X"));
+            GameMemory.GetBaseEntityMemberOffset("m_angAbsRotation", state, state.GameEngine.ServerModule, out _baseEntityAngleOffset);
+            GameMemory.GetBaseEntityMemberOffset("m_vecAngVelocity", state, state.GameEngine.ServerModule, out _baseEntityAngleVelOffset);
 
             SigScanTarget _latest_Client_Trg = new SigScanTarget(0, Encoding.ASCII.GetBytes("ClientCommand, 0 length string supplied."));
             _latest_Client_Trg.OnFound = (proc, scanner, ptr) =>
