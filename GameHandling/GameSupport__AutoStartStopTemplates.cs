@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LiveSplit.TimeFormatters;
 using System.Security.AccessControl;
+using System.Drawing.Printing;
 
 namespace LiveSplit.SourceSplit.GameHandling
 {
@@ -71,14 +72,14 @@ namespace LiveSplit.SourceSplit.GameHandling
 
         protected List<AutoStartStopTemplate> Templates = new List<AutoStartStopTemplate>();
 
-        protected class ViewIndexSwitchTemplate : AutoStartStopTemplate
+        protected class ViewIndexChanged : AutoStartStopTemplate
         {
             private Func<GameState, int> _getFromIndex = null;
             private int _curFromIndex = -1;
             private Func<GameState, int> _getToIndex = null;
             private int _curToIndex = -1;
 
-            public ViewIndexSwitchTemplate
+            public ViewIndexChanged
             (
                 GameSupport parent, ActionType type,
                 Func<GameState, int> getFromIndex = null, Func<GameState, int> getToIndex = null
@@ -127,7 +128,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <param name="toCamera">The name of the entity whose index is switched away from</param>
         protected void WhenCameraSwitchesToPlayer(ActionType action = ActionType.AutoStart, string fromCamera = null)
         {
-            Templates.Add(new ViewIndexSwitchTemplate
+            Templates.Add(new ViewIndexChanged
             (
                 this,
                 action,
@@ -143,7 +144,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <param name="toCamera">The name of the entity whose index is switched to</param>
         protected void WhenCameraSwitchesFromPlayer(ActionType action = ActionType.AutoEnd, string toCamera = null)
         {
-            Templates.Add(new ViewIndexSwitchTemplate
+            Templates.Add(new ViewIndexChanged
             (
                 this,
                 action,
@@ -157,13 +158,13 @@ namespace LiveSplit.SourceSplit.GameHandling
             Fired,
             Queued
         }
-        protected class OutputDetectedTemplate : AutoStartStopTemplate
+        protected class OutputDetected : AutoStartStopTemplate
         {
             protected Func<GameState, float> GetFireTime = null;
             protected ValueWatcher<float> FireTime = new ValueWatcher<float>();
             protected OutputDetectionType DetectionType;
 
-            public OutputDetectedTemplate
+            public OutputDetected
             (
                 GameSupport parent, ActionType type,
                 OutputDetectionType detectionType, string targetName, string command = null, string param = null, int clamp = 100
@@ -205,7 +206,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <param name="clamp">Maximum number of outputs to check</param>
         protected void WhenOutputIsFired(ActionType action, string targetName, string command = null, string param = null, int clamp = 100)
         {
-            Templates.Add(new OutputDetectedTemplate
+            Templates.Add(new OutputDetected
             (
                 this, action,
                 OutputDetectionType.Fired,
@@ -223,7 +224,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <param name="clamp">Maximum number of outputs to check</param>
         protected void WhenOutputIsQueued(ActionType action, string targetName, string command = null, string param = null, int clamp = 100)
         {
-            Templates.Add(new OutputDetectedTemplate
+            Templates.Add(new OutputDetected
             (
                 this, action,
                 OutputDetectionType.Queued,
@@ -231,9 +232,9 @@ namespace LiveSplit.SourceSplit.GameHandling
             ));
         }
 
-        class DisconnectOutputFiredTemplate : OutputDetectedTemplate
+        class DisconnectOutputFired : OutputDetected
         {
-            public DisconnectOutputFiredTemplate
+            public DisconnectOutputFired
             (
                 GameSupport parent, ActionType type,
                 string targetName, string command = null, string param = null, int clamp = 100
@@ -276,17 +277,17 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <param name="clamp">Maximum number of outputs to check</param>
         protected void WhenDisconnectOutputFires(ActionType action, string targetName, string command = null, string param = null, int clamp = 100)
         {
-            Templates.Add(new DisconnectOutputFiredTemplate(this, action, targetName, command, param, clamp));
+            Templates.Add(new DisconnectOutputFired(this, action, targetName, command, param, clamp));
         }
 
 
-        protected class EntityMurderedTemplate : AutoStartStopTemplate
+        protected class EntityMurdered : AutoStartStopTemplate
         {
             private Func<GameState, IntPtr> getEntity = null;
             private int _baseEntityHealthOffset = -1;
             private MemoryWatcher<int> _health = null;
 
-            public EntityMurderedTemplate(GameSupport parent, ActionType type, Func<GameState, IntPtr> getEntity) 
+            public EntityMurdered(GameSupport parent, ActionType type, Func<GameState, IntPtr> getEntity) 
                 : base(parent, type)
             {
                 this.getEntity = getEntity;
@@ -339,19 +340,19 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <param name="entityName">The entity's name</param>
         protected void WhenEntityIsMurdered(ActionType action, string entityName)
         {
-            Templates.Add(new EntityMurderedTemplate
+            Templates.Add(new EntityMurdered
             (
                 this, action,
                 (s) => s.GameEngine.GetEntityByName(entityName)
             ));
         }
 
-        protected class EntityKilledTemplate : AutoStartStopTemplate
+        protected class EntityKilled : AutoStartStopTemplate
         {
             private Func<GameState, int> _getEntityIndex;
             private int _curEntityIndex = -1;
 
-            public EntityKilledTemplate(GameSupport parent, ActionType type, Func<GameState, int> getEntityIndex) : base(parent, type)
+            public EntityKilled(GameSupport parent, ActionType type, Func<GameState, int> getEntityIndex) : base(parent, type)
             {
                 _getEntityIndex = getEntityIndex;
             }
@@ -385,7 +386,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <param name="entityName">The entity's name</param>
         protected void WhenEntityIsKilled(ActionType action, string entityName)
         {
-            Templates.Add(new EntityKilledTemplate
+            Templates.Add(new EntityKilled
             (
                 this, action,
                 (s) => s.GameEngine.GetEntIndexByName(entityName)
@@ -393,7 +394,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         }
 
         // TODO: this may work better as an option in the settings?
-        protected class EnumeratedDisconnectDetection : AutoStartStopTemplate
+        protected class EnumeratedDisconnectDetected : AutoStartStopTemplate
         {
             private string _mapName = null;
             private new bool IsMapCorrect()
@@ -408,7 +409,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             private List<EntityIO> _currentIOs = new List<EntityIO>();
             private List<float> _currentFireTimes = new List<float>();
 
-            public EnumeratedDisconnectDetection(GameSupport parent, ActionType type, string mapName = null) : base(parent, type)
+            public EnumeratedDisconnectDetected(GameSupport parent, ActionType type, string mapName = null) : base(parent, type)
             {
                 _mapName = mapName;
             }
@@ -614,7 +615,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <param name="map">The map. If left as null, all maps will be considered.</param>
         protected void WhenFoundDisconnectOutputFires(ActionType action, string map = null)
         {
-            Templates.Add(new EnumeratedDisconnectDetection
+            Templates.Add(new EnumeratedDisconnectDetected
             (
                 this, action,
                 map
@@ -694,7 +695,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             ));
         }
 
-        protected class ParentEntitySwitchTemplate : AutoStartStopTemplate
+        protected class ParentEntityChanged : AutoStartStopTemplate
         {
             private Func<GameState, int> _getFromIndex = null;
             private Func<GameState, int> _getToIndex = null;
@@ -702,7 +703,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             private int _curFromIndex = -1;
             private int _curToIndex = -1;
 
-            public ParentEntitySwitchTemplate
+            public ParentEntityChanged
             (
                 GameSupport parent, ActionType type,
                 Func<GameState, int> getFromIndex = null,
@@ -756,7 +757,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <param name="vehicleName">The name of the vehicle. If left as null, the game will check for if the player enters any vehicle.</param>
         protected void WhenBeginEnteringVehicle(ActionType action, string vehicleName = null)
         {
-            Templates.Add(new ParentEntitySwitchTemplate
+            Templates.Add(new ParentEntityChanged
             (
                 this, action,
                 (s) => -1,
@@ -771,11 +772,100 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <param name="vehicleName">The name of the vehicle. If left as null, the game will check for if the player exits any vehicle.</param>
         protected void WhenBeginExitingVehicle(ActionType action, string vehicleName = null)
         {
-            Templates.Add(new ParentEntitySwitchTemplate
+            Templates.Add(new ParentEntityChanged
             (
                 this, action,
                 vehicleName is null ? null : (s) => s.GameEngine.GetEntIndexByName(vehicleName),
                 (s) => -1
+            ));
+        }
+
+        protected class OutputDetectedIntrusive : AutoStartStopTemplate
+        {
+            private const string CLIENT_COMMAND_ENTITY_NAME = "__ss_output_detection_cc__";
+
+            private string _entityName;
+            private string _eventName;
+            private float _delay;
+
+            private string _instanceName;
+            private CustomCommand _trigger;
+
+            public OutputDetectedIntrusive
+            (
+                GameSupport parent, ActionType type,
+                string entityName, string eventName, float delay
+            ) : base(parent, type)
+            {
+                _entityName = entityName;
+                _eventName = eventName;
+                _delay = delay;
+
+                _instanceName = (this.GetHashCode() ^ SourceSplitUtils.ActiveTime.ElapsedTicks).ToString("X");
+                _trigger = new CustomCommand
+                (
+                    $"__ss_output_detection_{_instanceName}",
+                    "0"
+                )
+                {
+                    Hidden = true,
+                    Archived = false
+                };
+
+                CommandHandler.Commands.Add(_trigger);
+            }
+
+            protected override void OnGenericUpdateInternal(GameState state, TimerActions actions)
+            {
+                if (IsMapCorrect() && _trigger.Boolean)
+                {
+                    Enact(actions);
+                }
+
+                _trigger.Update("0");
+            }
+
+            protected override void OnSessionStartInternal(GameState state, TimerActions actions)
+            {
+                if (IsMapCorrect())
+                {
+                    bool createNew = state.GameEngine.GetEntityByName(CLIENT_COMMAND_ENTITY_NAME) == IntPtr.Zero;
+
+                    Task.Run(() =>
+                    {
+                        if (createNew)
+                        {
+                            state.GameProcess.SendMessage
+                            (
+                                $"ent_create point_clientcommand targetname {CLIENT_COMMAND_ENTITY_NAME}"
+                            );
+                        }
+
+                        state.GameProcess.SendMessage
+                        (
+                            $"ent_fire " +
+                            $"{_entityName} addoutput " +
+                            $"\"{_eventName} {CLIENT_COMMAND_ENTITY_NAME},Command,{_trigger.Name} 1,{_delay},-1\""
+                        );
+                    });
+                }
+            }
+        }
+        /// <summary>
+        /// Defines and activates a template which triggers an action when an output is fired. This is achieved by adding an output to the firing entity that is fired at the same time as the desired output.
+        /// <para />WARNING: If the action is an Auto-Start (or Stop), it will only trigger when IsFirstMap (or IsLastMap) is true
+        /// </summary>
+        /// <remarks>PLEASE ONLY USE THIS IF NO OTHER OPTION IS AVAILABLE!!! It may also not work if the game/mod does not accept Windows messages as commands to be fired, or has crippled the function of 'ent_fire' in any way.</remarks>
+        /// <param name="action">Whether the template should Auto-Start or Auto-Stop the timer when its condition has passed.</param>
+        /// <param name="entityName">The name of the entity which fires the target output</param>
+        /// <param name="eventName">The event which triggers the firing of the output</param>
+        /// <param name="delay">The time delay (in seconds) of the output</param>
+        protected void WhenOutputIsFiredIntrusive(ActionType action, string entityName, string eventName, float delay = 0)
+        {
+            Templates.Add(new OutputDetectedIntrusive
+            (
+                this, action,
+                entityName, eventName, delay
             ));
         }
     }

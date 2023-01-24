@@ -17,7 +17,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             StartOnFirstLoadMaps.AddRange(FirstMaps);
             this.AddLastMap("endbattle");
 
-            Templates.Add(new EntityMurderedTemplate
+            Templates.Add(new EntityMurdered
             (
                 this, ActionType.AutoEnd,
                 (s) => s.GameEngine.GetEntityByPos(0f, 0f, 1888f, 1f)
