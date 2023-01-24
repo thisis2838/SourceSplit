@@ -89,7 +89,8 @@
     <Compile Include="GameHandling\GameSupport__Functions.cs" />
     <Compile Include="GameHandling\GameSupport__Cases.cs" />
     <Compile Include="ComponentHandling\Session.cs" />
-    <Compile Include="GameSpecific\HL2Mods\BisounoursPartyAdventure.cs" />
+    <Compile Include="GameSpecific\HL2Mods\CausalityEffect.cs" />
+    <Compile Include="GameSpecific\HL2Mods\BearPartyAdventure.cs" />
     <Compile Include="GameSpecific\HL2Mods\Whoopservatory.cs" />
     <Compile Include="GameSpecific\HL2Mods\Tr1p.cs" />
     <Compile Include="GameSpecific\HL2Mods\TheLighthouse.cs" />

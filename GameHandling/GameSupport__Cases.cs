@@ -251,6 +251,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Whoopservatory();
                 case "bisounew":
                     return new BearPartyAdventure();
+                case "causalityeffect":
+                    return new CausalityEffect();
             }
 
             var rtsl = IsRTSLMapPack(state);
