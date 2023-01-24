@@ -249,6 +249,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new Tr1p();
                 case "obs":
                     return new Whoopservatory();
+                case "bisounew":
+                    return new BearPartyAdventure();
             }
 
             var rtsl = IsRTSLMapPack(state);
