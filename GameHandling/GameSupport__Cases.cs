@@ -253,6 +253,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new BearPartyAdventure();
                 case "causalityeffect":
                     return new CausalityEffect();
+                case "last_zombie":
+                    return new LastZombie();
             }
 
             var rtsl = IsRTSLMapPack(state);
