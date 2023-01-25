@@ -255,6 +255,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new CausalityEffect();
                 case "last_zombie":
                     return new LastZombie();
+                case "snowdrop_escape":
+                    return new SnowdropEscape();
             }
 
             var rtsl = IsRTSLMapPack(state);
