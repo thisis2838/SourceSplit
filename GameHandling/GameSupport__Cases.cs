@@ -257,6 +257,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new LastZombie();
                 case "snowdrop_escape":
                     return new SnowdropEscape();
+                case "human_error":
+                    return new HumanError();
             }
 
             var rtsl = IsRTSLMapPack(state);
