@@ -89,6 +89,7 @@
     <Compile Include="GameHandling\GameSupport__Functions.cs" />
     <Compile Include="GameHandling\GameSupport__Cases.cs" />
     <Compile Include="ComponentHandling\Session.cs" />
+    <Compile Include="GameSpecific\HL2Mods\ThundersLeaves.cs" />
     <Compile Include="GameSpecific\HL2Mods\HumanError.cs" />
     <Compile Include="GameSpecific\HL2Mods\SnowdropEscape.cs" />
     <Compile Include="GameSpecific\HL2Mods\LastZombie.cs" />

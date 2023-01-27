@@ -259,6 +259,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new SnowdropEscape();
                 case "human_error":
                     return new HumanError();
+                case "thundersleaves":
+                    return new ThundersLeaves();
             }
 
             var rtsl = IsRTSLMapPack(state);
