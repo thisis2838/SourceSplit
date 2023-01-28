@@ -207,6 +207,8 @@
       <change>Added a new Help window which shows detailed explanations of the options in the Settings</change>
       <change>Added text to show the currently detected game/mod under the Abouts page</change>
       <change>Fixed Evacuation's Auto-End not always working</change>
+      <change>Fixed Half-Life 2: Deeper Down's Auto-Start being 1.2 seconds late</change>
+      <change>Added checks and routines to prevent retrieving a bogus game directory path if it originally contained Unicode characters.</change>
       <change>Corrected Auto-Start time offset for Portal's portal open auto-start.</change>
       <change>Internal code minimizing, revisions, and cleanup.</change>
     </changelog>

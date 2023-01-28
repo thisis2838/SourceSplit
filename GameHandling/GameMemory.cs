@@ -15,6 +15,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using LiveSplit.SourceSplit.ComponentHandling;
 using LiveSplit.SourceSplit.Utilities.Forms;
+using System.Management;
+using System.Diagnostics.Eventing.Reader;
 
 namespace LiveSplit.SourceSplit.GameHandling
 {
@@ -194,12 +196,102 @@ namespace LiveSplit.SourceSplit.GameHandling
                 p.ReadString(_gameDirPtr, ReadStringType.UTF8, 260, out string absoluteGameDir);
                 if (string.IsNullOrWhiteSpace(absoluteGameDir))
                     return false;
+
+                if (!Directory.Exists(absoluteGameDir))
+                {
+                    Debug.WriteLine($"Bogus absolute game directory: {absoluteGameDir}");
+                    try
+                    {
+                        ManagementClass mngmtClass = new ManagementClass("Win32_Process");
+                        foreach (ManagementObject mngmtObject in mngmtClass.GetInstances())
+                        {
+                            // get the executable path for this object
+                            var pathObject = mngmtObject["ExecutablePath"];
+                            if (pathObject is null || !(pathObject is string)) 
+                                continue;
+                            var pathString = (pathObject as string).ToLower();
+                            if (pathString !=  p.MainModule.FileName.ToLower())
+                                continue;
+
+                            // get the command line parameters for this object
+                            var launchParamObject = mngmtObject["CommandLine"];
+                            if (launchParamObject is null || !(launchParamObject is string))
+                                continue;
+                            var launchParam = (launchParamObject as string).ToLower();
+
+                            // we'll need to parse the command line parameters, accounting for quotes
+                            var elements = new List<string>();
+                            string curElement = "";
+                            for (int i = 0; i < launchParam.Length; i++)
+                            {
+                                if (launchParam[i] == '"')
+                                {
+                                    i++;
+                                    while (i < launchParam.Length && launchParam[i] != '\"')
+                                        curElement += launchParam[i++];
+                                    elements.Add(curElement);
+                                    curElement = "";
+                                    continue;
+                                }
+
+                                if (launchParam[i] == ' ')
+                                {
+                                    elements.Add(curElement);
+                                    curElement = "";
+                                    continue;
+                                }
+
+                                curElement += launchParam[i];
+                            }
+                            elements = elements.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.ToLower()).ToList();
+                            // apart from process name, it must contain at least 1 launch parameter
+                            if (elements.Count < 2) 
+                                continue;
+
+                            // skip the executable argument, then reverse the list to find the last one, as mods by defualt
+                            // sets game to 'steam', and then sets game to their directory down the line.
+                            elements = elements.Skip(1).Reverse().ToList();
+                            string baseGameFolder = Path.GetDirectoryName(p.MainModule.FileName);
+                            for (int i = 0; i < elements.Count(); i++)
+                            {
+                                if (elements[i] == "-game")
+                                {
+                                    if (i - 1 < 0) 
+                                        continue;
+
+                                    i--;
+
+                                    // -game can be relative to the game's executable
+                                    string possible = elements[i];  
+                                    if (Directory.Exists(possible) || 
+                                        Directory.Exists(possible = Path.Combine(baseGameFolder, possible)))
+                                    {
+                                        absoluteGameDir = possible;
+                                        Debug.WriteLine($"Found absolute game directory through WMI: {possible}");
+                                        goto success;
+                                    }
+
+                                    i++;
+                                }
+
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine("Error while trying to retrieve absolute file path: " + ex.ToString());
+                    }
+
+                    // don't return false as we can still function without absolute game directory.
+                    Debug.WriteLine("Couldn't retrieve absolute game directory!");
+                    success:;
+                }
+
                 state.GameDir = new DirectoryInfo(absoluteGameDir).Name.ToLower();
                 state.AbsoluteGameDir = absoluteGameDir;
             }
 
             state.MainSupport = GameSupport.Get(state);
-
             state.GameEngine = state.MainSupport.GetEngine();
 
             state.AllSupport.Clear();
