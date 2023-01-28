@@ -60,9 +60,9 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.tabCtrlMaster = new System.Windows.Forms.TabControl();
             this.tabPgAutoStartReset = new System.Windows.Forms.TabPage();
             this.tlpAutoStartEndReset = new System.Windows.Forms.TableLayoutPanel();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.panel2 = new System.Windows.Forms.Panel();
+            this.gAutoSplit = new System.Windows.Forms.GroupBox();
+            this.gMapTransitions = new System.Windows.Forms.GroupBox();
+            this.panSplitInterval = new System.Windows.Forms.Panel();
             this.lblMaps = new System.Windows.Forms.Label();
             this.dmnSplitInterval = new System.Windows.Forms.NumericUpDown();
             this.chkUseInterval = new System.Windows.Forms.CheckBox();
@@ -126,14 +126,15 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.labRunningFor = new System.Windows.Forms.Label();
             this.labCurrentGame = new System.Windows.Forms.Label();
             this.labVersion = new System.Windows.Forms.Label();
+            this.butHelp = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.nudSLPenalty)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudDecimalPlaces)).BeginInit();
             this.tabCtrlMaster.SuspendLayout();
             this.tabPgAutoStartReset.SuspendLayout();
             this.tlpAutoStartEndReset.SuspendLayout();
-            this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
-            this.panel2.SuspendLayout();
+            this.gAutoSplit.SuspendLayout();
+            this.gMapTransitions.SuspendLayout();
+            this.panSplitInterval.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dmnSplitInterval)).BeginInit();
             this.gMTL.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvMapTransitions)).BeginInit();
@@ -181,7 +182,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkHoldUntilPause.Location = new System.Drawing.Point(8, 23);
             this.chkHoldUntilPause.Margin = new System.Windows.Forms.Padding(4);
             this.chkHoldUntilPause.Name = "chkHoldUntilPause";
-            this.chkHoldUntilPause.Size = new System.Drawing.Size(229, 20);
+            this.chkHoldUntilPause.Size = new System.Drawing.Size(226, 20);
             this.chkHoldUntilPause.TabIndex = 27;
             this.chkHoldUntilPause.Text = "Resume timer after initial unpause";
             this.toolTip.SetToolTip(this.chkHoldUntilPause, "If the timer is started when the game is paused, pause the timer until the game u" +
@@ -195,7 +196,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkSplitGenericMap.Location = new System.Drawing.Point(289, 28);
             this.chkSplitGenericMap.Margin = new System.Windows.Forms.Padding(4);
             this.chkSplitGenericMap.Name = "chkSplitGenericMap";
-            this.chkSplitGenericMap.Size = new System.Drawing.Size(228, 20);
+            this.chkSplitGenericMap.Size = new System.Drawing.Size(225, 20);
             this.chkSplitGenericMap.TabIndex = 1;
             this.chkSplitGenericMap.Text = "Also count New Game map loads";
             this.toolTip.SetToolTip(this.chkSplitGenericMap, "Count New Game map loads as map transitions (e.g. using the \"map\" command to go f" +
@@ -211,7 +212,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkSplitSpecial.Location = new System.Drawing.Point(8, 300);
             this.chkSplitSpecial.Margin = new System.Windows.Forms.Padding(4);
             this.chkSplitSpecial.Name = "chkSplitSpecial";
-            this.chkSplitSpecial.Size = new System.Drawing.Size(239, 20);
+            this.chkSplitSpecial.Size = new System.Drawing.Size(236, 20);
             this.chkSplitSpecial.TabIndex = 2;
             this.chkSplitSpecial.Text = "Split on Special Pre-defined Events";
             this.toolTip.SetToolTip(this.chkSplitSpecial, "Split on designated game/mod-specific events such as custom endings or gameplay e" +
@@ -224,7 +225,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkRTAStartOffset.Location = new System.Drawing.Point(8, 52);
             this.chkRTAStartOffset.Margin = new System.Windows.Forms.Padding(4);
             this.chkRTAStartOffset.Name = "chkRTAStartOffset";
-            this.chkRTAStartOffset.Size = new System.Drawing.Size(315, 20);
+            this.chkRTAStartOffset.Size = new System.Drawing.Size(312, 20);
             this.chkRTAStartOffset.TabIndex = 28;
             this.chkRTAStartOffset.Text = "Auto-Start RTA and IGT with the same time offset";
             this.toolTip.SetToolTip(this.chkRTAStartOffset, "If there is a built-in time offset for Game Time upon Auto-Start, also apply that" +
@@ -237,7 +238,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.boxSplitInstead.Location = new System.Drawing.Point(8, 181);
             this.boxSplitInstead.Margin = new System.Windows.Forms.Padding(4);
             this.boxSplitInstead.Name = "boxSplitInstead";
-            this.boxSplitInstead.Size = new System.Drawing.Size(285, 20);
+            this.boxSplitInstead.Size = new System.Drawing.Size(282, 20);
             this.boxSplitInstead.TabIndex = 30;
             this.boxSplitInstead.Text = "Auto-Split when an Auto-Reset would occur.";
             this.toolTip.SetToolTip(this.boxSplitInstead, "Change all Auto-Resets to Auto-Splits");
@@ -251,7 +252,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkSplitLevelTrans.Location = new System.Drawing.Point(20, 48);
             this.chkSplitLevelTrans.Margin = new System.Windows.Forms.Padding(4);
             this.chkSplitLevelTrans.Name = "chkSplitLevelTrans";
-            this.chkSplitLevelTrans.Size = new System.Drawing.Size(172, 20);
+            this.chkSplitLevelTrans.Size = new System.Drawing.Size(169, 20);
             this.chkSplitLevelTrans.TabIndex = 0;
             this.chkSplitLevelTrans.Text = "Split on Map Transitions";
             this.toolTip.SetToolTip(this.chkSplitLevelTrans, "Split on Map Transitions");
@@ -265,7 +266,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkAutoStart.Location = new System.Drawing.Point(4, 4);
             this.chkAutoStart.Margin = new System.Windows.Forms.Padding(4);
             this.chkAutoStart.Name = "chkAutoStart";
-            this.chkAutoStart.Size = new System.Drawing.Size(56, 18);
+            this.chkAutoStart.Size = new System.Drawing.Size(53, 18);
             this.chkAutoStart.TabIndex = 0;
             this.chkAutoStart.Text = "Start";
             this.toolTip.SetToolTip(this.chkAutoStart, "Enables / Disables Auto-start");
@@ -279,7 +280,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkAutoStop.Location = new System.Drawing.Point(194, 4);
             this.chkAutoStop.Margin = new System.Windows.Forms.Padding(4);
             this.chkAutoStop.Name = "chkAutoStop";
-            this.chkAutoStop.Size = new System.Drawing.Size(57, 18);
+            this.chkAutoStop.Size = new System.Drawing.Size(54, 18);
             this.chkAutoStop.TabIndex = 1;
             this.chkAutoStop.Text = "Stop";
             this.toolTip.SetToolTip(this.chkAutoStop, "Enables / Disables Auto-stop");
@@ -293,7 +294,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkAutoReset.Location = new System.Drawing.Point(384, 4);
             this.chkAutoReset.Margin = new System.Windows.Forms.Padding(4);
             this.chkAutoReset.Name = "chkAutoReset";
-            this.chkAutoReset.Size = new System.Drawing.Size(65, 18);
+            this.chkAutoReset.Size = new System.Drawing.Size(62, 18);
             this.chkAutoReset.TabIndex = 2;
             this.chkAutoReset.Text = "Reset";
             this.toolTip.SetToolTip(this.chkAutoReset, "Enables / Disables Auto-reset");
@@ -305,7 +306,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkResetMapTransitions.Location = new System.Drawing.Point(8, 209);
             this.chkResetMapTransitions.Margin = new System.Windows.Forms.Padding(4);
             this.chkResetMapTransitions.Name = "chkResetMapTransitions";
-            this.chkResetMapTransitions.Size = new System.Drawing.Size(362, 20);
+            this.chkResetMapTransitions.Size = new System.Drawing.Size(359, 20);
             this.chkResetMapTransitions.TabIndex = 31;
             this.chkResetMapTransitions.Text = "Optimize for multi-run speedruns (for example, any% x25)";
             this.toolTip.SetToolTip(this.chkResetMapTransitions, "Execute additional actions to allow for multi-run speedruns like resetting map tr" +
@@ -327,7 +328,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkServerInitialTicks.Location = new System.Drawing.Point(9, 25);
             this.chkServerInitialTicks.Margin = new System.Windows.Forms.Padding(4);
             this.chkServerInitialTicks.Name = "chkServerInitialTicks";
-            this.chkServerInitialTicks.Size = new System.Drawing.Size(205, 20);
+            this.chkServerInitialTicks.Size = new System.Drawing.Size(202, 20);
             this.chkServerInitialTicks.TabIndex = 0;
             this.chkServerInitialTicks.Text = "Count server initialization ticks";
             this.toolTip.SetToolTip(this.chkServerInitialTicks, "Count ticks before the server fully loads in");
@@ -363,7 +364,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkShowGameTime.Location = new System.Drawing.Point(9, -1);
             this.chkShowGameTime.Margin = new System.Windows.Forms.Padding(4);
             this.chkShowGameTime.Name = "chkShowGameTime";
-            this.chkShowGameTime.Size = new System.Drawing.Size(198, 20);
+            this.chkShowGameTime.Size = new System.Drawing.Size(195, 20);
             this.chkShowGameTime.TabIndex = 12;
             this.chkShowGameTime.Text = "Show Higher Precision Time";
             this.toolTip.SetToolTip(this.chkShowGameTime, "Show clock with precision modifiable with the \"Decimal Places\" box below.");
@@ -375,7 +376,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkShowAlt.Location = new System.Drawing.Point(8, 57);
             this.chkShowAlt.Margin = new System.Windows.Forms.Padding(4);
             this.chkShowAlt.Name = "chkShowAlt";
-            this.chkShowAlt.Size = new System.Drawing.Size(210, 20);
+            this.chkShowAlt.Size = new System.Drawing.Size(207, 20);
             this.chkShowAlt.TabIndex = 22;
             this.chkShowAlt.Text = "Show Alternate Timing Method";
             this.toolTip.SetToolTip(this.chkShowAlt, "Tells the Higher Precision Timer to show the alternate timimg method instead.");
@@ -387,7 +388,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkShowTickCount.Location = new System.Drawing.Point(4, 4);
             this.chkShowTickCount.Margin = new System.Windows.Forms.Padding(4);
             this.chkShowTickCount.Name = "chkShowTickCount";
-            this.chkShowTickCount.Size = new System.Drawing.Size(202, 20);
+            this.chkShowTickCount.Size = new System.Drawing.Size(199, 20);
             this.chkShowTickCount.TabIndex = 21;
             this.chkShowTickCount.Text = "Show Game Time Tick Count";
             this.toolTip.SetToolTip(this.chkShowTickCount, "Show the current time as a tick count");
@@ -399,7 +400,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkCountPauses.Location = new System.Drawing.Point(145, 4);
             this.chkCountPauses.Margin = new System.Windows.Forms.Padding(4);
             this.chkCountPauses.Name = "chkCountPauses";
-            this.chkCountPauses.Size = new System.Drawing.Size(75, 20);
+            this.chkCountPauses.Size = new System.Drawing.Size(72, 20);
             this.chkCountPauses.TabIndex = 1;
             this.chkCountPauses.Text = "Pauses";
             this.toolTip.SetToolTip(this.chkCountPauses, "Include time when the game is paused");
@@ -411,7 +412,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkCountEngineTicks.Location = new System.Drawing.Point(4, 4);
             this.chkCountEngineTicks.Margin = new System.Windows.Forms.Padding(4);
             this.chkCountEngineTicks.Name = "chkCountEngineTicks";
-            this.chkCountEngineTicks.Size = new System.Drawing.Size(107, 20);
+            this.chkCountEngineTicks.Size = new System.Drawing.Size(104, 20);
             this.chkCountEngineTicks.TabIndex = 0;
             this.chkCountEngineTicks.Text = "Engine Ticks";
             this.toolTip.SetToolTip(this.chkCountEngineTicks, "Count Engine Ticks");
@@ -423,7 +424,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkCountDisconnect.Location = new System.Drawing.Point(286, 4);
             this.chkCountDisconnect.Margin = new System.Windows.Forms.Padding(4);
             this.chkCountDisconnect.Name = "chkCountDisconnect";
-            this.chkCountDisconnect.Size = new System.Drawing.Size(103, 20);
+            this.chkCountDisconnect.Size = new System.Drawing.Size(100, 20);
             this.chkCountDisconnect.TabIndex = 2;
             this.chkCountDisconnect.Text = "Disconnects";
             this.toolTip.SetToolTip(this.chkCountDisconnect, "Include time when no map or server is present");
@@ -435,7 +436,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkAutomatic.Location = new System.Drawing.Point(296, 81);
             this.chkAutomatic.Margin = new System.Windows.Forms.Padding(4);
             this.chkAutomatic.Name = "chkAutomatic";
-            this.chkAutomatic.Size = new System.Drawing.Size(166, 20);
+            this.chkAutomatic.Size = new System.Drawing.Size(163, 20);
             this.chkAutomatic.TabIndex = 31;
             this.chkAutomatic.Text = "Let SourceSplit Decide";
             this.toolTip.SetToolTip(this.chkAutomatic, "Let SourceSplit decide the Timing Methods");
@@ -447,7 +448,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkDemoInterop.Location = new System.Drawing.Point(16, 81);
             this.chkDemoInterop.Margin = new System.Windows.Forms.Padding(4);
             this.chkDemoInterop.Name = "chkDemoInterop";
-            this.chkDemoInterop.Size = new System.Drawing.Size(242, 20);
+            this.chkDemoInterop.Size = new System.Drawing.Size(239, 20);
             this.chkDemoInterop.TabIndex = 30;
             this.chkDemoInterop.Text = "Interoperation with Demo Recording";
             this.toolTip.SetToolTip(this.chkDemoInterop, "Allow interoperation with Demo Recording, which switches back and forth between u" +
@@ -460,7 +461,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkNoGamePresent.Location = new System.Drawing.Point(427, 4);
             this.chkNoGamePresent.Margin = new System.Windows.Forms.Padding(4);
             this.chkNoGamePresent.Name = "chkNoGamePresent";
-            this.chkNoGamePresent.Size = new System.Drawing.Size(87, 20);
+            this.chkNoGamePresent.Size = new System.Drawing.Size(84, 20);
             this.chkNoGamePresent.TabIndex = 3;
             this.chkNoGamePresent.Text = "No Game";
             this.toolTip.SetToolTip(this.chkNoGamePresent, "Include time when the game isn\'t running");
@@ -472,7 +473,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkShowCurDemo.Location = new System.Drawing.Point(4, 32);
             this.chkShowCurDemo.Margin = new System.Windows.Forms.Padding(4);
             this.chkShowCurDemo.Name = "chkShowCurDemo";
-            this.chkShowCurDemo.Size = new System.Drawing.Size(214, 20);
+            this.chkShowCurDemo.Size = new System.Drawing.Size(211, 20);
             this.chkShowCurDemo.TabIndex = 33;
             this.chkShowCurDemo.Text = "Show currently-recorded Demo";
             this.toolTip.SetToolTip(this.chkShowCurDemo, "Show name and current time of the currently-recorded Demo.");
@@ -497,7 +498,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkAutoSplitEnabled.Location = new System.Drawing.Point(8, 23);
             this.chkAutoSplitEnabled.Margin = new System.Windows.Forms.Padding(4);
             this.chkAutoSplitEnabled.Name = "chkAutoSplitEnabled";
-            this.chkAutoSplitEnabled.Size = new System.Drawing.Size(80, 20);
+            this.chkAutoSplitEnabled.Size = new System.Drawing.Size(77, 20);
             this.chkAutoSplitEnabled.TabIndex = 25;
             this.chkAutoSplitEnabled.Text = "Enabled";
             this.toolTip.SetToolTip(this.chkAutoSplitEnabled, "Enables / Disables Auto-splitting");
@@ -511,7 +512,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkFirstMapReset.Location = new System.Drawing.Point(8, 238);
             this.chkFirstMapReset.Margin = new System.Windows.Forms.Padding(4);
             this.chkFirstMapReset.Name = "chkFirstMapReset";
-            this.chkFirstMapReset.Size = new System.Drawing.Size(349, 20);
+            this.chkFirstMapReset.Size = new System.Drawing.Size(346, 20);
             this.chkFirstMapReset.TabIndex = 32;
             this.chkFirstMapReset.Text = "Auto-Reset when starting a New Game on the first map";
             this.toolTip.SetToolTip(this.chkFirstMapReset, "Auto-Reset when triggering a New Game load to the first map (e.g. using \'map\' com" +
@@ -527,6 +528,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.tabCtrlMaster.Location = new System.Drawing.Point(9, 9);
             this.tabCtrlMaster.Margin = new System.Windows.Forms.Padding(4);
             this.tabCtrlMaster.Name = "tabCtrlMaster";
+            this.tabCtrlMaster.Padding = new System.Drawing.Point(6, 10);
             this.tabCtrlMaster.SelectedIndex = 0;
             this.tabCtrlMaster.Size = new System.Drawing.Size(615, 647);
             this.tabCtrlMaster.TabIndex = 14;
@@ -534,11 +536,11 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             // tabPgAutoStartReset
             // 
             this.tabPgAutoStartReset.Controls.Add(this.tlpAutoStartEndReset);
-            this.tabPgAutoStartReset.Location = new System.Drawing.Point(4, 25);
+            this.tabPgAutoStartReset.Location = new System.Drawing.Point(4, 39);
             this.tabPgAutoStartReset.Margin = new System.Windows.Forms.Padding(4);
             this.tabPgAutoStartReset.Name = "tabPgAutoStartReset";
             this.tabPgAutoStartReset.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPgAutoStartReset.Size = new System.Drawing.Size(607, 618);
+            this.tabPgAutoStartReset.Size = new System.Drawing.Size(607, 604);
             this.tabPgAutoStartReset.TabIndex = 0;
             this.tabPgAutoStartReset.Text = "Main Functions";
             this.tabPgAutoStartReset.UseVisualStyleBackColor = true;
@@ -548,7 +550,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.tlpAutoStartEndReset.ColumnCount = 2;
             this.tlpAutoStartEndReset.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tlpAutoStartEndReset.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tlpAutoStartEndReset.Controls.Add(this.groupBox1, 0, 0);
+            this.tlpAutoStartEndReset.Controls.Add(this.gAutoSplit, 0, 0);
             this.tlpAutoStartEndReset.Controls.Add(this.gbAutoStartEndReset, 0, 1);
             this.tlpAutoStartEndReset.Controls.Add(this.gbTiming, 0, 2);
             this.tlpAutoStartEndReset.Location = new System.Drawing.Point(4, 4);
@@ -562,49 +564,49 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.tlpAutoStartEndReset.Size = new System.Drawing.Size(596, 604);
             this.tlpAutoStartEndReset.TabIndex = 14;
             // 
-            // groupBox1
+            // gAutoSplit
             // 
-            this.tlpAutoStartEndReset.SetColumnSpan(this.groupBox1, 2);
-            this.groupBox1.Controls.Add(this.chkAutoSplitEnabled);
-            this.groupBox1.Controls.Add(this.chkSplitLevelTrans);
-            this.groupBox1.Controls.Add(this.chkSplitSpecial);
-            this.groupBox1.Controls.Add(this.groupBox2);
-            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox1.Location = new System.Drawing.Point(4, 4);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox1.Size = new System.Drawing.Size(588, 327);
-            this.groupBox1.TabIndex = 10;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Auto Split";
+            this.tlpAutoStartEndReset.SetColumnSpan(this.gAutoSplit, 2);
+            this.gAutoSplit.Controls.Add(this.chkAutoSplitEnabled);
+            this.gAutoSplit.Controls.Add(this.chkSplitLevelTrans);
+            this.gAutoSplit.Controls.Add(this.chkSplitSpecial);
+            this.gAutoSplit.Controls.Add(this.gMapTransitions);
+            this.gAutoSplit.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gAutoSplit.Location = new System.Drawing.Point(4, 4);
+            this.gAutoSplit.Margin = new System.Windows.Forms.Padding(4);
+            this.gAutoSplit.Name = "gAutoSplit";
+            this.gAutoSplit.Padding = new System.Windows.Forms.Padding(4);
+            this.gAutoSplit.Size = new System.Drawing.Size(588, 327);
+            this.gAutoSplit.TabIndex = 10;
+            this.gAutoSplit.TabStop = false;
+            this.gAutoSplit.Text = "Auto Split";
             // 
-            // groupBox2
+            // gMapTransitions
             // 
-            this.groupBox2.Controls.Add(this.panel2);
-            this.groupBox2.Controls.Add(this.cmbMTLMode);
-            this.groupBox2.Controls.Add(this.chkUseMTL);
-            this.groupBox2.Controls.Add(this.chkSplitGenericMap);
-            this.groupBox2.Controls.Add(this.gMTL);
-            this.groupBox2.Location = new System.Drawing.Point(8, 50);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(4);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox2.Size = new System.Drawing.Size(572, 241);
-            this.groupBox2.TabIndex = 24;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "                                      ";
+            this.gMapTransitions.Controls.Add(this.panSplitInterval);
+            this.gMapTransitions.Controls.Add(this.cmbMTLMode);
+            this.gMapTransitions.Controls.Add(this.chkUseMTL);
+            this.gMapTransitions.Controls.Add(this.chkSplitGenericMap);
+            this.gMapTransitions.Controls.Add(this.gMTL);
+            this.gMapTransitions.Location = new System.Drawing.Point(8, 50);
+            this.gMapTransitions.Margin = new System.Windows.Forms.Padding(4);
+            this.gMapTransitions.Name = "gMapTransitions";
+            this.gMapTransitions.Padding = new System.Windows.Forms.Padding(4);
+            this.gMapTransitions.Size = new System.Drawing.Size(572, 241);
+            this.gMapTransitions.TabIndex = 24;
+            this.gMapTransitions.TabStop = false;
+            this.gMapTransitions.Text = "                                      ";
             // 
-            // panel2
+            // panSplitInterval
             // 
-            this.panel2.Controls.Add(this.lblMaps);
-            this.panel2.Controls.Add(this.dmnSplitInterval);
-            this.panel2.Controls.Add(this.chkUseInterval);
-            this.panel2.Location = new System.Drawing.Point(8, 23);
-            this.panel2.Margin = new System.Windows.Forms.Padding(0);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(251, 30);
-            this.panel2.TabIndex = 6;
+            this.panSplitInterval.Controls.Add(this.lblMaps);
+            this.panSplitInterval.Controls.Add(this.dmnSplitInterval);
+            this.panSplitInterval.Controls.Add(this.chkUseInterval);
+            this.panSplitInterval.Location = new System.Drawing.Point(8, 23);
+            this.panSplitInterval.Margin = new System.Windows.Forms.Padding(0);
+            this.panSplitInterval.Name = "panSplitInterval";
+            this.panSplitInterval.Size = new System.Drawing.Size(251, 30);
+            this.panSplitInterval.TabIndex = 6;
             // 
             // lblMaps
             // 
@@ -649,7 +651,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkUseInterval.Location = new System.Drawing.Point(4, 4);
             this.chkUseInterval.Margin = new System.Windows.Forms.Padding(4);
             this.chkUseInterval.Name = "chkUseInterval";
-            this.chkUseInterval.Size = new System.Drawing.Size(64, 20);
+            this.chkUseInterval.Size = new System.Drawing.Size(61, 20);
             this.chkUseInterval.TabIndex = 12;
             this.chkUseInterval.Text = "Every";
             this.chkUseInterval.UseVisualStyleBackColor = true;
@@ -673,7 +675,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkUseMTL.Location = new System.Drawing.Point(23, 62);
             this.chkUseMTL.Margin = new System.Windows.Forms.Padding(4);
             this.chkUseMTL.Name = "chkUseMTL";
-            this.chkUseMTL.Size = new System.Drawing.Size(56, 20);
+            this.chkUseMTL.Size = new System.Drawing.Size(53, 20);
             this.chkUseMTL.TabIndex = 13;
             this.chkUseMTL.Text = "Only";
             this.chkUseMTL.UseVisualStyleBackColor = true;
@@ -700,7 +702,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.label1.Location = new System.Drawing.Point(4, 144);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(299, 17);
+            this.label1.Size = new System.Drawing.Size(223, 13);
             this.label1.TabIndex = 28;
             this.label1.Text = "Enter a single asterisk (*) to signify \"any map\".";
             // 
@@ -810,9 +812,9 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkAllowAddAutoStart.Location = new System.Drawing.Point(13, -1);
             this.chkAllowAddAutoStart.Margin = new System.Windows.Forms.Padding(4);
             this.chkAllowAddAutoStart.Name = "chkAllowAddAutoStart";
-            this.chkAllowAddAutoStart.Size = new System.Drawing.Size(151, 20);
+            this.chkAllowAddAutoStart.Size = new System.Drawing.Size(157, 20);
             this.chkAllowAddAutoStart.TabIndex = 14;
-            this.chkAllowAddAutoStart.Text = "Also Auto-Start when";
+            this.chkAllowAddAutoStart.Text = "Also Auto-Start when...";
             this.chkAllowAddAutoStart.UseVisualStyleBackColor = true;
             // 
             // tableAdditionalAutoStart
@@ -896,11 +898,11 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             // tabPgMisc
             // 
             this.tabPgMisc.Controls.Add(this.tableLayoutPanel8);
-            this.tabPgMisc.Location = new System.Drawing.Point(4, 25);
+            this.tabPgMisc.Location = new System.Drawing.Point(4, 39);
             this.tabPgMisc.Margin = new System.Windows.Forms.Padding(4);
             this.tabPgMisc.Name = "tabPgMisc";
             this.tabPgMisc.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPgMisc.Size = new System.Drawing.Size(607, 618);
+            this.tabPgMisc.Size = new System.Drawing.Size(607, 604);
             this.tabPgMisc.TabIndex = 1;
             this.tabPgMisc.Text = "Miscellaneous";
             this.tabPgMisc.UseVisualStyleBackColor = true;
@@ -923,7 +925,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 126F));
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 277F));
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 15F));
-            this.tableLayoutPanel8.Size = new System.Drawing.Size(599, 610);
+            this.tableLayoutPanel8.Size = new System.Drawing.Size(599, 596);
             this.tableLayoutPanel8.TabIndex = 30;
             // 
             // gbAdditionalTimer
@@ -978,7 +980,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.label2.Location = new System.Drawing.Point(4, 103);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(421, 17);
+            this.label2.Size = new System.Drawing.Size(315, 13);
             this.label2.TabIndex = 27;
             this.label2.Text = "SourceSplit must be loaded in the Layout Edtior for these to work.\r\n";
             // 
@@ -1048,7 +1050,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.groupBox5.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox5.Size = new System.Drawing.Size(575, 92);
+            this.groupBox5.Size = new System.Drawing.Size(574, 92);
             this.groupBox5.TabIndex = 29;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Save/Load Handling";
@@ -1059,9 +1061,9 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.label4.Location = new System.Drawing.Point(64, 57);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(138, 16);
+            this.label4.Size = new System.Drawing.Size(222, 16);
             this.label4.TabIndex = 2;
-            this.label4.Text = "Ticks to add per Load";
+            this.label4.Text = "Ticks to add to IGT per finished load";
             // 
             // gbMapTimes
             // 
@@ -1103,7 +1105,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkPrintDemoInfo.Location = new System.Drawing.Point(12, 0);
             this.chkPrintDemoInfo.Margin = new System.Windows.Forms.Padding(4);
             this.chkPrintDemoInfo.Name = "chkPrintDemoInfo";
-            this.chkPrintDemoInfo.Size = new System.Drawing.Size(229, 20);
+            this.chkPrintDemoInfo.Size = new System.Drawing.Size(226, 20);
             this.chkPrintDemoInfo.TabIndex = 0;
             this.chkPrintDemoInfo.Text = "Print info of Demos after recording";
             this.chkPrintDemoInfo.UseVisualStyleBackColor = true;
@@ -1167,11 +1169,11 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             // tabPage1
             // 
             this.tabPage1.Controls.Add(this.tableLayoutPanel6);
-            this.tabPage1.Location = new System.Drawing.Point(4, 25);
+            this.tabPage1.Location = new System.Drawing.Point(4, 39);
             this.tabPage1.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(4);
-            this.tabPage1.Size = new System.Drawing.Size(607, 618);
+            this.tabPage1.Size = new System.Drawing.Size(607, 604);
             this.tabPage1.TabIndex = 2;
             this.tabPage1.Text = "About";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -1194,7 +1196,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 69F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 82F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 33F));
-            this.tableLayoutPanel6.Size = new System.Drawing.Size(599, 610);
+            this.tableLayoutPanel6.Size = new System.Drawing.Size(599, 596);
             this.tableLayoutPanel6.TabIndex = 0;
             // 
             // groupBox3
@@ -1239,7 +1241,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.label7.Location = new System.Drawing.Point(8, 15);
             this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(202, 46);
+            this.label7.Size = new System.Drawing.Size(163, 37);
             this.label7.TabIndex = 0;
             this.label7.Text = "SourceSplit";
             // 
@@ -1438,22 +1440,33 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             // 
             this.labVersion.AutoSize = true;
             this.labVersion.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labVersion.Location = new System.Drawing.Point(596, 12);
+            this.labVersion.Location = new System.Drawing.Point(534, 28);
             this.labVersion.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labVersion.Name = "labVersion";
             this.labVersion.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.labVersion.Size = new System.Drawing.Size(15, 15);
+            this.labVersion.Size = new System.Drawing.Size(14, 12);
             this.labVersion.TabIndex = 29;
             this.labVersion.Text = "v.";
             this.labVersion.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // butHelp
+            // 
+            this.butHelp.Location = new System.Drawing.Point(546, 17);
+            this.butHelp.Name = "butHelp";
+            this.butHelp.Size = new System.Drawing.Size(75, 28);
+            this.butHelp.TabIndex = 30;
+            this.butHelp.Text = "Help";
+            this.butHelp.UseVisualStyleBackColor = true;
+            this.butHelp.Click += new System.EventHandler(this.butHelp_Click);
             // 
             // SourceSplitSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.butHelp);
             this.Controls.Add(this.labVersion);
             this.Controls.Add(this.tabCtrlMaster);
-            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Margin = new System.Windows.Forms.Padding(4, 14, 4, 4);
             this.Name = "SourceSplitSettings";
             this.Padding = new System.Windows.Forms.Padding(9);
             this.Size = new System.Drawing.Size(633, 665);
@@ -1462,12 +1475,12 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.tabCtrlMaster.ResumeLayout(false);
             this.tabPgAutoStartReset.ResumeLayout(false);
             this.tlpAutoStartEndReset.ResumeLayout(false);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
-            this.panel2.ResumeLayout(false);
-            this.panel2.PerformLayout();
+            this.gAutoSplit.ResumeLayout(false);
+            this.gAutoSplit.PerformLayout();
+            this.gMapTransitions.ResumeLayout(false);
+            this.gMapTransitions.PerformLayout();
+            this.panSplitInterval.ResumeLayout(false);
+            this.panSplitInterval.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dmnSplitInterval)).EndInit();
             this.gMTL.ResumeLayout(false);
             this.gMTL.PerformLayout();
@@ -1529,7 +1542,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         private System.Windows.Forms.TabControl tabCtrlMaster;
         private System.Windows.Forms.TabPage tabPgAutoStartReset;
         private System.Windows.Forms.TableLayoutPanel tlpAutoStartEndReset;
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox gAutoSplit;
         private System.Windows.Forms.GroupBox gbAutoStartEndReset;
         private System.Windows.Forms.CheckBox chkAutoStart;
         private System.Windows.Forms.TabPage tabPgMisc;
@@ -1565,7 +1578,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         private System.Windows.Forms.DataGridViewTextBoxColumn colToMap;
         private System.Windows.Forms.ComboBox cmbMTLMode;
         private System.Windows.Forms.CheckBox chkUseMTL;
-        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Panel panSplitInterval;
         private System.Windows.Forms.Label lblMaps;
         private System.Windows.Forms.NumericUpDown dmnSplitInterval;
         private System.Windows.Forms.CheckBox chkUseInterval;
@@ -1610,7 +1623,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.CheckBox chkAutoSplitEnabled;
-        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.GroupBox gMapTransitions;
         private System.Windows.Forms.CheckBox chkFirstMapReset;
         private System.Windows.Forms.GroupBox groupBox8;
         private System.Windows.Forms.Button butSetup;
@@ -1621,5 +1634,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         private System.Windows.Forms.TableLayoutPanel tableCoolInfo;
         private System.Windows.Forms.Label labRunningFor;
         private System.Windows.Forms.Label labCurrentGame;
+        private System.Windows.Forms.Button butHelp;
     }
 }

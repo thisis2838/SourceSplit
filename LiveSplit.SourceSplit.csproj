@@ -75,6 +75,15 @@
     <Compile Include="ComponentHandling\SourceSplitComponent__Graphics.cs" />
     <Compile Include="ComponentHandling\SourceSplitComponent__SplitOperations.cs" />
     <Compile Include="ComponentHandling\SourceSplitComponent__TimerResponses.cs" />
+    <Compile Include="ComponentHandling\SourceSplitSettingsHelp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ComponentHandling\SourceSplitSettingsHelp.Designer.cs">
+      <DependentUpon>SourceSplitSettingsHelp.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ComponentHandling\SourceSplitSettings__SettingsDescs.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="ComponentHandling\SourceSplitSettings__Settings.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -274,6 +283,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ComponentHandling\SourceSplitSettings.resx">
       <DependentUpon>SourceSplitSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ComponentHandling\SourceSplitSettingsHelp.resx">
+      <DependentUpon>SourceSplitSettingsHelp.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
