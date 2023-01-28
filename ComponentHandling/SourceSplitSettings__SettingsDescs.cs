@@ -63,7 +63,7 @@ The left-hand side of each line is the source map, and the corresponding right-h
 Select and type in the bottom-most row to add a new entry. Select an entire line and hit Delete to remove that line. 
 Double click on a cell to begin editing it. Select one or more cells and hit backspace to clear them.
 
-Enter '*' to signify any map.");
+Enter a single asterisk (*) to signify any map.");
 
             Instance.SetName(cmbMTLMode, "Map Transition Filtering Type");
             Instance.SetDescription(cmbMTLMode,

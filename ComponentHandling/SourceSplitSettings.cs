@@ -39,16 +39,21 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkAllowAddAutoStart.CheckedChanged += UpdateDisabledControls;
             this.chkSplitLevelTrans.CheckedChanged += UpdateDisabledControls;
 
-            var oldPos = butHelp.Location.X;
-            this.labVersion.Text =
+
+            string versionString =
 #if DEBUG
                 "DEBUG " +
 #endif
-                $"v. {typeof(SourceSplitFactory).Assembly.GetName().Version} " +
-                $"({Properties.Resources.BuildDate.Trim(' ', '\n', '\r')})";
-            this.labVersion.Location = new Point(oldPos - (labVersion.Width + 1), labVersion.Location.Y);
-            this.Name = $"SourceSplit {labVersion.Text}";
-            this.labVersionCredits.Text = labVersion.Text;
+                $"version {typeof(SourceSplitFactory).Assembly.GetName().Version}";
+            string buildDate = Properties.Resources.BuildDate.Trim(' ', '\n', '\r');
+
+            var oldPos = butHelp.Location;
+            var oldSize = butHelp.Size;
+            this.labVersion.Text = $"{versionString}\r\tBuild time: {buildDate}";
+            this.labVersion.Location = new Point(oldPos.X - (labVersion.Width + 1), oldPos.Y - (labVersion.Height - oldSize.Height));
+
+            this.labVersionCredits.Text = $"{versionString} ({buildDate})";
+            this.Name = "SourceSplit " + this.labVersionCredits.Text;
 
             this.gbAdditionalTimer.Enabled = isLayout;
 
@@ -66,7 +71,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                     UpdateRunningForSplash();
                 }
             };
-
             (tabCtrlMaster as Control).Text = "root";
 
             SetCurrentGame(null);
@@ -108,7 +112,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                 }
             }
             addHelpCallback(this);
-
             SetSettingDescriptions();
 
             Application.AddMessageFilter(this);

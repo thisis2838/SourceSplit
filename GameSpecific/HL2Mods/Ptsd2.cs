@@ -8,7 +8,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
     class Ptsd2 : GameSupport
     {
-        // how to match with demos:
         // start: after output to unfreeze player is fired
         // ending: when the byte for if a video is playing turns from 0 to 1
 
