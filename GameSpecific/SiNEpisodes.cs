@@ -6,7 +6,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
 {
     class SiNEpisodes : GameSupport
     {
-        // how to match with demos:
         // start: on first map
 
         public SiNEpisodes()

@@ -11,7 +11,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
 {
     class BMSRetail : GameSupport
     {
-        // how to match with demos:
         // start: on map load
         // xen start: when view entity changes back to the player's
         // ending: first tick nihilanth's health is zero

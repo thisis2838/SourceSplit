@@ -9,7 +9,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
 {
     class HL2 : GameSupport
     {
-        // how to match with demos:
         // start: first tick when your position is at -9419 -2483 22 (cl_showpos 1)
         // ending: first tick when screen flashes white
 

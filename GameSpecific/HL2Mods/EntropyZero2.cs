@@ -7,7 +7,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
     class EntropyZero2 : GameSupport
     {
-        // how to match with demos:
         // start: on first map load
         // ending: when the final logic_relay is triggered
 

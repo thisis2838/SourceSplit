@@ -6,7 +6,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.BMSMods
 {
     class HazardCourse : GameSupport
     {
-        // how to match with demos:
         // start: when the tram door is opening
         // end: when the flash sprites disappears
 

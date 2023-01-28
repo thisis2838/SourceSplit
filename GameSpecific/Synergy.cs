@@ -10,7 +10,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
 {
     class Synergy : GameSupport
     {
-        // how to match with demos:
         // start: on map load
 
         private CustomCommand _autosplitIL = new CustomCommand("ilstart", "0");

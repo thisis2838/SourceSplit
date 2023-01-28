@@ -10,7 +10,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
 {
     class TheFlashVersion : PortalBase
     {
-        // how to match with demos:
         // start: first tick when your position is at 0 168 129 (cl_showpos 1)
         // ending: first tick player is slowed down by the ending trigger
 

@@ -7,54 +7,13 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
     class Localmotive : GameSupport
     {
-        // start: on first map
-        // ending: when the end text model's skin code is 10 and player view entity switches to the final camera
-
-        private int _camIndex;
-        private int _spriteIndex = -1;
-
         public Localmotive()
         {
             this.AddFirstMap("eli_final");
-        }
+            this.AddLastMap("eli_final");
 
-        protected override void OnSessionStartInternal(GameState state, TimerActions actions)
-        {
-            if (IsFirstMap)
-            {
-                _camIndex = state.GameEngine.GetEntIndexByName("car_view");
-                _spriteIndex = state.GameEngine.GetEntIndexByName("exit_button_sprite");
-            }
-        }
-
-
-        protected override void OnUpdateInternal(GameState state, TimerActions actions)
-        {
-            if (OnceFlag)
-                return;
-
-            if (this.IsFirstMap)
-            {
-                if (state.PlayerViewEntityIndex.ChangedFromTo(_camIndex, 1))
-                {
-                    actions.Start();
-                    Debug.WriteLine("localmotive start");
-                    return;
-                }
-                if (_spriteIndex != -1)
-                {
-                    if (state.GameEngine.GetEntityByIndex(_spriteIndex) == System.IntPtr.Zero)
-                    {
-                        actions.End();
-                        Debug.WriteLine($"localmotive end");
-                        _spriteIndex = -1;
-                        OnceFlag = true;
-                        return;
-                    }
-                }
-            }
-
-            return;
+            WhenCameraSwitchesToPlayer(ActionType.AutoStart, "car_view");
+            WhenEntityIsKilled(ActionType.AutoEnd, "exit_button_sprite");
         }
     }
 }

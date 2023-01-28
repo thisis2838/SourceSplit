@@ -6,7 +6,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.BMSMods
 {
     class FurtherData : GameSupport
     {
-        // how to match with demos:
         // start: on first map
         // end: when the final output is queued 
 

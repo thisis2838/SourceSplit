@@ -11,7 +11,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
 {
     class LostCoast : GameSupport
     {
-        // how to match with demos:
         // start: when the input to kill the blackout entity's parent is fired
         // ending: when the final output is fired by the trigger_once
 

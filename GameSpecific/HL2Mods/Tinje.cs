@@ -7,7 +7,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
     class Tinje : GameSupport
     {
-        // how to match with demos:
         // start: on map load
         // end: when final guard is killed
 
