@@ -40,8 +40,11 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkSplitLevelTrans.CheckedChanged += UpdateDisabledControls;
 
             var oldPos = butHelp.Location.X;
-            this.labVersion.Text = 
-                $"version {typeof(SourceSplitFactory).Assembly.GetName().Version} " +
+            this.labVersion.Text =
+#if DEBUG
+                "DEBUG " +
+#endif
+                $"v. {typeof(SourceSplitFactory).Assembly.GetName().Version} " +
                 $"({Properties.Resources.BuildDate.Trim(' ', '\n', '\r')})";
             this.labVersion.Location = new Point(oldPos - (labVersion.Width + 1), labVersion.Location.Y);
             this.Name = $"SourceSplit {labVersion.Text}";
