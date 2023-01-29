@@ -13,25 +13,18 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
         private int _laggedMovementOffset = -1;
         private MemoryWatcher<float> _playerLaggedMoveValue;
-        private ValueWatcher<float> _endSplit = new ValueWatcher<float>();
 
         public ForestTrain()
         {
             AddFirstMap("foresttrain");
+            AddLastMap("foresttrain");
+
+            WhenOutputIsQueued(ActionType.AutoEnd, "cred");
         }
 
         protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
-            ProcessModuleWow64Safe server = state.GetModule("server.dll");
-            var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
-            if (GameMemory.GetBaseEntityMemberOffset
-            (
-                "m_flLaggedMovementValue", 
-                state.GameProcess, 
-                scanner, 
-                out _laggedMovementOffset
-            ))
-                Debug.WriteLine("CBasePlayer::m_flLaggedMovementValue offset = 0x" + _laggedMovementOffset.ToString("X"));
+            GameMemory.GetBaseEntityMemberOffset("m_flLaggedMovementValue", state, state.GameEngine.ServerModule, out _laggedMovementOffset);
         }
 
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
@@ -40,8 +33,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             {
                 _playerLaggedMoveValue = new MemoryWatcher<float>(state.PlayerEntInfo.EntityPtr + _laggedMovementOffset);
                 _playerLaggedMoveValue.Update(state.GameProcess);
-
-                _endSplit.Current = state.GameEngine.GetOutputFireTime("cred");
             }
         }
 
@@ -59,14 +50,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                 {
                     Debug.WriteLine("forest train start");
                     actions.Start();
-                }
-
-                _endSplit.Current = state.GameEngine.GetOutputFireTime("cred");
-                if (_endSplit.ChangedFrom(0))
-                {
-                    Debug.WriteLine("forest train end");
-                    actions.End();
-                    OnceFlag = true;
                 }
             }
         }

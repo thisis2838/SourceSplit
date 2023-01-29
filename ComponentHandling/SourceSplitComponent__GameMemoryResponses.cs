@@ -26,6 +26,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         {
             _gameMemory.OnSetTickRate += gameMemory_OnSetTickRate;
             _gameMemory.OnSetTimingSpecifics += gameMemory_OnSetTimingSpecifics;
+            _gameMemory.OnGameAttached += gameMemory_OnGameAttached; ;
             _gameMemory.OnSessionTimeUpdate += gameMemory_OnSessionTimeUpdate;
             _gameMemory.TimerActions.OnPlayerGainedControl += gameMemory_OnPlayerGainedControl;
             _gameMemory.TimerActions.OnPlayerLostControl += gameMemory_OnPlayerLostControl;
@@ -37,6 +38,11 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             _gameMemory.OnMiscTime += gameMemory_OnMiscTime;
             _gameMemory.OnGameStatusChanged += _gameMemory_OnGameStatusChanged;
             _gameMemory.OnUpdateCurrentDemoInfoEvent += _gameMemory_OnUpdateCurrentDemoInfoEvent;
+        }
+
+        private void gameMemory_OnGameAttached(object sender, OnGameAttachedEventArgs e)
+        {
+            SettingControl.SetCurrentGame(e.GameSupportType);
         }
 
         private void _gameMemory_OnUpdateCurrentDemoInfoEvent(object sender, CurrentDemoInfoEvent e)

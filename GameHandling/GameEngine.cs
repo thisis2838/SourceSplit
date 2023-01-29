@@ -43,7 +43,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         public int BaseEntityAbsOriginOffset;
         public int BaseEntityTargetNameOffset;
         public int BaseEntityParentHandleOffset;
-        public int BasePlayerViewEntity;
+        public int BasePlayerViewEntityOffset;
         #endregion
 
         #region MODULES
@@ -51,6 +51,10 @@ namespace LiveSplit.SourceSplit.GameHandling
         public ProcessModuleWow64Safe ClientModule;
         public ProcessModuleWow64Safe EngineModule;
         #endregion
+
+        // FIXME: this is per-engine!!! find a way to sigscan for this...
+        public uint EntIndexMask = 0xFFF;
+
 
         public Process GameProcess;
 
@@ -66,12 +70,6 @@ namespace LiveSplit.SourceSplit.GameHandling
             ScanMiscellaneous();
 
             GetOtherOffsets();
-
-            Debug.WriteLine("CBaseEntity::m_fFlags offset = 0x" + BaseEntityFlagsOffset.ToString("X"));
-            Debug.WriteLine("CBaseEntity::m_vecAbsOrigin offset = 0x" + BaseEntityAbsOriginOffset.ToString("X"));
-            Debug.WriteLine("CBaseEntity::m_iName offset = 0x" + BaseEntityTargetNameOffset.ToString("X"));
-            Debug.WriteLine("CBaseEntity::m_pParent offset = 0x" + BaseEntityParentHandleOffset.ToString("X"));
-            Debug.WriteLine("CBasePlayer::m_hViewEntity offset = 0x" + BasePlayerViewEntity.ToString("X"));
 
             return true;
         }
@@ -102,7 +100,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             if (!(
                 GetBaseEntityMemberOffset("m_fFlags", GameProcess, scanner, out BaseEntityFlagsOffset) &&
                 GetBaseEntityMemberOffset("m_vecAbsOrigin", GameProcess, scanner, out BaseEntityAbsOriginOffset) &&
-                GetBaseEntityMemberOffset("m_hViewEntity", GameProcess, scanner, out BasePlayerViewEntity) &&
+                GetBaseEntityMemberOffset("m_hViewEntity", GameProcess, scanner, out BasePlayerViewEntityOffset) &&
                 GetBaseEntityMemberOffset("m_iName", GameProcess, scanner, out BaseEntityTargetNameOffset)
                 ))
                 return false;
@@ -209,7 +207,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 GetBaseEntityMemberOffset("m_fFlags", GameProcess, scanner, out BaseEntityFlagsOffset) &&
                 GetBaseEntityMemberOffset("m_iName", GameProcess, scanner, out BaseEntityTargetNameOffset) &&
                 GetBaseEntityMemberOffset("m_vecAbsOrigin", GameProcess, scanner, out BaseEntityAbsOriginOffset) &&
-                (_isBeta || GetBaseEntityMemberOffset("m_hViewEntity", GameProcess, scanner, out BasePlayerViewEntity))
+                (_isBeta || GetBaseEntityMemberOffset("m_hViewEntity", GameProcess, scanner, out BasePlayerViewEntityOffset))
                 ))
                 return false;
 

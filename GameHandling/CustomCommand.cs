@@ -30,20 +30,21 @@ namespace LiveSplit.SourceSplit.GameHandling
             set => _longDesc = value;
         }
 
-        public bool Archived { get; set; }
+        public bool Archived { get; set; } = true;
+        public bool Hidden { get; set; } = false;
 
         public bool Boolean { get; set; }
         public string String { get; set; }
         public int Integer { get; set; }
         public float Float { get; set; }
 
-        private Action _callback = null;
+        private Action<string> _callback = null;
         private static string[] _noVars = new string[] { "0", "false", "" };
 
         public CustomCommand(
             string name, 
             string def, string description = "", string longDescription = null, 
-            Action callback = null, 
+            Action<string> callback = null, 
             bool archived = false)
         {
             Name = name;
@@ -56,13 +57,13 @@ namespace LiveSplit.SourceSplit.GameHandling
 
         public bool Update(string input)
         {
-            if (string.IsNullOrWhiteSpace(input)) return false;
+            if (string.IsNullOrWhiteSpace(input)) 
+                return false;
 
+            _callback?.Invoke(input);
             Parse(input);
 
-            _callback?.Invoke();
-            SystemSounds.Asterisk.Play();
-
+            if (!Hidden) SystemSounds.Asterisk.Play();
             return true;
         }
 
@@ -140,7 +141,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             Update(state);
             SetAliases();
 
-            if (Commands.Count() == 0) return;
+            if (Commands.Where(x => !x.Hidden).Count() == 0) return;
             SendConsoleMessage(
 @$"//////////////////////////////////////////////////////////////////////////////////
 
@@ -166,12 +167,21 @@ There are {Commands.Count()} command(s) available.
 
         private void GetExecPtr(GameState state)
         {
-            var tier0 = state.GetModule("tier0.dll");
-            var tier0Symbols = WinUtils.AllSymbols(state.GameProcess, tier0);
+            try
+            {
+                var tier0 = state.GetModule("tier0.dll");
+                var tier0Symbols = WinUtils.AllSymbols(state.GameProcess, tier0);
 
-            _conMsgPtr = (IntPtr)tier0Symbols.Where(x => x.Name == "ConMsg").FirstOrDefault().Address;
-            if (_conMsgPtr != IntPtr.Zero) Debug.WriteLine($"ConMsg found at {_conMsgPtr.ToString("X")}");
+                _conMsgPtr = (IntPtr)tier0Symbols.Where(x => x.Name == "ConMsg").FirstOrDefault().Address;
+            } 
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Couldn't find ConMsg pointer: {ex}");
+                _conMsgPtr = IntPtr.Zero;   
+            }
 
+            if (_conMsgPtr != IntPtr.Zero) 
+                Debug.WriteLine($"ConMsg found at {_conMsgPtr.ToString("X")}");
         }
 
         public void Update(GameState state)
@@ -267,7 +277,10 @@ There are {Commands.Count()} command(s) available.
                         SourceSplitComponent.Settings.SetMiscSetting($"{_gameDir}__{cmd.Name}", cmd.String);
                     }
 
-                    SendConsoleMessage($"{cmd.Name} set to \"{cmd.String}\"!\n");
+                    if (!cmd.Hidden)
+                    {
+                        SendConsoleMessage($"{cmd.Name} set to \"{cmd.String}\"!\n");
+                    }
                 }
 
                 return true;
@@ -308,8 +321,8 @@ There are {Commands.Count()} command(s) available.
         {
             SendConsoleMessage
             (
-                $"Listing {Commands.Count()} command(s):\n" +
-                Commands.Aggregate("", (a, b) => $"{a}\t- {b}\n\t  {b.Description}\n").TrimEnd('\n')
+                $"Listing {Commands.Where(x => !x.Hidden).Count()} command(s):\n" +
+                Commands.Where(x => !x.Hidden).Aggregate("", (a, b) => $"{a}\t- {b}\n\t  {b.Description}\n").TrimEnd('\n')
             );
         }
 

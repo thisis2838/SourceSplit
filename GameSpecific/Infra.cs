@@ -8,7 +8,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
 {
     class Infra : GameSupport
     {
-        // how to match with demos:
         // start: on map load
         // endings: all on fades
         public Infra()

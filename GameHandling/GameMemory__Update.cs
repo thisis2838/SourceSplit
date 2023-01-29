@@ -83,13 +83,13 @@ namespace LiveSplit.SourceSplit.GameHandling
                     // view entity
                     const int ENT_ENTRY_MASK = 0x7FF;
                     int viewEntityHandle; // EHANDLE
-                    game.ReadValue(state.PlayerEntInfo.EntityPtr + engine.BasePlayerViewEntity, out viewEntityHandle);
+                    game.ReadValue(state.PlayerEntInfo.EntityPtr + engine.BasePlayerViewEntityOffset, out viewEntityHandle);
                     state.PlayerViewEntityIndex.Current = viewEntityHandle == -1
                         ? GameState.ENT_INDEX_PLAYER
                         : viewEntityHandle & ENT_ENTRY_MASK;
 
                     // parent entity
-                    state.PlayerParentEntityHandle.Current = game.ReadValue<int>(state.PlayerEntInfo.EntityPtr + engine.BaseEntityParentHandleOffset);
+                    state.PlayerParentEntityHandle.Current = game.ReadValue<uint>(state.PlayerEntInfo.EntityPtr + engine.BaseEntityParentHandleOffset);
 
                     // if it's the first tick, don't use stuff from the previous map
                     if (firstTick)

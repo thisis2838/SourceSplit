@@ -50,6 +50,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Speech" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
@@ -75,6 +76,15 @@
     <Compile Include="ComponentHandling\SourceSplitComponent__Graphics.cs" />
     <Compile Include="ComponentHandling\SourceSplitComponent__SplitOperations.cs" />
     <Compile Include="ComponentHandling\SourceSplitComponent__TimerResponses.cs" />
+    <Compile Include="ComponentHandling\SourceSplitSettingsHelp.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ComponentHandling\SourceSplitSettingsHelp.Designer.cs">
+      <DependentUpon>SourceSplitSettingsHelp.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ComponentHandling\SourceSplitSettings__SettingsDescs.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="ComponentHandling\SourceSplitSettings__Settings.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -85,17 +95,71 @@
     <Compile Include="GameHandling\GameEngine__Signatures.cs" />
     <Compile Include="GameHandling\GameMemory__UIEvents.cs" />
     <Compile Include="GameHandling\GameMemory__Update.cs" />
+    <Compile Include="GameHandling\GameSupport__AutoStartStopTemplates.cs" />
     <Compile Include="GameHandling\GameSupport__Functions.cs" />
     <Compile Include="GameHandling\GameSupport__Cases.cs" />
     <Compile Include="ComponentHandling\Session.cs" />
-    <Compile Include="GameSpecific\HL2Mods\CIty17IsFarAway.cs" />
+    <Compile Include="GameSpecific\HL2Mods\ThundersLeaves.cs" />
+    <Compile Include="GameSpecific\HL2Mods\HumanError.cs" />
+    <Compile Include="GameSpecific\HL2Mods\SnowdropEscape.cs" />
+    <Compile Include="GameSpecific\HL2Mods\LastZombie.cs" />
+    <Compile Include="GameSpecific\HL2Mods\CausalityEffect.cs" />
+    <Compile Include="GameSpecific\HL2Mods\BearPartyAdventure.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Whoopservatory.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Tr1p.cs" />
+    <Compile Include="GameSpecific\HL2Mods\TheLighthouse.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Station51.cs" />
+    <Compile Include="GameSpecific\HL2Mods\SphericalNightmares.cs" />
+    <Compile Include="GameSpecific\HL2Mods\TheRoadToAbyss.cs" />
+    <Compile Include="GameSpecific\HL2Mods\ResearchAndDevelopment.cs" />
+    <Compile Include="GameSpecific\HL2Mods\PersonOfInterest.cs" />
+    <Compile Include="GameSpecific\HL2Mods\RavenholmTheLostChapter.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Penetration.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Overawe.cs" />
+    <Compile Include="GameSpecific\HL2Mods\MissileStrikeImminent.cs" />
+    <Compile Include="GameSpecific\HL2Mods\MountainCaves.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Siren.cs" />
+    <Compile Include="GameSpecific\HL2Mods\RiotAct.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Depot.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Expectation.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Daylight.cs" />
+    <Compile Include="GameSpecific\HL2Mods\CombineDestiny.cs" />
+    <Compile Include="GameSpecific\HL2Mods\CallIn.cs" />
+    <Compile Include="GameSpecific\HL2Mods\RTSLPacks.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Awakening.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Aberration.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Uzvara.cs" />
+    <Compile Include="GameSpecific\HL2Mods\CloneMachine.cs" />
+    <Compile Include="GameSpecific\HL2Mods\DangerousWorld.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Dark17.cs" />
+    <Compile Include="GameSpecific\HL2Mods\City17IsFarAway.cs" />
+    <Compile Include="GameSpecific\HL2Mods\DaBaby.cs" />
+    <Compile Include="GameSpecific\HL2Mods\EpisodeThree.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Exit2.cs" />
+    <Compile Include="GameSpecific\HL2Mods\GetALife.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Grey.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Precursor.cs" />
+    <Compile Include="GameSpecific\HL2Mods\SchoolAdventures.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Sebastian.cs" />
+    <Compile Include="GameSpecific\HL2Mods\SouthernmostCombine.cs" />
+    <Compile Include="GameSpecific\HL2Mods\NTKS_Demo.cs" />
+    <Compile Include="GameSpecific\HL2Mods\JollysHardcoreMod.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Offshore.cs" />
+    <Compile Include="GameSpecific\HL2Mods\VeryHardMod.cs" />
+    <Compile Include="GameSpecific\HL2Mods\UpmineStruggle.cs" />
+    <Compile Include="GameSpecific\HL2Mods\HellsMines.cs" />
+    <Compile Include="GameSpecific\HL2Mods\DarkIntervention.cs" />
+    <Compile Include="GameSpecific\HL2Mods\TheCitizen.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Reject.cs" />
+    <Compile Include="GameSpecific\HL2Mods\BackwardsMod.cs" />
+    <Compile Include="GameSpecific\HL2Mods\NightmareHouse.cs" />
+    <Compile Include="GameSpecific\HL2Mods\NightmareHouse2.cs" />
     <Compile Include="GameSpecific\HL2Mods\AvenueOdessa.cs" />
     <Compile Include="GameSpecific\HL2Mods\Amalgam.cs" />
     <Compile Include="GameSpecific\HL2Mods\Evacuation.cs" />
     <Compile Include="GameSpecific\HL2Mods\Minerva.cs" />
     <Compile Include="GameSpecific\HL2Mods\ForestTrain.cs" />
     <Compile Include="GameSpecific\HL2Mods\A2BTrajectory.cs" />
-    <Compile Include="GameSpecific\HL2Mods\EpisodeThree.cs" />
     <Compile Include="GameSpecific\HL2Mods\DarkEvening.cs" />
     <Compile Include="GameSpecific\HL2Mods\EntropyZero2.cs" />
     <Compile Include="GameSpecific\HL2Mods\Localmotive.cs" />
@@ -117,11 +181,9 @@
     <Compile Include="ComponentHandling\DetailedListView.Designer.cs">
       <DependentUpon>DetailedListView.cs</DependentUpon>
     </Compile>
-    <Compile Include="GameSpecific\HL2Mods\SouthernmostCombine.cs" />
     <Compile Include="GameHandling\CustomCommand.cs" />
     <Compile Include="GameSpecific\BMSMods\FurtherData.cs" />
     <Compile Include="GameSpecific\BMSMods\HazardCourse.cs" />
-    <Compile Include="GameSpecific\HL2Mods\DangerousWorld.cs" />
     <Compile Include="GameSpecific\SiNEpisodes.cs" />
     <Compile Include="GameSpecific\PortalMods\TheFlashVersion.cs" />
     <Compile Include="GameSpecific\PortalMods\ERROR.cs" />
@@ -136,15 +198,11 @@
     <Compile Include="GameSpecific\HL2Mods\1187Ep1.cs" />
     <Compile Include="GameSpecific\HL2Mods\Hangover.cs" />
     <Compile Include="GameSpecific\HL2Mods\GGEFC13.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Precursor.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Grey.cs" />
-    <Compile Include="GameSpecific\HL2Mods\GetALife.cs" />
     <Compile Include="GameSpecific\HL2Mods\Ptsd2.cs" />
     <Compile Include="GameSpecific\HL2Mods\Terminal7.cs" />
     <Compile Include="GameSpecific\HL2Mods\TheCitizen2AndReturns.cs" />
     <Compile Include="GameSpecific\HL2Mods\EntropyZero.cs" />
     <Compile Include="GameSpecific\HL2Mods\DeeperDown.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Others.cs" />
     <Compile Include="GameSpecific\HL2Mods\ExperimentalFuel.cs" />
     <Compile Include="GameSpecific\HL2Mods\Tinje.cs" />
     <Compile Include="GameSpecific\HL2Mods\TheLostCity.cs" />
@@ -153,11 +211,9 @@
     <Compile Include="GameSpecific\HL2Mods\Logistique.cs" />
     <Compile Include="GameSpecific\HL2Mods\KillTheMonk.cs" />
     <Compile Include="GameSpecific\HL2Mods\YearLongAlarm.cs" />
-    <Compile Include="GameSpecific\HL2Mods\DaBaby.cs" />
     <Compile Include="GameSpecific\HL2Mods\ICE.cs" />
     <Compile Include="GameSpecific\HL2Mods\DearEsther.cs" />
     <Compile Include="GameSpecific\HL2Mods\Crates.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Exit2.cs" />
     <Compile Include="GameSpecific\HL2Mods\DayHard.cs" />
     <Compile Include="GameSpecific\PortalMods\PortalPrelude.cs" />
     <Compile Include="GameSpecific\PortalMods\PortalPro.cs" />
@@ -228,6 +284,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ComponentHandling\SourceSplitSettings.resx">
       <DependentUpon>SourceSplitSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ComponentHandling\SourceSplitSettingsHelp.resx">
+      <DependentUpon>SourceSplitSettingsHelp.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

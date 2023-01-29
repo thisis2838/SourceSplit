@@ -12,11 +12,15 @@ using static LiveSplit.SourceSplit.Utilities.XMLUtils;
 using System.Drawing;
 using LiveSplit.SourceSplit.ComponentHandling;
 using static LiveSplit.SourceSplit.ComponentHandling.SourceSplitComponent;
+using System.Drawing.Imaging;
 
 namespace LiveSplit.SourceSplit.ComponentHandling
 {
-    public partial class SourceSplitSettings : UserControl
+    public partial class SourceSplitSettings : UserControl, IMessageFilter
     {
+        private System.Windows.Forms.Timer _updater = new System.Windows.Forms.Timer();
+        private string _runningForSplash = "";
+
         public SourceSplitSettings(bool isLayout)
         {
             this.InitializeComponent();
@@ -35,13 +39,21 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkAllowAddAutoStart.CheckedChanged += UpdateDisabledControls;
             this.chkSplitLevelTrans.CheckedChanged += UpdateDisabledControls;
 
-            this.labVersion.Text = 
-                $"version {typeof(SourceSplitFactory).Assembly.GetName().Version} " +
-                $"({Properties.Resources.BuildDate.Trim(' ', '\n', '\r')})";
 
-            this.labVersion.Location = new Point(470 - (labVersion.Width + 1), labVersion.Location.Y);
-            this.Name = $"SourceSplit {labVersion.Text}";
-            this.labVersionCredits.Text = labVersion.Text;
+            string versionString =
+#if DEBUG
+                "DEBUG " +
+#endif
+                $"version {typeof(SourceSplitFactory).Assembly.GetName().Version}";
+            string buildDate = Properties.Resources.BuildDate.Trim(' ', '\n', '\r');
+
+            var oldPos = butHelp.Location;
+            var oldSize = butHelp.Size;
+            this.labVersion.Text = $"{versionString}\r\tBuild time: {buildDate}";
+            this.labVersion.Location = new Point(oldPos.X - (labVersion.Width + 1), oldPos.Y - (labVersion.Height - oldSize.Height));
+
+            this.labVersionCredits.Text = $"{versionString} ({buildDate})";
+            this.Name = "SourceSplit " + this.labVersionCredits.Text;
 
             this.gbAdditionalTimer.Enabled = isLayout;
 
@@ -52,7 +64,16 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.dgvMapTransitions.CellBorderStyle = DataGridViewCellBorderStyle.SingleVertical;
             this.dgvMapTransitions.SelectionMode = DataGridViewSelectionMode.CellSelect;
 
-            this.tableCoolInfo.Invalidated += TableCoolInfo_Invalidated;
+            this.tabCtrlMaster.SelectedIndexChanged += (s, e) =>
+            {
+                if (tabCtrlMaster.SelectedIndex == tabCtrlMaster.TabCount - 1)
+                {
+                    UpdateRunningForSplash();
+                }
+            };
+            (tabCtrlMaster as Control).Text = "root";
+
+            SetCurrentGame(null);
 
             // HACKHACK: due to all the data bindings shenanigans, we need to load all the tab pages when opening the settings
             // so just give in...
@@ -64,9 +85,72 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                     Thread.Sleep(1);
                 }
             };
+
+            _updater.Interval = 20;
+            _updater.Tick += (s, e) =>
+            {
+                this.InvokeIfRequired(() => labRunningFor.Text = _runningForSplash + " " + SourceSplitUtils.ActiveTime.Elapsed.ToStringCustom());
+            };
+            _updater.Start();
+
+            this.Disposed += (s, e) =>
+            {
+                try
+                {
+                    _updater.Stop();
+                }
+                catch { } 
+            };
+
+            void addHelpCallback(Control ctrl)
+            {
+                ctrl.MouseHover += (s, e) => { SourceSplitSettingsHelp.Instance.UpdateDescription(ctrl); };
+
+                foreach (var child in ctrl.Controls.Cast<Control>())
+                {
+                    addHelpCallback(child);
+                }
+            }
+            addHelpCallback(this);
+            SetSettingDescriptions();
+
+            Application.AddMessageFilter(this);
         }
 
-        private void TableCoolInfo_Invalidated(object sender, InvalidateEventArgs e)
+        public bool PreFilterMessage(ref Message m)
+        {
+            if (m.Msg == 0x200) //WM_MOUSEMOVE = 0x200
+            {
+                List<Control> controls = new List<Control>();
+
+                var mouse = MousePosition;
+
+                void check(Control ctrl)
+                {
+                    var rect = ctrl.DisplayRectangle;
+                    var pos = ctrl.PointToScreen(Point.Empty);
+                    rect.Location = pos;
+
+                    if (rect.Contains(mouse) && !ctrl.Enabled)
+                    {
+                        controls.Add(ctrl);
+                    }
+                    
+                    foreach (var c in ctrl.Controls.Cast<Control>())
+                    {
+                        check(c);
+                    }
+                }
+
+                check(tabCtrlMaster.Controls[tabCtrlMaster.SelectedIndex]);
+
+                if (controls.Count > 0)
+                    SourceSplitSettingsHelp.Instance.UpdateDescription(controls.Last());
+            }
+            return false;
+        }
+
+        private void UpdateRunningForSplash()
         {
             var r = new Random();
             string time = SourceSplitUtils.ActiveTime.Elapsed.ToStringCustom();
@@ -80,7 +164,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                 case 17: text = "You haven't PB'd in at least: "; break;
             }
 
-            labRunningFor.Text = text + time;
+            _runningForSplash = text;
         }
 
         private void DmnSplitInterval_ValueChanged(object sender, EventArgs e)
@@ -119,11 +203,17 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             UpdateDisabledControls(null, null);
         }
 
+        public void SetCurrentGame(Type game)
+        {
+            if (game is null) labCurrentGame.Text = "No game/mod detected!";
+            else labCurrentGame.Text = $"Detected game/mod: {game.Name}";
+        }
+
         void UpdateDisabledControls(object sender, EventArgs e)
         {
             gMTL.Enabled = cmbMTLMode.Enabled = chkUseMTL.Checked;
             chkSplitSpecial.Enabled = chkSplitLevelTrans.Enabled = chkAutoSplitEnabled.Checked;
-            groupBox2.Enabled = chkSplitLevelTrans.Checked && chkSplitLevelTrans.Enabled;
+            gMapTransitions.Enabled = chkSplitLevelTrans.Checked && chkSplitLevelTrans.Enabled;
             nudDecimalPlaces.Enabled = chkShowAlt.Enabled = chkShowGameTime.Checked;
             dmnSplitInterval.Enabled = chkUseInterval.Checked;
             gTimingMethods.Enabled = !chkAutomatic.Checked;
@@ -169,6 +259,13 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         {
             Process.Start("https://github.com/thisis2838/SourceSplit/issues");
         }
+
+        private void butHelp_Click(object sender, EventArgs e)
+        {
+            SourceSplitSettingsHelp.Instance.Show();
+            SourceSplitSettingsHelp.Instance.Focus();
+        }
+
     }
 
     public enum MTLMode

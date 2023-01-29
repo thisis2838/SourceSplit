@@ -47,7 +47,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                 float splitTime = state.GameEngine.GetOutputFireTime("commands", "Command", "disconnect");
                 _splitTime = (splitTime == 0f) ? _splitTime : splitTime;
 
-                if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true) && !OnceFlag)
+                if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
                     Debug.WriteLine("wdp ce ending");
                     _splitTime = 0f;

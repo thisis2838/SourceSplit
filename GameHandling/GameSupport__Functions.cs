@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using LiveSplit.SourceSplit.GameSpecific;
 using LiveSplit.SourceSplit.ComponentHandling;
+using static System.Windows.Forms.AxHost;
 
 
 namespace LiveSplit.SourceSplit.GameHandling
@@ -22,6 +23,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             CommandHandler.Init(state);
 
             OnGameAttachedInternal(state, actions);
+            Templates?.ForEach(x => x.OnGameAttached(state, actions));
             AdditionalGameSupport?.ForEach(x => x.OnGameAttached(state, actions));
         }
         /// <summary>
@@ -34,6 +36,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         public virtual void OnTimerReset(bool resetFlagTo)
         {
             OnTimerResetInternal(resetFlagTo);
+            Templates?.ForEach(x => x.OnTimerReset(resetFlagTo));
             AdditionalGameSupport?.ForEach(x => x.OnTimerReset(resetFlagTo));
         }
         /// <summary>
@@ -47,13 +50,12 @@ namespace LiveSplit.SourceSplit.GameHandling
         {
             OnceFlag = false;
 
-            //UpdateOutputFireTimeWatchers(state);
-
             string map = state.Map.Current;
             this.IsFirstMap = FirstMaps.ConvertAll(x => x.ToLower()).Contains(map);
             this.IsLastMap = LastMaps.ConvertAll(x => x.ToLower()).Contains(map);
 
             OnSessionStartInternal(state, actions);
+            Templates?.ForEach(x => x.OnSessionStart(state, actions));
             AdditionalGameSupport?.ForEach(x => x.OnSessionStart(state, actions));
         }
         /// <summary>
@@ -66,6 +68,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         public void OnSessionEnd(GameState state, TimerActions actions)
         {
             OnSessionEndInternal(state, actions);
+            Templates?.ForEach(x => x.OnSessionEnd(state, actions));
             AdditionalGameSupport?.ForEach(x => x.OnSessionEnd(state, actions));
         }
         /// <summary>
@@ -80,6 +83,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             CommandHandler.Update(state);
 
             OnGenericUpdateInternal(state, actions);
+            Templates?.ForEach(x => x.OnGenericUpdate(state, actions));
             AdditionalGameSupport?.ForEach(x => x.OnGenericUpdate(state, actions));
         }
         /// <summary>
@@ -92,6 +96,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         public void OnUpdate(GameState state, TimerActions actions)
         {
             OnUpdateInternal(state, actions);
+            Templates?.ForEach(x => x.OnUpdate(state, actions));
             AdditionalGameSupport?.ForEach(x => x.OnUpdate(state, actions));
         }
         /// <summary>
@@ -104,6 +109,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         public void OnSaveLoaded(GameState state, TimerActions actions, string saveName)
         {
             OnSaveLoadedInternal(state, actions, saveName);
+            Templates?.ForEach(x => x.OnSaveLoaded(state, actions, saveName));
             AdditionalGameSupport?.ForEach(x => x.OnSaveLoaded(state, actions, saveName));
         }
         /// <summary>.
@@ -122,8 +128,12 @@ namespace LiveSplit.SourceSplit.GameHandling
                 return false;
             }
 
-            if (OnNewGameInternal(state, actions, newMapName))
-                return AdditionalGameSupport.All(x => x.OnNewGame(state, actions, newMapName));
+            if (OnNewGameInternal(state, actions, newMapName) &&
+                Templates.All(x => x.OnNewGame(state, actions, newMapName)) &&
+                AdditionalGameSupport.All(x => x.OnNewGame(state, actions, newMapName)))
+            {
+                return true;
+            }
             else return false;
         }
         /// <summary>
@@ -136,8 +146,12 @@ namespace LiveSplit.SourceSplit.GameHandling
 
         public bool OnChangelevel(GameState state, TimerActions actions, string newMapName)
         {
-            if (OnChangelevelInternal(state, actions, newMapName))
-                return AdditionalGameSupport.All(x => x.OnChangelevel(state, actions, newMapName));
+            if (OnChangelevelInternal(state, actions, newMapName) &&
+                Templates.All(x => x.OnChangelevel(state, actions, newMapName)) &&
+                AdditionalGameSupport.All(x => x.OnChangelevel(state, actions, newMapName)))
+            {
+                return true;
+            }
             else return false;
         }
         /// <summary>

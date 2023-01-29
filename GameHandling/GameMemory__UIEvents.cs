@@ -111,6 +111,18 @@ namespace LiveSplit.SourceSplit.GameHandling
             }, null);
         }
 
+        public event EventHandler<OnGameAttachedEventArgs> OnGameAttached;
+        public class OnGameAttachedEventArgs : EventArgs
+        {
+            public Type GameSupportType { get; internal set; }
+        }
+        public void SendGameAttachedEvent(Type gameSupportType)
+        {
+            _uiThread.Post(d => {
+                this.OnGameAttached?.Invoke(this, new OnGameAttachedEventArgs() { GameSupportType = gameSupportType });
+            }, null);
+        }
+
 
         public event EventHandler<GameStatusEventArgs> OnGameStatusChanged;
         public class GameStatusEventArgs : EventArgs

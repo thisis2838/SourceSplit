@@ -46,7 +46,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         public ValueWatcher<FL> PlayerFlags = new ValueWatcher<FL>(new FL());
         public ValueWatcher<Vector3f> PlayerPosition = new ValueWatcher<Vector3f>(new Vector3f());
         public ValueWatcher<int> PlayerViewEntityIndex = new ValueWatcher<int>(0);
-        public ValueWatcher<int> PlayerParentEntityHandle = new ValueWatcher<int>(0);
+        public ValueWatcher<uint> PlayerParentEntityHandle = new ValueWatcher<uint>(0xFFFFFFFF);
         public CEntInfoV2 PlayerEntInfo;
 
         public GameEngine GameEngine;

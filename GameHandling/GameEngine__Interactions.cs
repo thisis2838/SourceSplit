@@ -13,6 +13,9 @@ namespace LiveSplit.SourceSplit.GameHandling
 {
     public abstract partial class GameEngine
     {
+        protected const uint INVALID_ENT_HANDLE = 0xFFFFFFFF;
+        public int GetEntIndexFromHandle(uint handle) => handle == INVALID_ENT_HANDLE ? -1 : (int)(handle & EntIndexMask);
+
         #region STATE RETRIEVAL FUNCTIONS
 
         /// <summary>
@@ -152,20 +155,15 @@ namespace LiveSplit.SourceSplit.GameHandling
         #region GLOBAL ENTITY LIST SEARCHING
 
         /// <summary>
-        /// Gets the index of the first entity whose name passes the name condition
-        /// </summary>
-        /// <param name="nameCond">The name condition</param>
-        /// <returns>The index of the first entity whose name passes the name condition. If no such entity exists, -1 will be returned.</returns>
-        public int GetEntIndexByName(string nameCond)
-            => GetEntIndexesByName(nameCond).FirstOrSpecified(-1);
-
-        /// <summary>
         /// Enumerates through the global entity list and returns the indexes of entities whose name passes the name condition
         /// </summary>
         /// <param name="nameCond">The name condition</param>
         /// <returns>The indexes of entities whose name passes the name condition. If no such entity exists, -1 will be returned.</returns>
         public virtual IEnumerable<int> GetEntIndexesByName(string nameCond)
         {
+            if (nameCond is null)
+                yield break;
+
             foreach (var ent in GetEntityListEntries())
             {
                 var n = GetEntityTargetName(ent.Entity);
@@ -180,6 +178,14 @@ namespace LiveSplit.SourceSplit.GameHandling
                 }
             }
         }
+
+        /// <summary>
+        /// Gets the index of the first entity whose name passes the name condition
+        /// </summary>
+        /// <param name="nameCond">The name condition</param>
+        /// <returns>The index of the first entity whose name passes the name condition. If no such entity exists, -1 will be returned.</returns>
+        public int GetEntIndexByName(string nameCond)
+            => GetEntIndexesByName(nameCond).FirstOrSpecified(-1);
 
         /// <summary>
         /// Enumerates through the global entity list and returns the indexes of entities whose position is near or exactly at the target location
@@ -278,6 +284,9 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <returns>The entities with passing targetnames</returns>
         public IEnumerable<IntPtr> GetEntitiesByName(string nameCond)
         {
+            if (nameCond is null)
+                yield break;
+
             foreach (var ent in GetEntities())
             {
                 var n = GetEntityTargetName(ent);
@@ -567,6 +576,9 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// <returns>Tthe fire time of a queued output whose targetname, command, and param all pass their respective string conditions. If no such output exists, 0 will be returned.</returns>
         public virtual float GetOutputFireTime(string targetName_, string command_, string param_, int clamp = 100)
         {
+            if (targetName_ is null)
+                return -1;
+
             float ret = 0;
 #if DEBUG
             Stopwatch sw = Stopwatch.StartNew();

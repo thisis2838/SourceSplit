@@ -7,7 +7,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
 {
     class HL2Ep1 : GameSupport
     {
-        // how to match with demos:
         // start: crosshair appear
         // ending: the first tick where your position changes on while on train (cl_showpos 1)
 

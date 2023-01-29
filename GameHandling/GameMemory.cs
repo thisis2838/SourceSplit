@@ -15,6 +15,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using LiveSplit.SourceSplit.ComponentHandling;
 using LiveSplit.SourceSplit.Utilities.Forms;
+using System.Management;
+using System.Diagnostics.Eventing.Reader;
 
 namespace LiveSplit.SourceSplit.GameHandling
 {
@@ -160,19 +162,19 @@ namespace LiveSplit.SourceSplit.GameHandling
                 }
                 catch (Exception ex) when (ex is InvalidOperationException || ex is Win32Exception)
                 {
-                    Trace.WriteLine(ex.ToString());
+                    Debug.WriteLine(ex.ToString());
                     Thread.Sleep(1000);
                 }
-#if DEBUG
-#else
+
                 catch (Exception ex)
                 {
-                    Trace.WriteLine(ex.ToString());
+                    Debug.WriteLine(ex.ToString());
+#if DEBUG
+#else
                     new ErrorDialog($"Main:\n{ex}\n\nInner:\n{ex.InnerException?.ToString()}");
-
+#endif
                     Thread.Sleep(1000);
                 }
-#endif
 
                 SendGameStatusEvent(false);
             }
@@ -194,12 +196,102 @@ namespace LiveSplit.SourceSplit.GameHandling
                 p.ReadString(_gameDirPtr, ReadStringType.UTF8, 260, out string absoluteGameDir);
                 if (string.IsNullOrWhiteSpace(absoluteGameDir))
                     return false;
+
+                if (!Directory.Exists(absoluteGameDir))
+                {
+                    Debug.WriteLine($"Bogus absolute game directory: {absoluteGameDir}");
+                    try
+                    {
+                        ManagementClass mngmtClass = new ManagementClass("Win32_Process");
+                        foreach (ManagementObject mngmtObject in mngmtClass.GetInstances())
+                        {
+                            // get the executable path for this object
+                            var pathObject = mngmtObject["ExecutablePath"];
+                            if (pathObject is null || !(pathObject is string)) 
+                                continue;
+                            var pathString = (pathObject as string).ToLower();
+                            if (pathString !=  p.MainModule.FileName.ToLower())
+                                continue;
+
+                            // get the command line parameters for this object
+                            var launchParamObject = mngmtObject["CommandLine"];
+                            if (launchParamObject is null || !(launchParamObject is string))
+                                continue;
+                            var launchParam = (launchParamObject as string).ToLower();
+
+                            // we'll need to parse the command line parameters, accounting for quotes
+                            var elements = new List<string>();
+                            string curElement = "";
+                            for (int i = 0; i < launchParam.Length; i++)
+                            {
+                                if (launchParam[i] == '"')
+                                {
+                                    i++;
+                                    while (i < launchParam.Length && launchParam[i] != '\"')
+                                        curElement += launchParam[i++];
+                                    elements.Add(curElement);
+                                    curElement = "";
+                                    continue;
+                                }
+
+                                if (launchParam[i] == ' ')
+                                {
+                                    elements.Add(curElement);
+                                    curElement = "";
+                                    continue;
+                                }
+
+                                curElement += launchParam[i];
+                            }
+                            elements = elements.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.ToLower()).ToList();
+                            // apart from process name, it must contain at least 1 launch parameter
+                            if (elements.Count < 2) 
+                                continue;
+
+                            // skip the executable argument, then reverse the list to find the last one, as mods by defualt
+                            // sets game to 'steam', and then sets game to their directory down the line.
+                            elements = elements.Skip(1).Reverse().ToList();
+                            string baseGameFolder = Path.GetDirectoryName(p.MainModule.FileName);
+                            for (int i = 0; i < elements.Count(); i++)
+                            {
+                                if (elements[i] == "-game")
+                                {
+                                    if (i - 1 < 0) 
+                                        continue;
+
+                                    i--;
+
+                                    // -game can be relative to the game's executable
+                                    string possible = elements[i];  
+                                    if (Directory.Exists(possible) || 
+                                        Directory.Exists(possible = Path.Combine(baseGameFolder, possible)))
+                                    {
+                                        absoluteGameDir = possible;
+                                        Debug.WriteLine($"Found absolute game directory through WMI: {possible}");
+                                        goto success;
+                                    }
+
+                                    i++;
+                                }
+
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine("Error while trying to retrieve absolute file path: " + ex.ToString());
+                    }
+
+                    // don't return false as we can still function without absolute game directory.
+                    Debug.WriteLine("Couldn't retrieve absolute game directory!");
+                    success:;
+                }
+
                 state.GameDir = new DirectoryInfo(absoluteGameDir).Name.ToLower();
                 state.AbsoluteGameDir = absoluteGameDir;
             }
 
-            state.MainSupport = GameSupport.FromGameDir(state.GameDir);
-
+            state.MainSupport = GameSupport.Get(state);
             state.GameEngine = state.MainSupport.GetEngine();
 
             state.AllSupport.Clear();
@@ -232,9 +324,12 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             string[] procs = _targetProccesNames.Select(x => x.ToLower().Replace(".exe", "")).ToArray();
             var p = Process.GetProcesses().FirstOrDefault(x =>
-                Utilities.WinUtils.FindWindow("Valve001", x.MainWindowTitle) != IntPtr.Zero ||
-                procs.Contains(x.ProcessName.ToLower()) // todo: test on edge cases like hl2 survivor to see if this is still needed
-            );
+            {
+                return
+                    Utilities.WinUtils.FindWindow("Valve001", x.MainWindowTitle) != IntPtr.Zero ||
+                    // todo: test on edge cases like hl2 survivor to see if this is still needed
+                    procs.Contains(x.ProcessName.ToLower()); 
+            });
             if (p == null || p.HasExited || SourceSplitUtils.IsVACProtectedProcess(p))
                 return false;
 
@@ -393,12 +488,14 @@ namespace LiveSplit.SourceSplit.GameHandling
                 this.SendSessionEndedEvent();
 
             this.SendGameStatusEvent(false);
+            this.SendGameAttachedEvent(null);
         }
         void InitGameState(GameState state)
         {
             state.Map.Current = (String.Empty);
             Debug.WriteLine($"running game-specific code for: {state.GameDir} : {state.MainSupport}");
             this.SendSetTimingSpecificsEvent(state.MainSupport.TimingSpecifics);
+            this.SendGameAttachedEvent(state.MainSupport.GetType());
         }
 
         // also works for anything derived from CBaseEntity (player etc) (no multiple inheritance)
@@ -408,9 +505,9 @@ namespace LiveSplit.SourceSplit.GameHandling
         /// </summary>
         /// <param name="member">The name of the member</param>
         /// <param name="game">The game process</param>
-        /// <param name="scanner">The scanner which encompasses the module that contains this class</param>
-        /// <param name="offset">Output offset value</param>
-        /// <returns></returns>
+        /// <param name="scanner">The scanner which encompasses the module that contains instances of this class</param>
+        /// <param name="offset">The offset value</param>
+        /// <returns>Whether the operation was successful</returns>
         public static bool GetBaseEntityMemberOffset(string member, Process game, SignatureScanner scanner, out int offset)
         {
             offset = -1;
@@ -418,7 +515,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             IntPtr stringPtr = scanner.Scan(new SigScanTarget(0, Encoding.ASCII.GetBytes(member)));
 
             if (stringPtr == IntPtr.Zero)
-                return false;
+                goto end;
 
             var target = new SigScanTarget(10,
                 $"C7 05 ?? ?? ?? ?? {stringPtr.GetByteString()}"); // mov     dword_15E2BF1C, offset aM_fflags ; "m_fFlags"
@@ -439,10 +536,39 @@ namespace LiveSplit.SourceSplit.GameHandling
                 addr = scanner.Scan(target2);
 
                 if (addr == IntPtr.Zero)
-                    return false;
+                    goto end;
             }
 
-            return game.ReadValue(addr, out offset);
+            offset = game.ReadValue<int>(addr);
+
+            end:
+
+            if (offset == -1)
+            {
+                Debug.WriteLine($"Couldn't find {member} offset.");
+                return false;
+            }
+            else
+            {
+                Debug.WriteLine($"{member} offset is 0x{offset.ToString("X")}");
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Gets the offset of a member from the base address of the entity's class
+        /// </summary>
+        /// <param name="member">The name of the member</param>
+        /// <param name="state">The game's state</param>
+        /// <param name="module">The module that contains instances of this class</param>
+        /// <param name="offset">The offset value</param>
+        /// <returns>Whether the operation was successful</returns>
+        public static bool GetBaseEntityMemberOffset(string member, GameState state, ProcessModuleWow64Safe module, out int offset)
+        {
+            Trace.Assert(module != null);
+            var scanner = new SignatureScanner(state.GameProcess, module.BaseAddress, module.ModuleMemorySize);
+
+            return GetBaseEntityMemberOffset(member, state.GameProcess, scanner, out offset);
         }
 
 #if DEBUG

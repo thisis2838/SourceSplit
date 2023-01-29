@@ -11,7 +11,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
 {
     class BMSRetail : GameSupport
     {
-        // how to match with demos:
         // start: on map load
         // xen start: when view entity changes back to the player's
         // ending: first tick nihilanth's health is zero
@@ -73,12 +72,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
         protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
             ProcessModuleWow64Safe server = state.GetModule("server.dll");
-
             var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
+
             _getGlobalNameFuncPtr = scanner.Scan(new SigScanTarget("55 8B EC 51 FF 75 ?? 8D 45 ??"));
 
-            if (GameMemory.GetBaseEntityMemberOffset("m_iHealth", state.GameProcess, scanner, out _baseEntityHealthOffset))
-                Debug.WriteLine("CBaseEntity::m_iHealth offset = 0x" + _baseEntityHealthOffset.ToString("X"));
+            GameMemory.GetBaseEntityMemberOffset("m_iHealth", state.GameProcess, scanner, out _baseEntityHealthOffset);
 
             if (server.ModuleMemorySize < _serverModernModuleSize)
             {

@@ -25,17 +25,15 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 new HL2Mods.HellsMines(),
                 new HL2Mods.UpmineStruggle(),
                 new HL2Mods.City17IsFarAway(),
-                new HL2Mods.A2BTrajectory()
+                new HL2Mods.Uzvara(),
+                new HL2Mods.A2BTrajectory(),
+                new HL2Mods.MountainCaves()
             };
         }
 
         protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
-            ProcessModuleWow64Safe server = state.GetModule("server.dll");
-            var scanner = new SignatureScanner(state.GameProcess, server.BaseAddress, server.ModuleMemorySize);
-
-            if (GameMemory.GetBaseEntityMemberOffset("m_flLaggedMovementValue", state.GameProcess, scanner, out _basePlayerLaggedMovementOffset))
-                Debug.WriteLine("CBasePlayer::m_flLaggedMovementValue offset = 0x" + _basePlayerLaggedMovementOffset.ToString("X"));
+            GameMemory.GetBaseEntityMemberOffset("m_flLaggedMovementValue", state, state.GameEngine.ServerModule, out _basePlayerLaggedMovementOffset);
         }
 
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
@@ -70,8 +68,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             {
                 // "OnTrigger4" "cvehicle.hangar,EnterVehicle,,0,1"
 
-                if (state.PlayerParentEntityHandle.Current != -1
-                    && state.PlayerParentEntityHandle.Old == -1)
+                if (state.PlayerParentEntityHandle.Current != 0xFFFFFFFF && state.PlayerParentEntityHandle.Old == 0xFFFFFFFF)
                 {
                     Debug.WriteLine("ep2 end");
                     OnceFlag = true;

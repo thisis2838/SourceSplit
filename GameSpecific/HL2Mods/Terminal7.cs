@@ -6,7 +6,6 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
     class Terminal7 : GameSupport
     {
-        // how to match with demos:
         // start: on first map load
         // ending: when the game begins fading out
 

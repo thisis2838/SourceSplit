@@ -47,7 +47,7 @@ This controls how SourceSplit should Auto-Start, Stop and Reset. Here you can
 * Enable / Disable an additional Auto-Start condition, which allows you to Auto-Start the timer when one of the following happens (note that the input needn't include file extensions)
     * Starting a New Game on a specific map
     * Transitioning to a specific map
-    * Loading a save file with a specific file   
+    * Loading a save file with a specific file name
 
 #### Timing Options
 This controls how SourceSplit should be counting Game Time.  
