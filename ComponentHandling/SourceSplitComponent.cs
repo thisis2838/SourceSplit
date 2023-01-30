@@ -60,24 +60,28 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             get
             {
                 long time = _sessions?.TotalTicks ?? 0;
-                return TimeSpan.FromTicks(time * (long)(_intervalPerTick * TimeSpan.TicksPerSecond) + _cumulativeTime)
-                    + _miscTimeOffset + _inactiveTime + _disconnectTime;
+                long timeSpanTicksPerTick = (long)(_intervalPerTick * TimeSpan.TicksPerSecond);
+                return 
+                    TimeSpan.FromTicks(time * timeSpanTicksPerTick + _cumulativeTime)
+                    + _miscTimeOffset
+                    + _inactiveTime
+                    + _disconnectTime;
             }
         }
 
         private bool _autoGameTiming => (_timingSpecifics != null && Settings.CountAutomatic.Value);
-        private bool _countEngineTicks => _autoGameTiming ?  
-            _timingSpecifics.DefaultTimingMethod.EngineTicks :
-            Settings.CountEngineTicks.Value;
-        private bool _countPauses => _autoGameTiming ?
-            _timingSpecifics.DefaultTimingMethod.Pauses :
-            Settings.CountPauses.Value;
-        private bool _countDisconnects => _autoGameTiming ?
-            _timingSpecifics.DefaultTimingMethod.Disconnects :
-            Settings.CountDisconnects.Value;
-        private bool _countInactive => _autoGameTiming ?
-            _timingSpecifics.DefaultTimingMethod.Inactive :
-            Settings.CountInactive.Value;
+        private bool _countEngineTicks => _autoGameTiming 
+            ? _timingSpecifics.DefaultTimingMethod.EngineTicks 
+            : Settings.CountEngineTicks.Value;
+        private bool _countPauses => _autoGameTiming 
+            ? _timingSpecifics.DefaultTimingMethod.Pauses 
+            : Settings.CountPauses.Value;
+        private bool _countDisconnects => _autoGameTiming 
+            ? _timingSpecifics.DefaultTimingMethod.Disconnects 
+            : Settings.CountDisconnects.Value;
+        private bool _countInactive => _autoGameTiming 
+            ? _timingSpecifics.DefaultTimingMethod.Inactive 
+            : Settings.CountInactive.Value;
 
         public SourceSplitComponent(LiveSplitState state, bool isLayoutComponent)
         {
@@ -236,5 +240,4 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             TimerStarted = timerStarted;
         }
     }
-
 }

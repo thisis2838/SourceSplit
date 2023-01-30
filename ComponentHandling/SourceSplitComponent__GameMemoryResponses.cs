@@ -24,52 +24,30 @@ namespace LiveSplit.SourceSplit.ComponentHandling
     {
         private void RegisterGameMemoryResponses()
         {
+            _gameMemory.OnGameAttached += gameMemory_OnGameAttached;
             _gameMemory.OnSetTickRate += gameMemory_OnSetTickRate;
             _gameMemory.OnSetTimingSpecifics += gameMemory_OnSetTimingSpecifics;
-            _gameMemory.OnGameAttached += gameMemory_OnGameAttached; ;
+            _gameMemory.OnGameStatusChanged += _gameMemory_OnGameStatusChanged;
+
+            _gameMemory.OnSessionStarted += gameMemory_OnSessionStarted;
+            _gameMemory.OnSessionEnded += gameMemory_OnSessionEnded;
+
             _gameMemory.OnSessionTimeUpdate += gameMemory_OnSessionTimeUpdate;
+            _gameMemory.OnMiscTime += gameMemory_OnMiscTime;
+            _gameMemory.OnUpdateCurrentDemoInfoEvent += _gameMemory_OnUpdateCurrentDemoInfoEvent;
+
+            _gameMemory.OnMapChanged += gameMemory_OnMapChanged;
+            _gameMemory.OnNewGameStarted += gameMemory_OnNewGameStarted;
+
             _gameMemory.TimerActions.OnPlayerGainedControl += gameMemory_OnPlayerGainedControl;
             _gameMemory.TimerActions.OnPlayerLostControl += gameMemory_OnPlayerLostControl;
             _gameMemory.TimerActions.ManualSplit += gameMemory_ManualSplit;
-            _gameMemory.OnMapChanged += gameMemory_OnMapChanged;
-            _gameMemory.OnSessionStarted += gameMemory_OnSessionStarted;
-            _gameMemory.OnSessionEnded += gameMemory_OnSessionEnded;
-            _gameMemory.OnNewGameStarted += gameMemory_OnNewGameStarted;
-            _gameMemory.OnMiscTime += gameMemory_OnMiscTime;
-            _gameMemory.OnGameStatusChanged += _gameMemory_OnGameStatusChanged;
-            _gameMemory.OnUpdateCurrentDemoInfoEvent += _gameMemory_OnUpdateCurrentDemoInfoEvent;
         }
 
         private void gameMemory_OnGameAttached(object sender, OnGameAttachedEventArgs e)
         {
             SettingControl.SetCurrentGame(e.GameSupportType);
         }
-
-        private void _gameMemory_OnUpdateCurrentDemoInfoEvent(object sender, CurrentDemoInfoEvent e)
-        {
-            if (!Settings.ShowCurDemo.Value)
-                return;
-
-            // pad at most 4 spaces in front of tick count to align tick counts from 0 to 99999
-            // doesn't always line up due to font...
-            // todo: check if figure space breaks any font
-            _curDemoComponent.SetText($"{Path.GetFileNameWithoutExtension(e.Name)} | {StringUtils.NumberAlign(e.TickCount, 5)}");
-            _curDemoComponent.SetName(e.IsRecording ? "Cur. Demo" : "Prev. Demo");
-        }
-
-        private void _gameMemory_OnGameStatusChanged(object sender, GameStatusEventArgs e)
-        {
-            _addInactiveTime = !e.IsActive;
-        }
-
-        // first tick when player is fully in game
-        void gameMemory_OnSessionStarted(object sender, SessionStartedEventArgs e)
-        {
-            _currentMap = e.Map;
-            _sessions.Add(new Session(_currentMap, _intervalPerTick));
-            _sessions.Current.OffsetTicks = (int)Settings.SLPenalty.Value;
-        }
-
         void gameMemory_OnSetTickRate(object sender, SetTickRateEventArgs e)
         {
             // if we keep the ticks from the previous session, a tick rate change may happen due to 
@@ -86,11 +64,15 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
             _intervalPerTick = e.IntervalPerTick;
         }
-
         void gameMemory_OnSetTimingSpecifics(object sender, SetTimingSpecificsEventArgs e)
         {
             _timingSpecifics = e.Specifics;
         }
+        private void _gameMemory_OnGameStatusChanged(object sender, GameStatusEventArgs e)
+        {
+            _addInactiveTime = !e.IsActive;
+        }
+
 
         // called when player is fully in game
         void gameMemory_OnSessionTimeUpdate(object sender, SessionTicksUpdateEventArgs e)
@@ -112,18 +94,51 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
             _holdingFirstPause = false;
         }
-
-        // player is no longer fully in the game
-        void gameMemory_OnSessionEnded(object sender, EventArgs e)
+        void gameMemory_OnMiscTime(object sender, MiscTimeEventArgs e)
         {
-            if (_sessions.Current == null)
+            if (e.TickDifference < 0)
+                Debug.WriteLine($"misc time update tick difference under 0! ({e.TickDifference})");
+            else if (e.TickDifference == 0)
                 return;
 
-            _sessions.Current.Ended = true;
+            switch (e.Type)
+            {
+                case MiscTimeType.PauseTime:
+                    {
+                        if (!_countPauses || _holdingFirstPause)
+                            return;
 
-            Debug.WriteLine($"session ended, total time: {_sessions.Current.TotalTicks} ticks = " +
-                $"{TicksToTime(_sessions.Current.TotalTicks)}");
-            Debug.WriteLine($"current time: {_sessions.Count} ses. : {TicksToTime(_sessions.TotalTicks)} | {GameTime}");
+                        if (_sessions.Current != null)
+                        {
+                            _sessions.Current.PausedTicks += e.TickDifference;
+                            if (_sessions.Current.Ended)
+                                Debug.WriteLine($"adding {e.TickDifference} paused ticks to session that's ended!");
+                        }
+                        break;
+                    }
+                case MiscTimeType.ClientDisconnectTime:
+                    {
+                        if (!_countDisconnects)
+                            return;
+
+                        _disconnectTime += TicksToTime(e.TickDifference);
+                        break;
+                    }
+                case MiscTimeType.EndPause:
+                    _holdingFirstPause = false;
+                    break;
+            }
+        }
+        private void _gameMemory_OnUpdateCurrentDemoInfoEvent(object sender, CurrentDemoInfoEvent e)
+        {
+            if (!Settings.ShowCurDemo.Value)
+                return;
+
+            // pad at most 4 spaces in front of tick count to align tick counts from 0 to 99999
+            // doesn't always line up due to font...
+            // todo: check if figure space breaks any font
+            _curDemoComponent.SetText($"{Path.GetFileNameWithoutExtension(e.Name)} | {StringUtils.NumberAlign(e.TickCount, 5)}");
+            _curDemoComponent.SetName(e.IsRecording ? "Cur. Demo" : "Prev. Demo");
         }
 
         // called immediately after OnSessionEnded if it was a changelevel
@@ -159,6 +174,40 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
             skipadd:;
             // prevent adding map time twice
+        }
+        void gameMemory_OnNewGameStarted(object sender, EventArgs e)
+        {
+            if (!Settings.AutoStartEnabled.Value ||
+                !Settings.FirstMapAutoReset.Value)
+                return;
+
+            if (_timer.CurrentState.CurrentPhase == TimerPhase.Running &&
+                !Settings.AutoResetEnabled.Value)
+                return;
+
+            _timer.Reset();
+        }
+
+        // first tick when player is fully in game
+        void gameMemory_OnSessionStarted(object sender, SessionStartedEventArgs e)
+        {
+            _currentMap = e.Map;
+            _sessions.Add(new Session(_currentMap, _intervalPerTick));
+            _sessions.Current.OffsetTicks = (int)Settings.SLPenalty.Value;
+        }
+
+
+        // player is no longer fully in the game
+        void gameMemory_OnSessionEnded(object sender, EventArgs e)
+        {
+            if (_sessions.Current == null)
+                return;
+
+            _sessions.Current.Ended = true;
+
+            Debug.WriteLine($"session ended, total time: {_sessions.Current.TotalTicks} ticks = " +
+                $"{TicksToTime(_sessions.Current.TotalTicks)}");
+            Debug.WriteLine($"current time: {_sessions.Count} ses. : {TicksToTime(_sessions.TotalTicks)} | {GameTime}");
         }
 
         void gameMemory_OnPlayerGainedControl(object sender, TimerActionArgs e)
@@ -196,7 +245,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             if (_sessions.Current != null)
                 _sessions.Current.StartTick = _sessions.Current.TotalTicks + MillisecondsToTicks(e.MillisecondOffset);
         }
-
         void gameMemory_OnPlayerLostControl(object sender, TimerActionArgs e)
         {
             if (!Settings.AutoStopEnabled.Value)
@@ -207,7 +255,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
             this.DoSplit(MillisecondsToTicks(e.MillisecondOffset), false);
         }
-
         void gameMemory_ManualSplit(object sender, TimerActionArgs e)
         {
             if (!Settings.AutoSplitEnabled.Value || 
@@ -220,51 +267,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.DoSplit(MillisecondsToTicks(e.MillisecondOffset), true);
         }
 
-        void gameMemory_OnNewGameStarted(object sender, EventArgs e)
-        {
-            if (!Settings.AutoStartEnabled.Value || 
-                !Settings.FirstMapAutoReset.Value)
-                return;
 
-            if (_timer.CurrentState.CurrentPhase == TimerPhase.Running && 
-                !Settings.AutoResetEnabled.Value)
-                return;
 
-            _timer.Reset();
-        }
 
-        void gameMemory_OnMiscTime(object sender, MiscTimeEventArgs e)
-        {
-            if (e.TickDifference < 0)
-                Debug.WriteLine($"misc time update tick difference under 0! ({e.TickDifference})");
-
-            switch (e.Type)
-            {
-                case MiscTimeType.PauseTime:
-                    {
-                        if (!_countPauses || _holdingFirstPause)
-                            return;
-
-                        if (_sessions.Current != null)
-                        {
-                            _sessions.Current.PausedTicks += e.TickDifference;
-                            if (_sessions.Current.Ended)
-                                Debug.WriteLine($"adding {e.TickDifference} paused ticks to session that's ended!");
-                        }
-                        break;
-                    }
-                case MiscTimeType.ClientDisconnectTime:
-                    {
-                        if (!_countDisconnects)
-                            return;
-
-                        _disconnectTime += TicksToTime(e.TickDifference);
-                        break;
-                    }
-                case MiscTimeType.EndPause:
-                    _holdingFirstPause = false;
-                    break;
-            }
-        }
     }
 }
