@@ -106,8 +106,10 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.boxDemoParserPath = new System.Windows.Forms.TextBox();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
+            this.gDebugFeatures = new System.Windows.Forms.GroupBox();
+            this.butOpenDebug = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.label8 = new System.Windows.Forms.Label();
+            this.labDescription = new System.Windows.Forms.Label();
             this.labVersionCredits = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
@@ -160,6 +162,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.gPrintDemoInfo.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tableLayoutPanel6.SuspendLayout();
+            this.gDebugFeatures.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.tableLayoutPanel7.SuspendLayout();
@@ -1099,6 +1102,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             // 
             this.tableLayoutPanel6.ColumnCount = 1;
             this.tableLayoutPanel6.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel6.Controls.Add(this.gDebugFeatures, 0, 4);
             this.tableLayoutPanel6.Controls.Add(this.groupBox3, 0, 0);
             this.tableLayoutPanel6.Controls.Add(this.groupBox4, 0, 1);
             this.tableLayoutPanel6.Controls.Add(this.groupBox8, 0, 2);
@@ -1106,18 +1110,40 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.tableLayoutPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel6.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel6.Name = "tableLayoutPanel6";
-            this.tableLayoutPanel6.RowCount = 5;
+            this.tableLayoutPanel6.RowCount = 6;
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 78F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 110F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 56F));
             this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 67F));
-            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 27F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 56F));
+            this.tableLayoutPanel6.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
             this.tableLayoutPanel6.Size = new System.Drawing.Size(447, 480);
             this.tableLayoutPanel6.TabIndex = 0;
             // 
+            // gDebugFeatures
+            // 
+            this.gDebugFeatures.Controls.Add(this.butOpenDebug);
+            this.gDebugFeatures.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gDebugFeatures.Location = new System.Drawing.Point(3, 314);
+            this.gDebugFeatures.Name = "gDebugFeatures";
+            this.gDebugFeatures.Size = new System.Drawing.Size(441, 50);
+            this.gDebugFeatures.TabIndex = 4;
+            this.gDebugFeatures.TabStop = false;
+            this.gDebugFeatures.Text = "Debug Features";
+            // 
+            // butOpenDebug
+            // 
+            this.butOpenDebug.Location = new System.Drawing.Point(6, 19);
+            this.butOpenDebug.Name = "butOpenDebug";
+            this.butOpenDebug.Size = new System.Drawing.Size(429, 23);
+            this.butOpenDebug.TabIndex = 0;
+            this.butOpenDebug.Text = "Open Debug Logs";
+            this.butOpenDebug.UseVisualStyleBackColor = true;
+            this.butOpenDebug.Click += new System.EventHandler(this.butOpenDebug_Click);
+            // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.label8);
+            this.groupBox3.Controls.Add(this.labDescription);
             this.groupBox3.Controls.Add(this.labVersionCredits);
             this.groupBox3.Controls.Add(this.label7);
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -1128,14 +1154,14 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "About";
             // 
-            // label8
+            // labDescription
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(10, 49);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(252, 13);
-            this.label8.TabIndex = 2;
-            this.label8.Text = "An Auto-splitter for Source Engine games and mods.";
+            this.labDescription.AutoSize = true;
+            this.labDescription.Location = new System.Drawing.Point(10, 49);
+            this.labDescription.Name = "labDescription";
+            this.labDescription.Size = new System.Drawing.Size(252, 13);
+            this.labDescription.TabIndex = 2;
+            this.labDescription.Text = "An Auto-splitter for Source Engine games and mods.";
             // 
             // labVersionCredits
             // 
@@ -1413,6 +1439,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.gPrintDemoInfo.PerformLayout();
             this.tabPage1.ResumeLayout(false);
             this.tableLayoutPanel6.ResumeLayout(false);
+            this.gDebugFeatures.ResumeLayout(false);
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox4.ResumeLayout(false);
@@ -1496,7 +1523,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label labVersionCredits;
-        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label labDescription;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel7;
         private System.Windows.Forms.GroupBox groupBox7;
@@ -1528,5 +1555,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         private System.Windows.Forms.Label labRunningFor;
         private System.Windows.Forms.Label labCurrentGame;
         private System.Windows.Forms.Button butHelp;
+        private System.Windows.Forms.GroupBox gDebugFeatures;
+        private System.Windows.Forms.Button butOpenDebug;
     }
 }

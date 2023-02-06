@@ -52,12 +52,13 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                 window.Controls.Add(Settings);
                 window.ShowDialog();*/
 
-                dialog.Size = new Size(SettingControl.Width + 14, SettingControl.Height + 45);
+                dialog.Size = new Size(dialog.MaximumSize.Width, SettingControl.Size.Height + 100);
                 if (dialog.ShowDialog() == DialogResult.OK)
                     _timer.CurrentState.Layout.HasChanged = true;
             });
+
 #if DEBUG
-         //   this.ContextMenuControls.Add("SourceSplit: Debug", () => DebugOutputForm.Instance.Show());
+            this.ContextMenuControls.Add("SourceSplit: Debug Logs", () => SettingControl.butOpenDebug_Click(null, null));
 #endif
         }
 

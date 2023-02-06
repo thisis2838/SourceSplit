@@ -52,7 +52,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 case "ptsd":
                     return new Ptsd1();
                 case "missionimprobable":
-                    return new MImp();
+                    return new MissionImprobable();
                 case "downfall":
                     return new Downfall();
                 case "uncertaintyprinciple":

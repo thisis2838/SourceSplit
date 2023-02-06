@@ -13,6 +13,9 @@ using System.Drawing;
 using LiveSplit.SourceSplit.ComponentHandling;
 using static LiveSplit.SourceSplit.ComponentHandling.SourceSplitComponent;
 using System.Drawing.Imaging;
+using System.IO;
+using LiveSplit.SourceSplit.Utilities.Forms;
+using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.ComponentHandling
 {
@@ -54,6 +57,13 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
             this.labVersionCredits.Text = $"{versionString} ({buildDate})";
             this.Name = "SourceSplit " + this.labVersionCredits.Text;
+
+#if DEBUG
+            this.labDescription.Text = "This is a Debug build. Please excuse the poor performance and stability...";
+            this.gDebugFeatures.Visible = true;
+#else
+            this.gDebugFeatures.Visible = false;
+#endif
 
             this.gbAdditionalTimer.Enabled = isLayout;
 
@@ -266,6 +276,40 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             SourceSplitSettingsHelp.Instance.Focus();
         }
 
+        public void butOpenDebug_Click(object sender, EventArgs e)
+        {
+#if DEBUG
+            if (File.Exists("sourcesplit_log.txt"))
+            {
+                this.butOpenDebug.Enabled = false;
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        lock (TimedTraceListener.Instance.LogWriteLock)
+                        {
+                            File.Copy
+                            (
+                                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sourcesplit_log.txt"),
+                                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sourcesplit_log_temp.txt"),
+                                true
+                            );
+                        }
+                        Process.Start("notepad.exe", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sourcesplit_log_temp.txt"));
+                    }
+                    catch (Exception ex)
+                    {
+                        new ErrorDialog(ex.Message).ShowDialog();
+                    }
+
+                    butOpenDebug.InvokeIfRequired(() =>
+                    {
+                        butOpenDebug.Enabled = true;
+                    });
+                });
+            }
+#endif
+        }
     }
 
     public enum MTLMode

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.Utilities
@@ -88,6 +89,10 @@ namespace LiveSplit.SourceSplit.Utilities
             set;
         }
 
+#if DEBUG
+        public object LogWriteLock = new object();
+#endif
+
         public override void WriteLine(string message)
         {
 #if false
@@ -97,9 +102,16 @@ namespace LiveSplit.SourceSplit.Utilities
             base.WriteLine(message);
 
 #if DEBUG 
-            // flat out doesnt work on some machines, TODO figure out a way to debug stuff
-            // be careful with multiple instances, if you don't want the hassle, #if false me away
-            File.AppendAllText("sourcesplit_log.txt", message + Environment.NewLine);
+            try
+            {
+                lock (LogWriteLock)
+                {
+                    // flat out doesnt work on some machines, TODO figure out a way to debug stuff
+                    // be careful with multiple instances, if you don't want the hassle, #if false me away
+                    File.AppendAllText("sourcesplit_log.txt", message + Environment.NewLine);
+                }
+            }
+            catch { }
 #endif
         }
     }

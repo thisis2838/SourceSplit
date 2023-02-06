@@ -232,7 +232,7 @@
     <Compile Include="GameSpecific\HL2Mods\WatchingPaintDry.cs" />
     <Compile Include="GameSpecific\HL2Mods\UncertaintyPrinciple.cs" />
     <Compile Include="GameSpecific\HL2Mods\Downfall.cs" />
-    <Compile Include="GameSpecific\HL2Mods\MImp.cs" />
+    <Compile Include="GameSpecific\HL2Mods\MissionImprobable.cs" />
     <Compile Include="GameSpecific\HL2Mods\Ptsd1.cs" />
     <Compile Include="GameSpecific\HL2Mods\DeepDown.cs" />
     <Compile Include="GameSpecific\EstrangedAct1.cs" />
