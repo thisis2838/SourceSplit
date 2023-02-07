@@ -21,7 +21,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 {
     public partial class SourceSplitSettings : UserControl, IMessageFilter
     {
-        private System.Windows.Forms.Timer _updater = new System.Windows.Forms.Timer();
         private string _runningForSplash = "";
 
         public SourceSplitSettings(bool isLayout)
@@ -96,22 +95,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                 }
             };
 
-            _updater.Interval = 20;
-            _updater.Tick += (s, e) =>
-            {
-                this.InvokeIfRequired(() => labRunningFor.Text = _runningForSplash + " " + SourceSplitUtils.ActiveTime.Elapsed.ToStringCustom());
-            };
-            _updater.Start();
-
-            this.Disposed += (s, e) =>
-            {
-                try
-                {
-                    _updater.Stop();
-                }
-                catch { } 
-            };
-
             void addHelpCallback(Control ctrl)
             {
                 ctrl.MouseHover += (s, e) => { SourceSplitSettingsHelp.Instance.UpdateDescription(ctrl); };
@@ -175,6 +158,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             }
 
             _runningForSplash = text;
+            labRunningFor.Text = _runningForSplash + " " + SourceSplitUtils.ActiveTime.Elapsed.ToStringCustom();
         }
 
         private void DmnSplitInterval_ValueChanged(object sender, EventArgs e)
