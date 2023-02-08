@@ -160,21 +160,19 @@ namespace LiveSplit.SourceSplit.GameHandling
                     if (cts.IsCancellationRequested)
                         goto ret;
                 }
-                catch (Exception ex) when (ex is InvalidOperationException || ex is Win32Exception)
-                {
-                    Debug.WriteLine(ex.ToString());
-                    Thread.Sleep(1000);
-                }
-
-                catch (Exception ex)
+                catch (Exception ex) 
                 {
                     Debug.WriteLine(ex.ToString());
 #if DEBUG
 #else
-                    new ErrorDialog($"Main:\n{ex}\n\nInner:\n{ex.InnerException?.ToString()}");
+                    if (!(ex is InvalidOperationException || ex is Win32Exception))
+                    {
+                        new ErrorDialog("Encountered unhandled exception when reading game memory", false, ex);
+                    }
 #endif
                     Thread.Sleep(1000);
                 }
+
 
                 SendGameStatusEvent(false);
             }

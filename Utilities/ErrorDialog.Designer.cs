@@ -39,13 +39,18 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
             // 
             // boxMsg
             // 
-            this.boxMsg.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.boxMsg.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.boxMsg.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.boxMsg.Location = new System.Drawing.Point(12, 50);
             this.boxMsg.Multiline = true;
             this.boxMsg.Name = "boxMsg";
             this.boxMsg.ReadOnly = true;
+            this.boxMsg.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.boxMsg.Size = new System.Drawing.Size(467, 180);
             this.boxMsg.TabIndex = 0;
+            this.boxMsg.WordWrap = false;
             // 
             // labTitle
             // 
@@ -59,6 +64,7 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
             // 
             // butReport
             // 
+            this.butReport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.butReport.Location = new System.Drawing.Point(323, 236);
             this.butReport.Name = "butReport";
             this.butReport.Size = new System.Drawing.Size(75, 23);
@@ -69,6 +75,7 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
             // 
             // butClose
             // 
+            this.butClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.butClose.Location = new System.Drawing.Point(404, 236);
             this.butClose.Name = "butClose";
             this.butClose.Size = new System.Drawing.Size(75, 23);
@@ -95,7 +102,7 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
             this.Controls.Add(this.iconWarning);
             this.Controls.Add(this.labTitle);
             this.Controls.Add(this.boxMsg);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
             this.MaximizeBox = false;
             this.Name = "ErrorDialog";
             this.ShowIcon = false;

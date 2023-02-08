@@ -267,7 +267,7 @@
     <Compile Include="Utilities\SigScannerUtils.cs" />
     <Compile Include="Utilities\SigScanTargets.cs" />
     <Compile Include="Utilities\StringUtils.cs" />
-    <Compile Include="Utilities\ThreadUtils.cs" />
+    <Compile Include="Utilities\ControlUtils.cs" />
     <Compile Include="Utilities\TimeSpanUtils.cs" />
     <Compile Include="Utilities\TryMany.cs" />
     <Compile Include="Utilities\SourceSplitUtils.cs" />

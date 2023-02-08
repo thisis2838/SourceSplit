@@ -98,6 +98,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
         public override void Unlock()
         {
             if (!_locked) return;
+
             Debug.WriteLine($"Unlocking {Name}...");
             _control.InvokeIfRequired(() => _control.Enabled = true);
 

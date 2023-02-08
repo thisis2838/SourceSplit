@@ -39,8 +39,7 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
         {
             if (members.Length % 2 != 0)
             {
-                new ErrorDialog("listview column initializer with uneven arguments!!");
-                throw new Exception("listview column initializer with uneven arguments!!");
+                new ErrorDialog("listview column initializer with uneven arguments!!", true);
             }
 
             listMain.Columns.Clear();

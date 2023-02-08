@@ -14,20 +14,48 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
 {
     public partial class ErrorDialog : Form
     {
-        public ErrorDialog(string msg = "")
-        {
-            Load += ErrorDialog_Load;
+        public bool Fatal = false;
+        private Exception _ex = null;
 
+        public ErrorDialog(string msg = "", bool fatal = false, Exception e = null)
+        {
             InitializeComponent();
 
-            boxMsg.Text = msg.Replace("\n", "\r\n");
-            SystemSounds.Exclamation.Play();
+            Fatal = fatal;
+
+            string text = msg.Replace("\r\n", "\n").Trim('\n');
+            if (e != null)
+            {
+                _ex = e;
+                text += "\n\n------EXCEPTIONS------\n";
+
+                Exception iter = e;
+                int level = 0;
+                while (iter != null)
+                {
+                    text += $@"
+[{level++}] {iter.GetType().Name}";
+
+                    if (!string.IsNullOrWhiteSpace(iter.Message)) text += "\n\t" + "Message: " + iter.Message;
+                    if (!string.IsNullOrWhiteSpace(iter.Source)) text += "\n\t" + "Source: " + iter.Source;
+                    if (!string.IsNullOrWhiteSpace(iter.StackTrace)) 
+                        text += "\n\t" + "Stacktrace: " + string.Join("", iter.StackTrace.Split('\n').Select(x => "\n\t\t" + x));
+
+                    text += "\n";
+
+                    iter = iter.InnerException;
+                }
+            }
+            boxMsg.Text = text.Replace("\t", "    ").Replace("\n", "\r\n");
+
+            Load += ErrorDialog_Load;
 
             this.ShowDialog();
         }
 
         private void ErrorDialog_Load(object sender, EventArgs e)
         {
+            SystemSounds.Exclamation.Play();
             iconWarning.Image = SystemIcons.Warning.ToBitmap();
             this.Icon = SystemIcons.Warning;
         }
@@ -39,6 +67,12 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
 
         private void butClose_Click(object sender, EventArgs e)
         {
+            if (Fatal)
+            {
+                if (_ex is null) throw new Exception(boxMsg.Text);
+                else throw _ex;
+            }
+
             this.Close();
         }
     }

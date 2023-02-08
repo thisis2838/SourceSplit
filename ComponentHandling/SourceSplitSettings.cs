@@ -283,7 +283,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                     }
                     catch (Exception ex)
                     {
-                        new ErrorDialog(ex.Message).ShowDialog();
+                        new ErrorDialog("Encountered exception while trying to open debug log", false, ex);
                     }
 
                     butOpenDebug.InvokeIfRequired(() =>
