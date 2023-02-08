@@ -123,6 +123,10 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
         public void Dispose()
         {
+            // unlock stuff here, because internal stuff of disabled controls
+            // will prevent invocation later.
+            Settings.GetUIRepresented().ForEach(x => x.Unlock());
+
             this.Disposed = true;
 
             _timer.CurrentState.OnUndoSplit -= state_OnUndoSplit;
