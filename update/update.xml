@@ -215,4 +215,12 @@
       <change>Internal code minimizing, revisions, and cleanup.</change>
     </changelog>
   </update>
+  <update version="3.3.3.1">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Fixed process hang when LiveSplit is closed while a game with locked settings is running.</change>
+    </changelog>
+  </update>
 </updates>
