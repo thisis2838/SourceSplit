@@ -23,41 +23,68 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
 
             Fatal = fatal;
 
-            string text = msg.Replace("\r\n", "\n").Trim('\n');
-            if (e != null)
+            string text = "";// = msg.Replace("\r\n", "\n").Trim('\n');
+            if (e is null)
             {
-                _ex = e;
-                text += "\n\n------EXCEPTIONS------\n";
+                e = new Exception(msg);
+                e.GetType()
+                    .GetField("_stackTraceString", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
+                    .SetValue(e, Environment.StackTrace);
+            }
+            _ex = e;
+            //text += "\n\n------EXCEPTIONS------\n";
 
-                Exception iter = e;
-                int level = 0;
-                while (iter != null)
-                {
-                    text += $@"
+            Exception iter = e;
+            int level = 0;
+            while (iter != null)
+            {
+                text += $@"
 [{level++}] {iter.GetType().Name}";
 
-                    if (!string.IsNullOrWhiteSpace(iter.Message)) text += "\n\t" + "Message: " + iter.Message;
-                    if (!string.IsNullOrWhiteSpace(iter.Source)) text += "\n\t" + "Source: " + iter.Source;
-                    if (!string.IsNullOrWhiteSpace(iter.StackTrace)) 
-                        text += "\n\t" + "Stacktrace: " + string.Join("", iter.StackTrace.Split('\n').Select(x => "\n\t\t" + x));
+                if (!string.IsNullOrWhiteSpace(iter.Message)) text += "\n\t" + "Message: " + iter.Message;
+                if (!string.IsNullOrWhiteSpace(iter.Source)) text += "\n\t" + "Source: " + iter.Source;
+                if (!string.IsNullOrWhiteSpace(iter.StackTrace)) 
+                    text += "\n\t" + "Stacktrace: " + string.Join("", iter.StackTrace.Split('\n').Select(x => "\n\t\t" + x));
 
-                    text += "\n";
+                text += "\n";
 
-                    iter = iter.InnerException;
-                }
+                iter = iter.InnerException;
             }
+
+
             boxMsg.Text = text.Replace("\t", "    ").Replace("\n", "\r\n");
+            boxMsg.SelectionLength = 0;
+            boxMsg.SelectionStart = 0;
+
+            if (fatal)
+            {
+                iconWarning.Image = SystemIcons.Error.ToBitmap();
+                this.Icon = SystemIcons.Error;
+                labTitle.Text = "SourceSplit has encountered a FATAL error!\r\nYou should contact a developer and report this immediately.\r\n";
+            }
+            else
+            {
+                iconWarning.Image = SystemIcons.Warning.ToBitmap();
+                this.Icon = SystemIcons.Warning;
+                labTitle.Text = "SourceSplit has encountered a non-fatal error!\r\nYou can still use SourceSplit, but you should contact a developer.\r\n";
+            }
 
             Load += ErrorDialog_Load;
 
+            this.Focus();
             this.ShowDialog();
         }
 
         private void ErrorDialog_Load(object sender, EventArgs e)
         {
-            SystemSounds.Exclamation.Play();
-            iconWarning.Image = SystemIcons.Warning.ToBitmap();
-            this.Icon = SystemIcons.Warning;
+            if (Fatal)
+            {
+                SystemSounds.Hand.Play();
+            }
+            else
+            {
+                SystemSounds.Asterisk.Play();
+            }
         }
 
         private void butReport_Click(object sender, EventArgs e)
@@ -65,14 +92,14 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
             Process.Start("https://github.com/thisis2838/SourceSplit/issues");
         }
 
+        public static Exception Throw(string message, Exception e = null)
+        {
+            var wnd = new ErrorDialog(message, true, e);
+            return wnd._ex;
+        }
+
         private void butClose_Click(object sender, EventArgs e)
         {
-            if (Fatal)
-            {
-                if (_ex is null) throw new Exception(boxMsg.Text);
-                else throw _ex;
-            }
-
             this.Close();
         }
     }

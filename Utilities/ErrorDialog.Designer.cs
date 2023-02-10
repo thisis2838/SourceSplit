@@ -59,8 +59,8 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
             this.labTitle.Name = "labTitle";
             this.labTitle.Size = new System.Drawing.Size(269, 26);
             this.labTitle.TabIndex = 1;
-            this.labTitle.Text = "SourceSplit has encountered an error! Tell a Dev!\r\nHowever, you should still be a" +
-    "ble to continue as normal.\r\n";
+            this.labTitle.Text = "SourceSplit has encountered an error!\r\nHowever, you should still be able to conti" +
+    "nue as normal.\r\n";
             // 
             // butReport
             // 
@@ -102,10 +102,8 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
             this.Controls.Add(this.iconWarning);
             this.Controls.Add(this.labTitle);
             this.Controls.Add(this.boxMsg);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
-            this.MaximizeBox = false;
+            this.MinimumSize = new System.Drawing.Size(507, 309);
             this.Name = "ErrorDialog";
-            this.ShowIcon = false;
             this.Text = "SourceSplit | Error";
             ((System.ComponentModel.ISupportInitialize)(this.iconWarning)).EndInit();
             this.ResumeLayout(false);

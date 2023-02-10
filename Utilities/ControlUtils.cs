@@ -11,31 +11,33 @@ namespace LiveSplit.SourceSplit.Utilities
 {
     public static class ControlUtils
     {
+        private static bool IsInvocationRequired(Control ctrl)
+        {
+            try
+            {
+                return ctrl.InvokeRequired;
+            }
+            catch (InvalidOperationException)
+            {
+                // TODO: is this safe?
+                return true;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public static void InvokeIfRequired(this Control ctrl, Action a)
         {
             try
             {
-                var required = false;
-                try
-                {
-                    required = ctrl.InvokeRequired;
-                }
-                catch (InvalidOperationException)
-                {
-                    // TODO: is this safe?
-                    required = true;
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-
-                if (required) ctrl.Invoke(a);
+                if (IsInvocationRequired(ctrl)) ctrl.Invoke(a);
                 else a();
             }
             catch (Exception ex)
             {
-                new ErrorDialog($"Unhandled exception while invoking action on control.", true, ex);
+                throw ErrorDialog.Throw($"Unhandled exception while invoking action on control {ctrl.Name}.", ex);
             }
         }
 
@@ -43,28 +45,40 @@ namespace LiveSplit.SourceSplit.Utilities
         {
             try
             {
-                var required = false;
-                try
-                {
-                    required = ctrl.InvokeRequired;
-                }
-                catch (InvalidOperationException)
-                {
-                    // TODO: is this safe?
-                    required = true;
-                }
-                catch (Exception)
-                {
-                    throw;
-                }
-
-                if (required) return (T)ctrl.Invoke(get);
-                else return get();
+                if (IsInvocationRequired(ctrl)) return (T)ctrl.Invoke(get);
+                else return (T)get.Invoke();
             }
             catch (Exception ex)
             {
-                new ErrorDialog($"Unhandled exception while invoking action on control.", true, ex);
-                throw;
+                throw ErrorDialog.Throw($"Unhandled exception while invoking action on control {ctrl.Name}.", ex);
+            }
+        }
+
+        public static IAsyncResult BeginInvokeIfRequired(this Control ctrl, Action a)
+        {
+            try
+            {
+                if (IsInvocationRequired(ctrl)) return ctrl.BeginInvoke(a);
+                else
+                {
+                    a();
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ErrorDialog.Throw($"Unhandled exception while invoking action on control {ctrl.Name}.", ex);
+            }
+        }
+
+        public static void InvokeWithTimeout(this Control ctrl, int msTimeout, Action a)
+        {
+            var res = BeginInvokeIfRequired(ctrl, a);
+            if (res is null) return;
+
+            if (!res.AsyncWaitHandle.WaitOne(msTimeout))
+            {
+                throw ErrorDialog.Throw($"Timed out after {msTimeout}ms invoking action on control {ctrl.Name}.");
             }
         }
     }

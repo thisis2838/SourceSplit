@@ -137,7 +137,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             _timer.CurrentState.IsGameTimePaused = false; // hack
             _timer.CurrentState.LoadingTimes = TimeSpan.Zero;
 
-            _gameMemory?.Stop();
+            _gameMemory?.StopReading();
         }
 
         public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode)

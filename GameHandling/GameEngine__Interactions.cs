@@ -577,7 +577,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         public virtual float GetOutputFireTime(string targetName_, string command_, string param_, int clamp = 100)
         {
             if (targetName_ is null)
-                return -1;
+                return 0;
 
             float ret = 0;
 #if DEBUG
