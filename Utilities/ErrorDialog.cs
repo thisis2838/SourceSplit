@@ -23,7 +23,7 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
 
             Fatal = fatal;
 
-            string text = "";// = msg.Replace("\r\n", "\n").Trim('\n');
+            string text = "";
             if (e is null)
             {
                 e = new Exception(msg);
@@ -31,8 +31,10 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
                     .GetField("_stackTraceString", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
                     .SetValue(e, Environment.StackTrace);
             }
+            else if (!string.IsNullOrWhiteSpace(msg)) 
+                text = msg.Replace("\r\n", "\n").Trim('\n') + "\n\n------EXCEPTIONS------\n";
+
             _ex = e;
-            //text += "\n\n------EXCEPTIONS------\n";
 
             Exception iter = e;
             int level = 0;
@@ -92,7 +94,7 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
             Process.Start("https://github.com/thisis2838/SourceSplit/issues");
         }
 
-        public static Exception Throw(string message, Exception e = null)
+        public static Exception Exception(string message, Exception e = null)
         {
             var wnd = new ErrorDialog(message, true, e);
             return wnd._ex;

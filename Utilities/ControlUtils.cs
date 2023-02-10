@@ -37,7 +37,7 @@ namespace LiveSplit.SourceSplit.Utilities
             }
             catch (Exception ex)
             {
-                throw ErrorDialog.Throw($"Unhandled exception while invoking action on control {ctrl.Name}.", ex);
+                throw ErrorDialog.Exception($"Unhandled exception while invoking action on control {ctrl.Name}.", ex);
             }
         }
 
@@ -50,7 +50,7 @@ namespace LiveSplit.SourceSplit.Utilities
             }
             catch (Exception ex)
             {
-                throw ErrorDialog.Throw($"Unhandled exception while invoking action on control {ctrl.Name}.", ex);
+                throw ErrorDialog.Exception($"Unhandled exception while invoking action on control {ctrl.Name}.", ex);
             }
         }
 
@@ -67,7 +67,7 @@ namespace LiveSplit.SourceSplit.Utilities
             }
             catch (Exception ex)
             {
-                throw ErrorDialog.Throw($"Unhandled exception while invoking action on control {ctrl.Name}.", ex);
+                throw ErrorDialog.Exception($"Unhandled exception while invoking action on control {ctrl.Name}.", ex);
             }
         }
 
@@ -78,7 +78,7 @@ namespace LiveSplit.SourceSplit.Utilities
 
             if (!res.AsyncWaitHandle.WaitOne(msTimeout))
             {
-                throw ErrorDialog.Throw($"Timed out after {msTimeout}ms invoking action on control {ctrl.Name}.");
+                throw ErrorDialog.Exception($"Timed out after {msTimeout}ms invoking action on control {ctrl.Name}.");
             }
         }
     }

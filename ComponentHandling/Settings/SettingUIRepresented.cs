@@ -1,5 +1,6 @@
 ﻿using LiveSplit.SourceSplit.GameSpecific;
 using LiveSplit.SourceSplit.Utilities;
+using LiveSplit.SourceSplit.Utilities.Forms;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -43,7 +44,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
         private Func<string, T> _parseStorageValue = (e) =>
         {
             var converter = TypeDescriptor.GetConverter(typeof(T));
-            if (converter == null) throw new Exception("no converter");
+            if (converter == null) throw ErrorDialog.Exception($"No converter found for data type {typeof(T).FullName} while parsing setting");
 
             return (T)converter.ConvertFromString(e);
         };

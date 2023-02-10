@@ -109,9 +109,9 @@ namespace LiveSplit.SourceSplit.GameHandling
         public void StartReading()
         {
             if (_thread != null && _thread.Status == TaskStatus.Running)
-                throw new InvalidOperationException();
+                throw ErrorDialog.Exception("Memory reading thread is null or isn't running!");
             if (!(SynchronizationContext.Current is WindowsFormsSynchronizationContext))
-                throw new InvalidOperationException("SynchronizationContext.Current is not a UI thread.");
+                throw ErrorDialog.Exception("SynchronizationContext.Current is not a UI thread.");
 
             _cancelSource = new CancellationTokenSource();
             _uiThread = SynchronizationContext.Current;
