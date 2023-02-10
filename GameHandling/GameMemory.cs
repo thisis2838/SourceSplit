@@ -118,7 +118,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             TimerActions.Init();
             _thread = Task.Factory.StartNew(() => MemoryReadThread(_cancelSource));
         }
-        public void Stop()
+        public void StopReading()
         {
             if (_cancelSource == null || _thread == null || _thread.Status != TaskStatus.Running)
                 return;
@@ -135,6 +135,9 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             while (true)
             {
+                if (_cancelSource?.IsCancellationRequested ?? false)
+                    break;
+
                 try
                 {
                     Debug.WriteLine("Waiting for process");
@@ -422,7 +425,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             state.MainSupport?.OnGameAttached(_state, TimerActions);
             Debug.WriteLine($"EntInfoSize = {state.GameEngine.EntInfoSize}");
 
-            _settings.InvokeIfRequired(() =>
+            _settings.InvokeWithTimeout(10000, () =>
             {
                 _settings.Invalidate();
                 _settings.Update();

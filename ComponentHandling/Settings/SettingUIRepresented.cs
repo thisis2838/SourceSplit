@@ -6,8 +6,10 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -80,7 +82,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
         public void SetValue(T value)
         {
             if (_locked) _preLockValue = value;
-            else _control.InvokeIfRequired(() => _setFunc(value));
+            else _control.InvokeWithTimeout(5000, () => _setFunc.Invoke(value));
         }
 
         public void Lock(T value)
@@ -92,7 +94,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
 
             SetValue(value);
             _locked = true;
-            _control.InvokeIfRequired(() => _control.Enabled = false);
+            _control.InvokeWithTimeout(5000, () => _control.Enabled = false);
         }
 
         public override void Unlock()
@@ -100,7 +102,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
             if (!_locked) return;
 
             Debug.WriteLine($"Unlocking {Name}...");
-            _control.InvokeIfRequired(() => _control.Enabled = true);
+            _control.InvokeWithTimeout(5000, () => _control.Enabled = true);
 
             _locked = false;
             SetValue(_preLockValue);
