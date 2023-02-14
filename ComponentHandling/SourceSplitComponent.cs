@@ -138,6 +138,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             _timer.CurrentState.LoadingTimes = TimeSpan.Zero;
 
             _gameMemory?.StopReading();
+
+            SettingControl.Dispose();
         }
 
         public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode)

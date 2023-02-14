@@ -113,7 +113,17 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
             Application.AddMessageFilter(this);
 
+            this.Disposed += SourceSplitSettings_Disposed;
+
             this.VisibleChanged += SourceSplitSettings_VisibleChanged;
+        }
+
+        private void SourceSplitSettings_Disposed(object sender, EventArgs e)
+        {
+            Application.RemoveMessageFilter(this);
+
+            if (_help != null && !_help.IsDisposed) _help.Close();
+            if (SessionsForm != null && !SessionsForm.IsDisposed) SessionsForm.Close();
         }
 
         private void SourceSplitSettings_VisibleChanged(object sender, EventArgs e)
