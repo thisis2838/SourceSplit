@@ -75,8 +75,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
         public T GetValue()
         {
             T val = _default;
-            val = _getFunc.Invoke(); // FIXME: this is a bad idea....
-            // _control.InvokeIfRequired(_getFunc);
+            //val = _getFunc.Invoke(); // FIXME: this is a bad idea....
+            _control.InvokeWithTimeout(5000, () => val = _getFunc.Invoke());
             return val;
         }
 
