@@ -36,25 +36,25 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             _curDemoComponent = new InternalTextComponent(Settings.ShowCurDemo.Value, "Current Demo", "");
 
             this.ContextMenuControls = new Dictionary<String, Action>();
-            this.ContextMenuControls.Add("SourceSplit: Times", () => SessionsForm.Instance.Show());
+            this.ContextMenuControls.Add("SourceSplit: Times", () => SettingControl.SessionsForm.Show());
             this.ContextMenuControls.Add("SourceSplit: Settings", () =>
             {
                 var dialog = new ComponentSettingsDialog(this);
-                /*
-                var window = new Form()
-                {
-                    Size = new Size(Settings.Width + 14, Settings.Height + 45),
-                    FormBorderStyle = FormBorderStyle.FixedSingle,
-                    Text = Settings.Name,
-                    ShowIcon = false,
-                    MaximizeBox = false
-                };
-                window.Controls.Add(Settings);
-                window.ShowDialog();*/
-
                 dialog.Size = new Size(dialog.MaximumSize.Width, SettingControl.Size.Height + 100);
                 if (dialog.ShowDialog() == DialogResult.OK)
-                    _timer.CurrentState.Layout.HasChanged = true;
+                {
+                    if (IsLayoutComponent) _timer.CurrentState.Layout.HasChanged = true;
+                    else
+                    {
+                        var run = _timer.CurrentState.Run;
+                        var document = new XmlDocument();
+                        var autoSplitterSettings = document.CreateElement("AutoSplitterSettings");
+                        autoSplitterSettings.InnerXml = this.GetSettings(document).InnerXml;
+                        autoSplitterSettings.Attributes.Append(SettingsHelper.ToAttribute(document, "gameName", run.GameName));
+                        run.AutoSplitterSettings = autoSplitterSettings;
+                        run.HasChanged = true;
+                    }
+                }
             });
 
 #if DEBUG

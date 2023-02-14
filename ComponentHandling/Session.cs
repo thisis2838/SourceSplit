@@ -36,6 +36,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
     public class SessionList : List<Session>
     {
+        private SessionsForm _form = new SessionsForm();
+
         // cache this or else we easily get performance problems
         private long _totalTicks = 0;
         public long TotalTicks 
@@ -51,6 +53,11 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             } 
         }
 
+        public SessionList(SessionsForm form)
+        {
+            _form = form;
+        }
+
         public Session Current => this.LastOrDefault();
 
         public new void Add(Session session)
@@ -58,7 +65,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             if (Count > 0)
             {
                 _totalTicks = this.Sum(x => x.TotalTicks);
-                SessionsForm.Instance.Add(this);
+                _form.Update(this);
             }
             base.Add(session);
         }
@@ -67,7 +74,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         {
             base.Clear();
             _totalTicks = 0;
-            SessionsForm.Instance.Clear();
+            _form.Clear();
         }
     }
 }

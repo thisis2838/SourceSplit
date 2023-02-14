@@ -13,18 +13,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 {
     public partial class SessionsForm : Form
     {
-        private static SessionsForm _instance;
         private List<MapTime> _mapTimes = new List<MapTime>();
-
-        public static SessionsForm Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new SessionsForm();
-                return _instance;
-            }
-        }
 
         public SessionsForm()
         {
@@ -47,7 +36,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                 "Paused Time", 100);
         }
 
-        public void Add(SessionList list)
+        public void Update(SessionList list)
         {
             var cur = list.Last();
             listSessions.Add(new string[]

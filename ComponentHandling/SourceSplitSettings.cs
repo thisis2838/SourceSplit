@@ -22,6 +22,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling
     public partial class SourceSplitSettings : UserControl, IMessageFilter
     {
         private string _runningForSplash = "";
+        private SourceSplitSettingsHelp _help = new SourceSplitSettingsHelp();
+        public SessionsForm SessionsForm = new SessionsForm();
 
         public SourceSplitSettings(bool isLayout)
         {
@@ -87,17 +89,19 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             // HACKHACK: due to all the data bindings shenanigans, we need to load all the tab pages when opening the settings
             // so just give in...
             this.Load += (e, f) => 
-            { 
+            {
+                tabCtrlMaster.Visible = false;
                 for (int i = tabCtrlMaster.TabPages.Count - 1; i >= 0; i--)
                 {
                     tabCtrlMaster.SelectedIndex = i;
                     Thread.Sleep(1);
                 }
+                tabCtrlMaster.Visible = true;
             };
 
             void addHelpCallback(Control ctrl)
             {
-                ctrl.MouseHover += (s, e) => { SourceSplitSettingsHelp.Instance.UpdateDescription(ctrl); };
+                ctrl.MouseHover += (s, e) => { _help.UpdateDescription(ctrl); };
 
                 foreach (var child in ctrl.Controls.Cast<Control>())
                 {
@@ -108,6 +112,22 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             SetSettingDescriptions();
 
             Application.AddMessageFilter(this);
+
+            this.VisibleChanged += SourceSplitSettings_VisibleChanged;
+        }
+
+        private void SourceSplitSettings_VisibleChanged(object sender, EventArgs e)
+        {
+            if (Visible)
+            {
+                try
+                {
+                    var f = FindForm();
+                    if (f is null) return;
+                    f.FormClosing += (s, e) => _help.Close();
+                }
+                catch { }
+            }
         }
 
         public bool PreFilterMessage(ref Message m)
@@ -138,7 +158,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                 check(tabCtrlMaster.Controls[tabCtrlMaster.SelectedIndex]);
 
                 if (controls.Count > 0)
-                    SourceSplitSettingsHelp.Instance.UpdateDescription(controls.Last());
+                    _help.UpdateDescription(controls.Last());
             }
             return false;
         }
@@ -218,7 +238,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
         void btnShowMapTimes_Click(object sender, EventArgs e)
         {
-            SessionsForm.Instance.Show();
+            SessionsForm.Show();
         }
 
         private void butDemoParserPath_Click(object sender, EventArgs e)
@@ -231,7 +251,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
         private void butShowSessions_Click(object sender, EventArgs e)
         {
-            SessionsForm.Instance.Show();
+            SessionsForm.Show();
         }
 
         private void butGRepo_Click(object sender, EventArgs e)
@@ -256,8 +276,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
         private void butHelp_Click(object sender, EventArgs e)
         {
-            SourceSplitSettingsHelp.Instance.Show();
-            SourceSplitSettingsHelp.Instance.Focus();
+            _help.Show();
+            _help.Focus();
         }
 
         public void butOpenDebug_Click(object sender, EventArgs e)

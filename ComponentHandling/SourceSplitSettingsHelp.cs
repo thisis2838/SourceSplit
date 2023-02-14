@@ -31,16 +31,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         private Dictionary<string, string> _descriptions = new Dictionary<string, string>();
         private Dictionary<string, string> _names = new Dictionary<string, string>();
 
-        private static SourceSplitSettingsHelp _instance;
-        public static SourceSplitSettingsHelp Instance
-        {
-            get
-            {
-                if (_instance is null) _instance = new SourceSplitSettingsHelp();
-                return _instance;
-            }
-        }
-
         private string GetTitle(Control control)
         {
             if (_names.ContainsKey(control.Name))

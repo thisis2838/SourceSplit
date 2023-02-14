@@ -39,7 +39,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         private TimerModel _timer;
         private GameMemory _gameMemory;
 
-        private SessionList _sessions = new SessionList();
+        private SessionList _sessions;
         private float _intervalPerTick;
         private long _cumulativeTime;
         private bool _addInactiveTime = false;
@@ -93,9 +93,9 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             Trace.Listeners.Add(TimedTraceListener.Instance);
 #endif
 
-            _ = SessionsForm.Instance;
-
             SettingControl = new SourceSplitSettings(isLayoutComponent);
+            _sessions = new SessionList(SettingControl.SessionsForm);
+
             this.IsLayoutComponent = isLayoutComponent;
 
             InitGraphics(state);
