@@ -165,7 +165,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                     }
                 }
 
-                check(tabCtrlMaster.Controls[tabCtrlMaster.SelectedIndex]);
+                check(tabCtrlMaster.SelectedTab);
 
                 if (controls.Count > 0)
                     _help.UpdateDescription(controls.Last());
