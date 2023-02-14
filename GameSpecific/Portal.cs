@@ -7,6 +7,11 @@ using LiveSplit.SourceSplit.GameHandling;
 using System.IO;
 using System.Security.Cryptography;
 using LiveSplit.SourceSplit.ComponentHandling;
+using System.Drawing.Printing;
+using System.Linq;
+using System.CodeDom;
+using System.Threading.Tasks;
+using System.Text;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -27,10 +32,26 @@ namespace LiveSplit.SourceSplit.GameSpecific
             // portal tfv map pack: on first map
 
         private int _baseEntityHealthOffset = -1;
-        private const int VAULT_SAVE_TICK = 4261;
-        private ValueWatcher<float> _splitTime = new ValueWatcher<float>();
-        private float _elevSplitTime = 0;
         private MemoryWatcher<int> _playerHP;
+
+        private ValueWatcher<float> _splitTime = new ValueWatcher<float>();
+
+        private struct Elevator
+        {
+            public MemoryWatcher<Vector3f> Speed;
+            public MemoryWatcher<Vector3f> Position;
+            public void Update(Process proc)
+            {
+                Speed.Update(proc);
+                Position.Update(proc);
+            }
+        }
+
+        private int _baseModelNameOffset = -1;
+        private int _baseVelocityOffset = -1;
+        private int _baseSolidFlagsOffset = -1;
+        private List<Elevator> _elevatorSpeeds = new List<Elevator>();
+        private List<IntPtr> _elevatorBlockers = new List<IntPtr>();
 
         private List<string> _vaultHashes = new List<string>()
         {
@@ -40,7 +61,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         };
 
         private CustomCommand _newStart = new CustomCommand("newstart", "0", "Start the timer upon portal open");
-        private CustomCommand _elevSplit = new CustomCommand("elevsplit", "0", "Split when the elevator starts moving (limited)");
+        private CustomCommand _elevSplit = new CustomCommand("elevsplit", "0", "Split when an elevator starts moving from the ends of the shaft.");
         private CustomCommand _deathSplit = new CustomCommand("deathsplit", "0", "Death category extension ending");
 #if DEBUG
         private CustomCommand _enduranceTesting = new CustomCommand("endurancetesting", "", "Do endurance testing");
@@ -66,21 +87,81 @@ namespace LiveSplit.SourceSplit.GameSpecific
         protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
         {
             GameMemory.GetBaseEntityMemberOffset("m_iHealth", state, state.GameEngine.ServerModule, out _baseEntityHealthOffset);
+            GameMemory.GetBaseEntityMemberOffset("m_ModelName", state, state.GameEngine.ServerModule, out _baseModelNameOffset);
+            GameMemory.GetBaseEntityMemberOffset("m_vecAbsVelocity", state, state.GameEngine.ServerModule, out _baseVelocityOffset);
+
+            // find brush solidity flag offset (for elevator splitting)
+            {
+                if (!GameMemory.GetBaseEntityMemberOffset("m_Collision\0", state, state.GameEngine.ServerModule, out var collisionPropOffset)) goto skip;
+
+                var scanner = new SignatureScanner(state.GameProcess, state.GameEngine.ServerModule.BaseAddress, state.GameEngine.ServerModule.ModuleMemorySize);
+                
+                var strPtr = scanner.Scan(new SigScanTarget(Encoding.UTF8.GetBytes("m_usSolidFlags\0")));
+                if (strPtr == IntPtr.Zero) goto skip;
+
+                var strRef = scanner.Scan(new SigScanTarget(1, $"6a ?? 68 {strPtr.GetByteString()} 68 ?? ?? ?? ?? e8 ?? ?? ?? 00"));
+                if (strRef == IntPtr.Zero) goto skip;
+
+                _baseSolidFlagsOffset = collisionPropOffset + state.GameProcess.ReadValue<byte>(strRef);
+                Debug.WriteLine("Found CCollisionProperty::m_usSolidFlags offset = 0x" + _baseSolidFlagsOffset.ToString("X"));
+
+                skip:;
+            }
         }
 
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
         {
+            _elevatorSpeeds.Clear();
+            _elevatorBlockers.Clear();
+
+            if (_baseModelNameOffset != -1 && _baseVelocityOffset != -1 && _baseSolidFlagsOffset != -1 && _baseSolidFlagsOffset != -1)
+            {
+                var engine = state.GameEngine;
+                var proc = state.GameProcess;
+
+                foreach (var ent in engine.GetEntities())
+                {
+                    // is this an elevator blocker? 
+                    {
+                        if (!state.GameProcess.ReadString(proc.ReadPointer(ent + state.GameEngine.BaseEntityTargetNameOffset), 255, out string targetName)) goto skip;
+                        if (!targetName.Contains("block_crazy_player")) goto skip;
+
+                        Debug.WriteLine($"Found potential blocking entity @ 0x{ent.ToString("X")}");
+                        _elevatorBlockers.Add(ent); 
+                        continue;
+
+                        skip:;     
+                    }
+
+                    // is this an elevator body?
+                    {
+                        if (!state.GameProcess.ReadString(proc.ReadPointer(ent + _baseModelNameOffset), 255, out string modelName)) goto skip;
+                        if (modelName is null) continue;
+                        if (!modelName.ToLower().EndsWith("round_elevator_body.mdl")) goto skip;
+
+                        var parent = engine.GetEntityByIndex(engine.GetEntIndexFromHandle(proc.ReadValue<uint>(ent + engine.BaseEntityParentHandleOffset)));
+                        if (parent == IntPtr.Zero) goto skip;
+
+                        Debug.WriteLine($"Found potential elevator @ 0x{ent.ToString("X")}, parent @ 0x{parent.ToString("X")}");
+                        var w = new Elevator()
+                        {
+                            Speed = new MemoryWatcher<Vector3f>(parent + _baseVelocityOffset),
+                            Position = new MemoryWatcher<Vector3f>(ent + engine.BaseEntityAbsOriginOffset)
+                        };
+                        _elevatorSpeeds.Add(w);
+                        w.Update(proc);
+                        continue;
+
+                        skip:;
+                    }
+                }
+            }
+
             if (IsFirstMap)
                 _splitTime.Current = state.GameEngine.GetOutputFireTime("scene_*", "PitchShift", "2.0");
 
             if (this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
                 _splitTime.Current = state.GameEngine.GetOutputFireTime("cable_detach_04");
-
-            if (_elevSplit.Boolean)
-            {
-                _elevSplitTime = state.GameEngine.GetOutputFireTime("*elev_start");
-                Debug.WriteLine("Elevator split time is " + _elevSplitTime);
-            }
 
             _playerHP = new MemoryWatcher<int>(state.PlayerEntInfo.EntityPtr + _baseEntityHealthOffset);
         }
@@ -156,42 +237,50 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 }
             }
 #endif
-            _playerHP.Update(state.GameProcess);
 
-            if (_elevSplit.Boolean)
+            
             {
-                float splitTime = 0;
-
-                TryMany findSplitTime = new TryMany(
-                    () => splitTime == 0,
-                    () => splitTime = state.GameEngine.GetOutputFireTime("*elevator_start"),
-                    () => splitTime = state.GameEngine.GetOutputFireTime("*elevator_door_model_close"));
-                findSplitTime.Begin();
-
-                if (splitTime == 0 && _elevSplitTime != 0)
+                bool splitAlready = false;
+                foreach (var elevator in _elevatorSpeeds)
                 {
-                    Debug.WriteLine("Elevator began moving!");
-                    actions.Split();
-                }
-                _elevSplitTime = splitTime;
-            }
+                    elevator.Update(state.GameProcess);
+                    var pos = elevator.Position.Current;
+                    if (!splitAlready && elevator.Speed.Old.Z == 0 && elevator.Speed.Current.Z != 0)
+                    {
+                        foreach (var blocker in _elevatorBlockers)
+                        {
+                            var blockerPos = state.GameEngine.GetEntityPos(blocker);
+                            if (blockerPos.Distance(pos) > 200f) continue;
 
-            if (IsFirstMap && _deathSplit.Boolean)
-            {
-                if (_playerHP.Old > 0 && _playerHP.Current <= 0)
-                {
-                    Debug.WriteLine("Death% end");
-                    actions.Split();
+                            // is the blocker enabled? (i.e is it solid)
+                            if ((state.GameProcess.ReadValue<ushort>(blocker + _baseSolidFlagsOffset) & 0x0004) != 0) continue;
+
+                            Debug.WriteLine($"Elevator split (@ {pos})");
+                            splitAlready = true;
+                            if (_elevSplit.Boolean) actions.Split();
+                        }
+                    }
                 }
             }
+
+
 
             if (OnceFlag)
                 return;
 
             if (IsFirstMap)
             {
-                bool isInside = state.PlayerPosition.Current.InsideBox(-636, -452, -412, -228, 383, 158);
+                _playerHP.Update(state.GameProcess);
+                if (_deathSplit.Boolean)
+                {
+                    if (_playerHP.Old > 0 && _playerHP.Current <= 0)
+                    {
+                        Debug.WriteLine("Death% end");
+                        actions.Split();
+                    }
+                }
 
+                bool isInside = state.PlayerPosition.Current.InsideBox(-636, -452, -412, -228, 383, 158);
                 if (_newStart.Boolean)
                 {
                     _splitTime.Current = state.GameEngine.GetOutputFireTime("relay_portal_cancel_room1");
@@ -202,21 +291,6 @@ namespace LiveSplit.SourceSplit.GameSpecific
                         actions.Start(-57045);
                     }
                 }
-                /*else
-                {
-                    // vault save starts at tick 4261, but update interval may miss it so be a little lenient
-                    // player must be somewhere within the vault as well due to new vault skip
-                    var saveTick = Util.RecalcTickTime(VAULT_SAVE_TICK, 0.015f, state.IntervalPerTick);
-                    if (isInside &&
-                        state.TickBase >= saveTick && state.TickBase <= saveTick + 4.RecalcTickTime(0.015f, state.IntervalPerTick))
-                    {
-                        _onceFlag = true;
-                        int ticksSinceVaultSaveTick = state.TickBase - saveTick; // account for missing ticks if update interval missed it
-                        StartOffsetTicks = -(3534.RecalcTickTime(0.015f, state.IntervalPerTick) + 1) - ticksSinceVaultSaveTick; // 53.01 seconds + 1 tick
-                        actions.Start(StartOffsetTicks); return;
-                    }
-                }*/
-
                 if (isInside && state.PlayerViewEntityIndex.ChangedTo(1))
                 {
                     OnceFlag = true;
