@@ -18,14 +18,21 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         {
             InitializeComponent();
 
-            this.ShowInTaskbar = false;
-            UpdateDescription(null);
+            this.VisibleChanged += SourceSplitSettingsHelp_VisibleChanged;
+            this.FormClosing += SourceSplitSettingsHelp_FormClosing;
 
-            this.FormClosing += (s, e) =>
-            {
-                this.Hide();
-                e.Cancel = true;
-            };
+            UpdateDescription(null);
+        }
+
+        private void SourceSplitSettingsHelp_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            this.Hide();
+            e.Cancel = true;
+        }
+
+        private void SourceSplitSettingsHelp_VisibleChanged(object sender, EventArgs e)
+        {
+            _highlightedControl?.Invalidate(); _highlightedControl?.Update();
         }
 
         private Dictionary<string, string> _descriptions = new Dictionary<string, string>();
@@ -73,38 +80,80 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             _descriptions[control.Name] = description;
         }
 
+        private Control _highlightedControl = null;
+        private void DrawHighlight(object sender, PaintEventArgs e)
+        {
+            if (Visible)
+            {
+                var origRect = e.ClipRectangle;
+                var color = Color.SkyBlue;
+                e.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(70, color)), origRect);
+            }
+        }
+        private void HighlightControl(Control control)
+        {
+            if (control != null)
+            {
+                control.Paint += DrawHighlight;
+                control.Invalidate(); control.Update();
+                _highlightedControl = control;
+            }
+        }
+        private void RemoveCurrentHighlight()
+        {
+            if (_highlightedControl != null)
+            {
+                _highlightedControl.Paint -= DrawHighlight;
+                _highlightedControl.Invalidate(); _highlightedControl.Update();
+                _highlightedControl = null;
+            }
+        }
+
+        private Control _lastInput = null;
+
         public void UpdateDescription(Control control)
         {
+            if (_lastInput == control) return;
+            _lastInput = control;
+
             tlpMain.Visible = true;
+            RemoveCurrentHighlight();
 
-            if (control is null || !_descriptions.ContainsKey(control.Name))
+            if (control == null)
             {
-                if (control != null)
+                tlpMain.Visible = false;
+                return;
+            }
+
+
+            if (!_descriptions.ContainsKey(control.Name))
+            {
+                var parent = control.Parent;
+                if (GetAncestors(control).Any(x =>
                 {
-                    var parent = control.Parent;
-                    if (GetAncestors(control).Any(x =>
+                    if (_descriptions.ContainsKey(x.Name))
                     {
-                        if (_descriptions.ContainsKey(x.Name))
-                        {
-                            labName.Text = GetTitle(x);
-                            boxExplain.Text = _descriptions[x.Name];
-                            boxPath.Text = string.Join(" > ", GetAncestors(x, true).Reverse().Select(y => GetTitle(y)));
+                        labName.Text = GetTitle(x);
+                        boxExplain.Text = _descriptions[x.Name];
+                        boxPath.Text = string.Join(" > ", GetAncestors(x, true).Reverse().Select(y => GetTitle(y)));
 
-                            return true;
-                        }
+                        HighlightControl(x);
 
-                        return false;
-                    }))
-                    {
-                        return;
+                        return true;
                     }
+
+                    return false;
+                }))
+                {
+                    return;
                 }
 
                 tlpMain.Visible = false;
-
             }
             else
             {
+                HighlightControl(control);
+
                 labName.Text = GetTitle(control);
                 boxExplain.Text = _descriptions[control.Name];
                 boxPath.Text = string.Join(" > ", GetAncestors(control, true).Reverse().Select(x => GetTitle(x)));
