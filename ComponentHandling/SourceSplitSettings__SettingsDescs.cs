@@ -19,15 +19,15 @@ namespace LiveSplit.SourceSplit.ComponentHandling
     {
         private void SetSettingDescriptions()
         {
-            const string EXPLAIN_GENERIC_LOAD = "New Game map loads are map changes which are not triggered by a changelevel trigger, or through using the changelevel command. Instead, it is typically triggered using the 'map' command. If triggered through the console, a dedicated loading screen with a progress bar will apprear. If triggered by the map using entities, a black screen is shown.";
+            const string EXPLAIN_GENERIC_LOAD = "New Game map loads are map changes which are not triggered by a changelevel trigger, or by using the 'changelevel' command. Instead, it is typically triggered using the 'map' command. If triggered through the console, a dedicated loading screen with a progress bar will apprear. If triggered by the map using entities, a black screen is shown.";
 
-            const string EXPLAIN_CHANGELEVEL = "Changelevels are map changes which are triggered by a changelevel trigger, or through using the changelevel command. When a changelevel is triggered, the game will freeze the screen, and display a box with 'LOADING' written on it.";
+            const string EXPLAIN_CHANGELEVEL = "Changelevels are map changes which are triggered by a changelevel trigger, or by using the 'changelevel' command. When a changelevel is triggered, the game will freeze the screen, and flash a box with 'LOADING' written on it.";
 
-            const string EXPLAIN_SESSION = "A session is the time between 2 loads.";
+            const string EXPLAIN_SESSION = "A session begins after the game finishes loading, and ends when the game begins loading.";
 
             _help.SetName(labVersion, "Version text");
             _help.SetDescription(labVersion,
-                @"This is the version of this build of SourceSplit. The build date is parenthesized and appended to it.");
+                @"This is the version number and build date of this release of SourceSplit.");
 
             _help.SetName(tlpAutoStartEndReset, "Main Functions");
 
@@ -39,24 +39,24 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
             _help.SetName(gMapTransitions, "Split on Map Transitions");
             _help.SetDescription(gMapTransitions,
-                @"This option includes options for configuring how SourceSplit should treat types of map transitions, and whether to split upon detecting one.");
+                @"This option includes settings for configuring the logic used to decide if a detected map transition should trigger an Auto-Split.");
 
-            _help.SetName(panSplitInterval, "Every ? transition");
+            _help.SetName(panSplitInterval, "Every ? transition(s)");
             _help.SetDescription(panSplitInterval,
-                @"This option decides whether SourceSplit should skip a number of considered map transitions before Auto-Splitting on one.
+                @"This option decides whether SourceSplit should split every 1 (or 2, 3, etc..) considered map transitions.
 
-If set to 1, SourceSplit will not skip any transitions; if set to 2, SourceSplit will skip 1 transition, before splitting on the next one; and etc....
+Starting from 0, for every map transition that is considered, SourceSplit will count up by 1. If that count matches the specified value, SourceSplit will Auto-Split, and reset its count back to 0.
 
 This mechanism resets when the timer is reset.");
 
             _help.SetDescription(chkSplitGenericMap,
-                @"This option decides whether SourceSplit should consider New Game map loads as map transitions, or ignore them.
+                @"This option decides whether SourceSplit should consider New Game map loads, or ignore them.
 
 " + EXPLAIN_GENERIC_LOAD);
 
             _help.SetName(dgvMapTransitions, "Map Transition List");
             _help.SetDescription(dgvMapTransitions,
-                @"This option is the list of map transitions which is to be compared to one for filtering to decide whether SourceSplit should consider it.
+                @"This is the list of map transitions used to filter in or out detected transitions for consideration. If a transition is detected, and it exists in this list, whether it is ignored or considered for Auto-Splitting will depend on the the Filtering Type.
 
 The left-hand side of each line is the source map, and the corresponding right-hand side of each line is the destination map in a map transition.
 
@@ -67,30 +67,29 @@ Enter a single asterisk (*) to signify any map.");
 
             _help.SetName(cmbMTLMode, "Map Transition Filtering Type");
             _help.SetDescription(cmbMTLMode,
-                @"This option decides what SourceSplit should do if a map transition is included in the list.
+                @"This option decides what SourceSplit should do when it detects a map transition which is included in this list.
 
 If set to 'Allow', SourceSplit will consider this map transition. If set to 'Disallow', SourceSplit will ignore this map transition.");
 
             _help.SetName(chkUseMTL, "Only ? Map Transitions");
             _help.SetDescription(chkUseMTL,
-                @"This option decides whether to enable or disable filtering map transitions to decide which ones SourceSplit should consider.");
+                @"This option decides whether to enable or disable filtering in and out map transitions for consideration.");
 
             _help.SetName(gMTL, "Only ? Map Transitions");
             _help.SetDescription(gMTL,
-                @"This option contains settings of the filtering applied onto detected map transitions to decide whether SourceSplit should consider them");
+                @"This option decides whether to enable or disable filtering in and out map transitions for consideration.");
 
             _help.SetDescription(chkSplitSpecial,
                 @"This option decides whether SourceSplit should Auto-Split upon detecting a game/mod-specific pre-defined event such as completing objectives, reaching specific destinations, etc..");
 
-            _help.SetName(gAdditionalAutoStart, "Also Auto-Start when");
             _help.SetDescription(gbAutoStartEndReset,
-                @"This option contains settings for Automatic Starting, Stopping and Resetting");
+                @"This option contains settings for Automatic Starting, Stopping, and Resetting");
 
             _help.SetDescription(chkAutoStart,
                 @"This option enables or disables Automatic Starting");
 
             _help.SetDescription(chkAutoStop,
-                @"This option enables or disables Automatic Stop");
+                @"This option enables or disables Automatic Stopping");
 
             _help.SetDescription(chkAutoReset,
                 @"This option enables or disables Automatic Resetting");
@@ -100,7 +99,7 @@ If set to 'Allow', SourceSplit will consider this map transition. If set to 'Dis
 
             _help.SetName(gAdditionalAutoStart, "Also Auto-Start when...");
             _help.SetDescription(gAdditionalAutoStart,
-                @"This option contains settings of the Additional Auto-Start, which will be triggered along with the normal Auto-Start.");
+                @"This option contains settings for an additional, customizable Auto-Start condition.");
 
             _help.SetName(cmbAddAutoStartMode, "Additional Auto-Start condition");
             _help.SetDescription(cmbAddAutoStartMode,
@@ -119,7 +118,7 @@ The input string does not need to include the file extension, if there is one.
 
             _help.SetName(boxAddAutoStartName, "Additional Auto-Start input string");
             _help.SetDescription(boxAddAutoStartName,
-                @"This option defines the input string that the specified additional Auto-Start condition should use");
+                @"This option defines the input string that the additional Auto-Start condition should use");
 
             _help.SetDescription(gbTiming, 
                 @"This option contain settings for configuring how SourceSplit should count Game Time");
@@ -150,7 +149,7 @@ These moments are when the game is not open. This does seem weird, yes, but it's
             _help.SetDescription(chkDemoInterop,
                 @"This setting decides whether SourceSplit should perform interoperation with the game/mod's Demo Recording.
 
-If enabled, SourceSplit will incorporate Game Time measured in demos which are being recorded, or have just finished recording while the game/mod is running.
+If enabled, when available, SourceSplit will use the timing information of demos which are being recorded, or have just finished recording.
 
 In some games/mods, this setting is forced on.");
 
@@ -162,7 +161,7 @@ Enabling this will lock the controls in Timing Method.");
             _help.SetDescription(gbAdditionalTimer,
                 @"This setting contains options for enabling or disabling Additional Timers.
 
-These timers are displayed on LiveSplit like a Text Component. Their position is dependent on SourceSplit's position in the list in LiveSplit's Layout Editor.
+These timers are displayed on LiveSplit like a Text Component. Their position is dependent on SourceSplit's position in the layout, as configured in LiveSplit's Layout Editor.
 
 These timers will only work if SourceSplit is loaded in the Layout through the Layout Editor.");
 
@@ -170,12 +169,12 @@ These timers will only work if SourceSplit is loaded in the Layout through the L
             _help.SetDescription(gHigherPrecision,
                 @"This option contain settings for enabling, disabling, and configuring the Higher Precision Timer.
 
-This timer's precision can be configured, and can be instructed to show the alternate timing method compared to the current one. (If comparing to Game Time, then it will read Real Time, and vice versa).");
+The number of decimal places that this timer shows can be set up to 7. It can also be instructed to show the alternate timing method compared to the current one. (If comparing to Game Time, then it will show Real Time, and vice versa).");
 
             _help.SetDescription(chkShowGameTime,
                 @"This option enables or disables the Higher Precision Timer.");
 
-            string decimalPlacesHelp = @"This option decides the precision for the Higher Precision Timer.
+            string decimalPlacesHelp = @"This option decides the number of decimal places the Higher Precision Timer will display.
 
 The maximum value is 7.";
             _help.SetName(nudDecimalPlaces, "Decimal Places");
@@ -235,7 +234,7 @@ If 'Pauses' is not enabled in 'Timing Options', and this is enabled, the timer w
             _help.SetDescription(chkRTAStartOffset,
                 @"This option decides if the built-in Game Time offset for Auto-Start should be applied onto Real Time.
 
-Some games may have hardcoded Auto-Start time offsets, such as Portal when loading vault save. When an Auto-Start is triggered, that time offset is then applied onto Game Time, but not Real Time. This setting decides whether that offset should also be applied onto Real Time.");
+Some games have hardcoded Auto-Start time offsets, such as Portal when loading vault save. By default, when an Auto-Start is triggered, that time offset is applied onto Game Time, but not Real Time. This setting decides whether that offset should also be applied onto Real Time.");
 
             _help.SetDescription(groupBox5,
                 @"This option contain settings for handling Saving and Loading.");
@@ -247,7 +246,7 @@ These ticks happen before the game is fully loaded, and before demo recording ca
 
             string slPenaltyHelp = @"This option decides the number of ticks which should be added to Game Time when the game finishes loading something.
 
-Because this is only added when the game finishes loading, rapidly Save/Load buffering will not rapidly add this number of ticks to the timer.
+Because this is only added when the game finishes loading, rapidly saving and/or loading will not throttle this number of ticks to the timer.
 
 In some games/mods, this setting is forced to 1.";
             _help.SetName(nudSLPenalty, "Ticks to add to IGT per finished load");
@@ -299,7 +298,21 @@ Fatalis is the creator of the original versions of SourceSplit.
             _help.SetDescription(groupBox7,
                 @"The people who tested v3.3.0.
 
-Version 3.3.0 represented a massive change of this fork of SourceSplit, introducing many new features and changes to code. This required extensive testing, to ensure timing accuracy, and tool stability.");
+Version 3.3.0 introduced many new features and changes to code, which required extensive testing to ensure timing accuracy, and tool stability.");
+
+            _help.SetDescription(groupBox3,
+                @"Information about the tool and this release of it.");
+
+            _help.SetDescription(groupBox8,
+                @"Various links pertaining to this tool.");
+
+            _help.SetDescription(groupBox9,
+                @"Really cool.");
+
+#if DEBUG
+            _help.SetDescription(gDebugFeatures,
+                @"You are a developer, or have been peskied by a developer into using this Debug build of SourceSplit.");
+#endif
         }
     }
 }

@@ -21,6 +21,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.VisibleChanged += SourceSplitSettingsHelp_VisibleChanged;
             this.FormClosing += SourceSplitSettingsHelp_FormClosing;
 
+            this.Icon = SystemIcons.Information;
+
             UpdateDescription(null);
         }
 

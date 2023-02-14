@@ -46,14 +46,15 @@
             this.tlpMain.Controls.Add(this.boxPath, 0, 1);
             this.tlpMain.Controls.Add(this.groupBox1, 0, 2);
             this.tlpMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tlpMain.Location = new System.Drawing.Point(9, 9);
+            this.tlpMain.Location = new System.Drawing.Point(7, 7);
+            this.tlpMain.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.tlpMain.Name = "tlpMain";
             this.tlpMain.RowCount = 3;
-            this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
-            this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
+            this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 32F));
+            this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 41F));
             this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tlpMain.Size = new System.Drawing.Size(766, 643);
+            this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 16F));
+            this.tlpMain.Size = new System.Drawing.Size(574, 523);
             this.tlpMain.TabIndex = 0;
             // 
             // labName
@@ -61,8 +62,8 @@
             this.labName.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.labName.AutoSize = true;
             this.labName.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labName.Location = new System.Drawing.Point(2, 8);
-            this.labName.Margin = new System.Windows.Forms.Padding(2, 0, 9, 0);
+            this.labName.Location = new System.Drawing.Point(2, 4);
+            this.labName.Margin = new System.Windows.Forms.Padding(2, 0, 7, 0);
             this.labName.Name = "labName";
             this.labName.Size = new System.Drawing.Size(15, 24);
             this.labName.TabIndex = 0;
@@ -74,23 +75,23 @@
             this.boxPath.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.boxPath.Dock = System.Windows.Forms.DockStyle.Fill;
             this.boxPath.Font = new System.Drawing.Font("Microsoft Sans Serif", 7F);
-            this.boxPath.Location = new System.Drawing.Point(9, 40);
-            this.boxPath.Margin = new System.Windows.Forms.Padding(9, 0, 9, 0);
+            this.boxPath.Location = new System.Drawing.Point(7, 32);
+            this.boxPath.Margin = new System.Windows.Forms.Padding(7, 0, 7, 0);
             this.boxPath.Multiline = true;
             this.boxPath.Name = "boxPath";
             this.boxPath.ReadOnly = true;
-            this.boxPath.Size = new System.Drawing.Size(748, 50);
+            this.boxPath.Size = new System.Drawing.Size(560, 41);
             this.boxPath.TabIndex = 2;
             // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.boxExplain);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox1.Location = new System.Drawing.Point(9, 99);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(9);
+            this.groupBox1.Location = new System.Drawing.Point(7, 80);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(9);
-            this.groupBox1.Size = new System.Drawing.Size(748, 535);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.groupBox1.Size = new System.Drawing.Size(560, 436);
             this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Description";
@@ -99,34 +100,36 @@
             // 
             this.boxExplain.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.boxExplain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.boxExplain.Location = new System.Drawing.Point(9, 24);
+            this.boxExplain.Location = new System.Drawing.Point(7, 20);
+            this.boxExplain.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.boxExplain.Multiline = true;
             this.boxExplain.Name = "boxExplain";
             this.boxExplain.ReadOnly = true;
             this.boxExplain.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.boxExplain.Size = new System.Drawing.Size(730, 502);
+            this.boxExplain.Size = new System.Drawing.Size(546, 409);
             this.boxExplain.TabIndex = 2;
             // 
             // labSplash
             // 
             this.labSplash.AutoSize = true;
-            this.labSplash.Location = new System.Drawing.Point(9, 9);
+            this.labSplash.Location = new System.Drawing.Point(7, 7);
+            this.labSplash.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labSplash.Name = "labSplash";
-            this.labSplash.Size = new System.Drawing.Size(273, 16);
+            this.labSplash.Size = new System.Drawing.Size(221, 13);
             this.labSplash.TabIndex = 1;
             this.labSplash.Text = "Hover over a setting to see a description of it.";
             // 
             // SourceSplitSettingsHelp
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(784, 661);
+            this.ClientSize = new System.Drawing.Size(588, 537);
             this.Controls.Add(this.tlpMain);
             this.Controls.Add(this.labSplash);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.SizableToolWindow;
-            this.MinimumSize = new System.Drawing.Size(800, 700);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.MinimumSize = new System.Drawing.Size(604, 576);
             this.Name = "SourceSplitSettingsHelp";
-            this.Padding = new System.Windows.Forms.Padding(9);
+            this.Padding = new System.Windows.Forms.Padding(7, 7, 7, 7);
             this.Text = "SourceSplit Help";
             this.tlpMain.ResumeLayout(false);
             this.tlpMain.PerformLayout();
