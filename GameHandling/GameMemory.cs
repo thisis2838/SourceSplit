@@ -444,6 +444,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             bool forceExit = false;
 
             CancellationTokenSource cancelForceExit = new CancellationTokenSource();
+            /*
             Thread checkGameProcess = new Thread( new ThreadStart(() => 
             {
                 // REALLY make sure the game has exited, as sometimes the splitter stops functioning
@@ -457,6 +458,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 }
             }));
             checkGameProcess.Start();
+            */
 
             var profiler = Stopwatch.StartNew();
             while (!game.HasExited && !forceExit && !cts.IsCancellationRequested)

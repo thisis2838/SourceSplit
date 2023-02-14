@@ -36,9 +36,8 @@ namespace LiveSplit.SourceSplit.Utilities
                     ptrs.Add(new ScanGetAllResult()
                     {
                         Location = res,
-                        OnFoundResult = target.OnFound(scanner.Process, scanner, res)
-                    }
-                    );
+                        OnFoundResult = target.OnFound?.Invoke(scanner.Process, scanner, res) ?? res
+                    });
                     scanner.Address = res + 1;
                     scanner.Size = (int)((long)end - (long)scanner.Address);
                 }
