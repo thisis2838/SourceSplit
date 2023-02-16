@@ -82,6 +82,17 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 , _enduranceTesting
 #endif      
             );
+
+            _deathSplit.Callback = (s) =>
+            {
+                if (_deathSplit.Boolean)
+                    CommandHandler.SendConsoleMessage("Please reload a save to enable Death Splitting.");
+            };
+            _elevSplit.Callback = (s) =>
+            {
+                if (_elevSplit.Boolean)
+                    CommandHandler.SendConsoleMessage("Please reload a save to enable Elevator Splitting.");
+            };
         }
 
         protected override void OnGameAttachedInternal(GameState state, TimerActions actions)
@@ -114,7 +125,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _elevatorSpeeds.Clear();
             _elevatorBlockers.Clear();
 
-            if (_baseModelNameOffset != -1 && _baseVelocityOffset != -1 && _baseSolidFlagsOffset != -1 && _baseSolidFlagsOffset != -1)
+            if (_elevSplit.Boolean && _baseModelNameOffset != -1 && _baseVelocityOffset != -1 && _baseSolidFlagsOffset != -1 && _baseSolidFlagsOffset != -1)
             {
                 var engine = state.GameEngine;
                 var proc = state.GameProcess;
@@ -158,12 +169,15 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
 
             if (IsFirstMap)
+            {
                 _splitTime.Current = state.GameEngine.GetOutputFireTime("scene_*", "PitchShift", "2.0");
+
+                if (_deathSplit.Boolean)
+                    _playerHP = new MemoryWatcher<int>(state.PlayerEntInfo.EntityPtr + _baseEntityHealthOffset);
+            }
 
             if (this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
                 _splitTime.Current = state.GameEngine.GetOutputFireTime("cable_detach_04");
-
-            _playerHP = new MemoryWatcher<int>(state.PlayerEntInfo.EntityPtr + _baseEntityHealthOffset);
         }
 
         protected override void OnSaveLoadedInternal(GameState state, TimerActions actions, string name)
@@ -238,7 +252,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
 #endif
 
-            
+            if (_elevSplit.Boolean)
             {
                 bool splitAlready = false;
                 foreach (var elevator in _elevatorSpeeds)
@@ -257,22 +271,21 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                             Debug.WriteLine($"Elevator split (@ {pos})");
                             splitAlready = true;
-                            if (_elevSplit.Boolean) actions.Split();
+                            actions.Split();
                         }
                     }
                 }
             }
-
-
 
             if (OnceFlag)
                 return;
 
             if (IsFirstMap)
             {
-                _playerHP.Update(state.GameProcess);
-                if (_deathSplit.Boolean)
+                if (_deathSplit.Boolean && _playerHP != null)
                 {
+                    _playerHP.Update(state.GameProcess);
+
                     if (_playerHP.Old > 0 && _playerHP.Current <= 0)
                     {
                         Debug.WriteLine("Death% end");

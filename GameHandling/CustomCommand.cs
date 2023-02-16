@@ -38,7 +38,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         public int Integer { get; set; }
         public float Float { get; set; }
 
-        private Action<string> _callback = null;
+        public Action<string> Callback = null;
         private static string[] _noVars = new string[] { "0", "false", "" };
 
         public CustomCommand(
@@ -51,7 +51,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             Parse(def);
             Description = description;
             LongDescription = longDescription;
-            _callback = callback;
+            Callback = callback;
             Archived = archived;
         }
 
@@ -60,8 +60,8 @@ namespace LiveSplit.SourceSplit.GameHandling
             if (string.IsNullOrWhiteSpace(input)) 
                 return false;
 
-            _callback?.Invoke(input);
             Parse(input);
+            Callback?.Invoke(input);
 
             if (!Hidden) SystemSounds.Asterisk.Play();
             return true;
@@ -148,7 +148,7 @@ namespace LiveSplit.SourceSplit.GameHandling
 SourceSplit Custom Commands are present, enter ""ss_list"" to list them, or ""ss_help"" for help!
 There are {Commands.Count()} command(s) available.
 
-//////////////////////////////////////////////////////////////////////////////////");
+////////////////////////////////////////////////////////////////////////////////////");
             return;
 
             fail:
@@ -279,7 +279,7 @@ There are {Commands.Count()} command(s) available.
 
                     if (!cmd.Hidden)
                     {
-                        SendConsoleMessage($"{cmd.Name} set to \"{cmd.String}\"!\n");
+                        SendConsoleMessage($"{cmd.Name} set to \"{cmd.String}\"!");
                     }
                 }
 
@@ -301,10 +301,10 @@ There are {Commands.Count()} command(s) available.
                 input = input.Replace("%", "%%");
                 input = input.Replace("\t", "    ");
 
-                const int maxLen = 0x100;
-                for (int i = 0; i < input.Length; i += maxLen)
+                const int MAX_LEN = 0x100;
+                for (int i = 0; i < input.Length; i += MAX_LEN)
                 {
-                    var send = input.Substring(i, maxLen.Bounded(0, input.Length - i));
+                    var send = input.Substring(i, MAX_LEN.Bounded(0, input.Length - i));
                     _game.CallFunctionString(send, _conMsgPtr);
                 }
             }
@@ -328,10 +328,13 @@ There are {Commands.Count()} command(s) available.
 
         private void PrintHelp()
         {
-            SendConsoleMessage("SourceSplit Custom Commands help: \n" +
+            SendConsoleMessage
+            (
+                "SourceSplit Custom Commands help: \n" +
                 "\t- Enter in commands as if they are normal game commands. \n" +
                 "\t- Type \"ss_list\" for a list of available commands. \n" +
-                "\t- Enter \"ss_help <command>\" to show information about a command \n");
+                "\t- Enter \"ss_help <command>\" to show information about a command"
+            );
         }
     }
 }
