@@ -31,7 +31,9 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             InitSettings();
 
             EnumUtils.ComboBoxItemsFromEnum<MTLMode>(cmbMTLMode);
+            cmbMTLMode.SelectedIndex = 1;
             EnumUtils.ComboBoxItemsFromEnum<AdditionalAutoStartType>(cmbAddAutoStartMode);
+            cmbAddAutoStartMode.SelectedIndex = 0;
 
             this.chkUseMTL.CheckedChanged += UpdateDisabledControls;
             this.chkUseInterval.CheckedChanged += UpdateDisabledControls;
@@ -67,7 +69,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 #endif
 
             this.gbAdditionalTimer.Enabled = isLayout;
-
             this.UpdateDisabledControls(this, EventArgs.Empty);
 
             this.dgvMapTransitions.ColumnHeadersVisible = true;
@@ -110,11 +111,9 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             }
             addHelpCallback(this);
             SetSettingDescriptions();
-
             Application.AddMessageFilter(this);
 
             this.Disposed += SourceSplitSettings_Disposed;
-
             this.VisibleChanged += SourceSplitSettings_VisibleChanged;
         }
 
@@ -176,7 +175,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         private void UpdateRunningForSplash()
         {
             var r = new Random();
-            string time = SourceSplitUtils.ActiveTime.Elapsed.ToStringCustom();
             string text = "This SourceSplit session has been running for: ";
 
             switch (r.Next(0, 100))

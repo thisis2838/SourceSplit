@@ -37,6 +37,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             _help.SetDescription(chkAutoSplitEnabled,
                 "This option enables or disables Automatic Splitting.");
 
+            _help.SetDescription(chkSplitLevelTrans, "This option decides whether SourceSplit should split when a map transition is detected and considered.");
+
             _help.SetName(gMapTransitions, "Split on Map Transitions");
             _help.SetDescription(gMapTransitions,
                 @"This option includes settings for configuring the logic used to decide if a detected map transition should trigger an Auto-Split.");
@@ -46,6 +48,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                 @"This option decides whether SourceSplit should split every 1 (or 2, 3, etc..) considered map transitions.
 
 Starting from 0, for every map transition that is considered, SourceSplit will count up by 1. If that count matches the specified value, SourceSplit will Auto-Split, and reset its count back to 0.
+
+The default value is 1, where it will split on every considered map transition.
 
 This mechanism resets when the timer is reset.");
 
@@ -134,12 +138,12 @@ Engine Ticks are ticks when the game is active (i.e. a map is loaded), and when 
             _help.SetDescription(chkCountPauses,
                 @"This setting decides whether SourceSplit should count Pauses into Game Time. 
 
-These moments are when the game is displaying its load screen; or displaying the 'LOADING' plaque, if the pause was triggered using the 'pause' command.");
+These moments are when the game is displaying its load screen when it is paused normally; or when it is displaying the 'PAUSED' plaque, if the pause was triggered using the 'pause' command.");
 
             _help.SetDescription(chkCountDisconnect,
                 @"This setting decides whether SourceSplit should count Disconnects into Game Time.
 
-These moments are when the game is not active (i.e. when no map is loaded, and the game is sitting idle in the menus, with a picture for its background).");
+These moments are when the game is not active (i.e. when no map is loaded, and the game is sitting idle in the menus, with a static image for its background).");
 
             _help.SetDescription(chkNoGamePresent,
                 @"This setting decides whether SourceSplit should count No Game time into Game Time.

@@ -115,18 +115,13 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
         public void UpdateDescription(Control control)
         {
+            if (control == null) tlpMain.Visible = false;
+
             if (_lastInput == control) return;
             _lastInput = control;
 
             tlpMain.Visible = true;
             RemoveCurrentHighlight();
-
-            if (control == null)
-            {
-                tlpMain.Visible = false;
-                return;
-            }
-
 
             if (!_descriptions.ContainsKey(control.Name))
             {

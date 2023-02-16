@@ -29,8 +29,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.chkHoldUntilPause = new System.Windows.Forms.CheckBox();
             this.chkSplitGenericMap = new System.Windows.Forms.CheckBox();
             this.chkSplitSpecial = new System.Windows.Forms.CheckBox();
@@ -173,12 +171,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.tableCoolInfo.SuspendLayout();
             this.SuspendLayout();
             // 
-            // toolTip
-            // 
-            this.toolTip.AutoPopDelay = 5000;
-            this.toolTip.InitialDelay = 100;
-            this.toolTip.ReshowDelay = 100;
-            // 
             // chkHoldUntilPause
             // 
             this.chkHoldUntilPause.AutoSize = true;
@@ -187,8 +179,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkHoldUntilPause.Size = new System.Drawing.Size(184, 17);
             this.chkHoldUntilPause.TabIndex = 27;
             this.chkHoldUntilPause.Text = "Resume timer after initial unpause";
-            this.toolTip.SetToolTip(this.chkHoldUntilPause, "If the timer is started when the game is paused, pause the timer until the game u" +
-        "npauses.");
             this.chkHoldUntilPause.UseVisualStyleBackColor = true;
             // 
             // chkSplitGenericMap
@@ -200,8 +190,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkSplitGenericMap.Size = new System.Drawing.Size(183, 17);
             this.chkSplitGenericMap.TabIndex = 1;
             this.chkSplitGenericMap.Text = "Also count New Game map loads";
-            this.toolTip.SetToolTip(this.chkSplitGenericMap, "Count New Game map loads as map transitions (e.g. using the \"map\" command to go f" +
-        "rom one map to another)");
             this.chkSplitGenericMap.UseVisualStyleBackColor = true;
             // 
             // chkSplitSpecial
@@ -215,8 +203,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkSplitSpecial.Size = new System.Drawing.Size(192, 17);
             this.chkSplitSpecial.TabIndex = 2;
             this.chkSplitSpecial.Text = "Split on Special Pre-defined Events";
-            this.toolTip.SetToolTip(this.chkSplitSpecial, "Split on designated game/mod-specific events such as custom endings or gameplay e" +
-        "vents");
             this.chkSplitSpecial.UseVisualStyleBackColor = true;
             // 
             // chkRTAStartOffset
@@ -227,8 +213,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkRTAStartOffset.Size = new System.Drawing.Size(259, 17);
             this.chkRTAStartOffset.TabIndex = 28;
             this.chkRTAStartOffset.Text = "Auto-Start RTA and IGT with the same time offset";
-            this.toolTip.SetToolTip(this.chkRTAStartOffset, "If there is a built-in time offset for Game Time upon Auto-Start, also apply that" +
-        " offset onto Real Time");
             this.chkRTAStartOffset.UseVisualStyleBackColor = true;
             // 
             // boxSplitInstead
@@ -239,7 +223,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.boxSplitInstead.Size = new System.Drawing.Size(235, 17);
             this.boxSplitInstead.TabIndex = 30;
             this.boxSplitInstead.Text = "Auto-Split when an Auto-Reset would occur.";
-            this.toolTip.SetToolTip(this.boxSplitInstead, "Change all Auto-Resets to Auto-Splits");
             this.boxSplitInstead.UseVisualStyleBackColor = true;
             // 
             // chkSplitLevelTrans
@@ -252,7 +235,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkSplitLevelTrans.Size = new System.Drawing.Size(139, 17);
             this.chkSplitLevelTrans.TabIndex = 0;
             this.chkSplitLevelTrans.Text = "Split on Map Transitions";
-            this.toolTip.SetToolTip(this.chkSplitLevelTrans, "Split on Map Transitions");
             this.chkSplitLevelTrans.UseVisualStyleBackColor = true;
             // 
             // chkAutoStart
@@ -265,7 +247,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkAutoStart.Size = new System.Drawing.Size(48, 16);
             this.chkAutoStart.TabIndex = 0;
             this.chkAutoStart.Text = "Start";
-            this.toolTip.SetToolTip(this.chkAutoStart, "Enables / Disables Auto-start");
             this.chkAutoStart.UseVisualStyleBackColor = true;
             // 
             // chkAutoStop
@@ -278,7 +259,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkAutoStop.Size = new System.Drawing.Size(48, 16);
             this.chkAutoStop.TabIndex = 1;
             this.chkAutoStop.Text = "Stop";
-            this.toolTip.SetToolTip(this.chkAutoStop, "Enables / Disables Auto-stop");
             this.chkAutoStop.UseVisualStyleBackColor = true;
             // 
             // chkAutoReset
@@ -291,7 +271,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkAutoReset.Size = new System.Drawing.Size(54, 16);
             this.chkAutoReset.TabIndex = 2;
             this.chkAutoReset.Text = "Reset";
-            this.toolTip.SetToolTip(this.chkAutoReset, "Enables / Disables Auto-reset");
             this.chkAutoReset.UseVisualStyleBackColor = true;
             // 
             // chkResetMapTransitions
@@ -302,8 +281,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkResetMapTransitions.Size = new System.Drawing.Size(289, 17);
             this.chkResetMapTransitions.TabIndex = 31;
             this.chkResetMapTransitions.Text = "Optimize for multi-run speedruns (for example, any% x25)";
-            this.toolTip.SetToolTip(this.chkResetMapTransitions, "Execute additional actions to allow for multi-run speedruns like resetting map tr" +
-        "ansition history, etc..");
             this.chkResetMapTransitions.UseVisualStyleBackColor = true;
             // 
             // nudSLPenalty
@@ -312,7 +289,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.nudSLPenalty.Name = "nudSLPenalty";
             this.nudSLPenalty.Size = new System.Drawing.Size(36, 20);
             this.nudSLPenalty.TabIndex = 1;
-            this.toolTip.SetToolTip(this.nudSLPenalty, "How many ticks to add to game time per game load");
             // 
             // chkServerInitialTicks
             // 
@@ -322,7 +298,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkServerInitialTicks.Size = new System.Drawing.Size(167, 17);
             this.chkServerInitialTicks.TabIndex = 0;
             this.chkServerInitialTicks.Text = "Count server initialization ticks";
-            this.toolTip.SetToolTip(this.chkServerInitialTicks, "Count ticks before the server fully loads in");
             this.chkServerInitialTicks.UseVisualStyleBackColor = true;
             // 
             // nudDecimalPlaces
@@ -341,7 +316,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.nudDecimalPlaces.Name = "nudDecimalPlaces";
             this.nudDecimalPlaces.Size = new System.Drawing.Size(36, 20);
             this.nudDecimalPlaces.TabIndex = 28;
-            this.toolTip.SetToolTip(this.nudDecimalPlaces, "Number of decimal places the Higher Precision Timer should show");
             this.nudDecimalPlaces.Value = new decimal(new int[] {
             6,
             0,
@@ -356,7 +330,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkShowGameTime.Size = new System.Drawing.Size(159, 17);
             this.chkShowGameTime.TabIndex = 12;
             this.chkShowGameTime.Text = "Show Higher Precision Time";
-            this.toolTip.SetToolTip(this.chkShowGameTime, "Show clock with precision modifiable with the \"Decimal Places\" box below.");
             this.chkShowGameTime.UseVisualStyleBackColor = true;
             // 
             // chkShowAlt
@@ -367,7 +340,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkShowAlt.Size = new System.Drawing.Size(171, 17);
             this.chkShowAlt.TabIndex = 22;
             this.chkShowAlt.Text = "Show Alternate Timing Method";
-            this.toolTip.SetToolTip(this.chkShowAlt, "Tells the Higher Precision Timer to show the alternate timimg method instead.");
             this.chkShowAlt.UseVisualStyleBackColor = true;
             // 
             // chkShowTickCount
@@ -378,7 +350,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkShowTickCount.Size = new System.Drawing.Size(165, 17);
             this.chkShowTickCount.TabIndex = 21;
             this.chkShowTickCount.Text = "Show Game Time Tick Count";
-            this.toolTip.SetToolTip(this.chkShowTickCount, "Show the current time as a tick count");
             this.chkShowTickCount.UseVisualStyleBackColor = true;
             // 
             // chkCountPauses
@@ -389,7 +360,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkCountPauses.Size = new System.Drawing.Size(61, 17);
             this.chkCountPauses.TabIndex = 1;
             this.chkCountPauses.Text = "Pauses";
-            this.toolTip.SetToolTip(this.chkCountPauses, "Include time when the game is paused");
             this.chkCountPauses.UseVisualStyleBackColor = true;
             // 
             // chkCountEngineTicks
@@ -400,7 +370,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkCountEngineTicks.Size = new System.Drawing.Size(88, 17);
             this.chkCountEngineTicks.TabIndex = 0;
             this.chkCountEngineTicks.Text = "Engine Ticks";
-            this.toolTip.SetToolTip(this.chkCountEngineTicks, "Count Engine Ticks");
             this.chkCountEngineTicks.UseVisualStyleBackColor = true;
             // 
             // chkCountDisconnect
@@ -411,7 +380,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkCountDisconnect.Size = new System.Drawing.Size(85, 17);
             this.chkCountDisconnect.TabIndex = 2;
             this.chkCountDisconnect.Text = "Disconnects";
-            this.toolTip.SetToolTip(this.chkCountDisconnect, "Include time when no map or server is present");
             this.chkCountDisconnect.UseVisualStyleBackColor = true;
             // 
             // chkAutomatic
@@ -422,7 +390,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkAutomatic.Size = new System.Drawing.Size(135, 17);
             this.chkAutomatic.TabIndex = 31;
             this.chkAutomatic.Text = "Let SourceSplit Decide";
-            this.toolTip.SetToolTip(this.chkAutomatic, "Let SourceSplit decide the Timing Methods");
             this.chkAutomatic.UseVisualStyleBackColor = true;
             // 
             // chkDemoInterop
@@ -433,8 +400,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkDemoInterop.Size = new System.Drawing.Size(196, 17);
             this.chkDemoInterop.TabIndex = 30;
             this.chkDemoInterop.Text = "Interoperation with Demo Recording";
-            this.toolTip.SetToolTip(this.chkDemoInterop, "Allow interoperation with Demo Recording, which switches back and forth between u" +
-        "sing in-game timers and time from any recorded Demos.");
             this.chkDemoInterop.UseVisualStyleBackColor = true;
             // 
             // chkNoGamePresent
@@ -445,7 +410,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkNoGamePresent.Size = new System.Drawing.Size(71, 17);
             this.chkNoGamePresent.TabIndex = 3;
             this.chkNoGamePresent.Text = "No Game";
-            this.toolTip.SetToolTip(this.chkNoGamePresent, "Include time when the game isn\'t running");
             this.chkNoGamePresent.UseVisualStyleBackColor = true;
             // 
             // chkShowCurDemo
@@ -456,7 +420,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkShowCurDemo.Size = new System.Drawing.Size(172, 17);
             this.chkShowCurDemo.TabIndex = 33;
             this.chkShowCurDemo.Text = "Show currently-recorded Demo";
-            this.toolTip.SetToolTip(this.chkShowCurDemo, "Show name and current time of the currently-recorded Demo.");
             this.chkShowCurDemo.UseVisualStyleBackColor = true;
             // 
             // boxAddAutoStartName
@@ -466,8 +429,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.boxAddAutoStartName.Name = "boxAddAutoStartName";
             this.boxAddAutoStartName.Size = new System.Drawing.Size(206, 20);
             this.boxAddAutoStartName.TabIndex = 4;
-            this.toolTip.SetToolTip(this.boxAddAutoStartName, "When newly loading this map (e.g. using the \"map\" command), begin the timer.\r\n(na" +
-        "me is without file extension)");
             // 
             // chkAutoSplitEnabled
             // 
@@ -479,7 +440,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkAutoSplitEnabled.Size = new System.Drawing.Size(65, 17);
             this.chkAutoSplitEnabled.TabIndex = 25;
             this.chkAutoSplitEnabled.Text = "Enabled";
-            this.toolTip.SetToolTip(this.chkAutoSplitEnabled, "Enables / Disables Auto-splitting");
             this.chkAutoSplitEnabled.UseVisualStyleBackColor = true;
             // 
             // chkFirstMapReset
@@ -492,8 +452,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.chkFirstMapReset.Size = new System.Drawing.Size(285, 17);
             this.chkFirstMapReset.TabIndex = 32;
             this.chkFirstMapReset.Text = "Auto-Reset when starting a New Game on the first map";
-            this.toolTip.SetToolTip(this.chkFirstMapReset, "Auto-Reset when triggering a New Game load to the first map (e.g. using \'map\' com" +
-        "mand)");
             this.chkFirstMapReset.UseVisualStyleBackColor = true;
             // 
             // tabCtrlMaster
@@ -1458,7 +1416,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         }
 
         #endregion
-        private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.TabControl tabCtrlMaster;
         private System.Windows.Forms.TabPage tabPgAutoStartReset;
         private System.Windows.Forms.TableLayoutPanel tlpAutoStartEndReset;

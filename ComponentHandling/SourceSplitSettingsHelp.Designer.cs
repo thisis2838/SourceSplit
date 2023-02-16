@@ -47,7 +47,7 @@
             this.tlpMain.Controls.Add(this.groupBox1, 0, 2);
             this.tlpMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlpMain.Location = new System.Drawing.Point(7, 7);
-            this.tlpMain.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.tlpMain.Margin = new System.Windows.Forms.Padding(2);
             this.tlpMain.Name = "tlpMain";
             this.tlpMain.RowCount = 3;
             this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 32F));
@@ -88,9 +88,9 @@
             this.groupBox1.Controls.Add(this.boxExplain);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(7, 80);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(7);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(7);
             this.groupBox1.Size = new System.Drawing.Size(560, 436);
             this.groupBox1.TabIndex = 3;
             this.groupBox1.TabStop = false;
@@ -101,7 +101,7 @@
             this.boxExplain.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.boxExplain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.boxExplain.Location = new System.Drawing.Point(7, 20);
-            this.boxExplain.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.boxExplain.Margin = new System.Windows.Forms.Padding(2);
             this.boxExplain.Multiline = true;
             this.boxExplain.Name = "boxExplain";
             this.boxExplain.ReadOnly = true;
@@ -115,9 +115,9 @@
             this.labSplash.Location = new System.Drawing.Point(7, 7);
             this.labSplash.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labSplash.Name = "labSplash";
-            this.labSplash.Size = new System.Drawing.Size(221, 13);
+            this.labSplash.Size = new System.Drawing.Size(276, 13);
             this.labSplash.TabIndex = 1;
-            this.labSplash.Text = "Hover over a setting to see a description of it.";
+            this.labSplash.Text = "Move your mouse over a setting to see a description of it.";
             // 
             // SourceSplitSettingsHelp
             // 
@@ -126,10 +126,10 @@
             this.ClientSize = new System.Drawing.Size(588, 537);
             this.Controls.Add(this.tlpMain);
             this.Controls.Add(this.labSplash);
-            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.MinimumSize = new System.Drawing.Size(604, 576);
             this.Name = "SourceSplitSettingsHelp";
-            this.Padding = new System.Windows.Forms.Padding(7, 7, 7, 7);
+            this.Padding = new System.Windows.Forms.Padding(7);
             this.Text = "SourceSplit Help";
             this.tlpMain.ResumeLayout(false);
             this.tlpMain.PerformLayout();
