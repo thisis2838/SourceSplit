@@ -223,4 +223,16 @@
       <change>Fixed process hang when LiveSplit is closed while a game with locked settings is running.</change>
     </changelog>
   </update>
+  <update version="3.3.3.2">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Added safeguards against hanging caused by cross-thread operations.</change>
+      <change>Added highlighting to the setting which is currently being described by the Help window.</change>
+      <change>Cleaned up some of the help strings.</change>
+      <change>Improved Portal's elevator splitting.</change>
+      <change>Internal code changes and revisions.</change>
+    </changelog>
+  </update>  
 </updates>
