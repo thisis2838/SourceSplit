@@ -234,5 +234,14 @@
       <change>Improved Portal's elevator splitting.</change>
       <change>Internal code changes and revisions.</change>
     </changelog>
-  </update>  
+  </update>
+  <update version="3.3.3.3">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Refined UI setting handling to prevent cross-thread invocation errors.</change>
+      <change>Fixed some issues with currently-playing demo text.</change>
+    </changelog>
+  </update>
 </updates>
