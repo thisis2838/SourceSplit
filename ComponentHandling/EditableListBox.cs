@@ -11,8 +11,6 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
     /// </summary>
     class EditableListBox : DataGridView
     {
-        private ContextMenu _menuRemove;
-
         public EditableListBox()
         {
             this._menuRemove = new ContextMenu();
@@ -34,6 +32,7 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
             this.KeyDown += EditableListBox_KeyDown;
         }
 
+        private ContextMenu _menuRemove;
         private void EditableListBox_KeyDown(object sender, KeyEventArgs e)
         {
             if ((e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back) 
@@ -59,7 +58,7 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
             var ret = new List<string[]>();
             foreach (DataGridViewRow row in Rows)
             {
-                if (row.IsNewRow || (CurrentRow == row && IsCurrentRowDirty))
+                if (row.IsNewRow)
                     continue;
 
                 if (row.Cells.Count == 0)
@@ -70,6 +69,10 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
                     content.Add(cell.Value == null ? "" : cell.Value.ToString());
                 ret.Add(content.ToArray());
             }
+
+            ret = ret
+                .Where(x => x.Count() > 0 && x.Any(y => !string.IsNullOrEmpty(y)))
+                .ToList();
 
             if (ret.Count == 0)
                 ret.Add(new string[] { });

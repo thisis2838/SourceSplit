@@ -81,6 +81,12 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                 }
             );
 
+            dgvMapTransitions.CellValueChanged += (s, e) => p.MapTransitionList.UIValueChangedCallback();
+            dgvMapTransitions.CurrentCellDirtyStateChanged += (s, e) => p.MapTransitionList.UIValueChangedCallback();
+            dgvMapTransitions.CellBeginEdit += (s, e) => p.MapTransitionList.UIValueChangedCallback();
+            dgvMapTransitions.CellEndEdit += (s, e) => p.MapTransitionList.UIValueChangedCallback();
+            dgvMapTransitions.UserDeletedRow += (s, e) => p.MapTransitionList.UIValueChangedCallback();
+            dgvMapTransitions.UserAddedRow += (s, e) => p.MapTransitionList.UIValueChangedCallback();
         }
     }
 }

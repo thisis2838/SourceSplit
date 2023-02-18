@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -80,6 +81,24 @@ namespace LiveSplit.SourceSplit.Utilities
             {
                 throw ErrorDialog.Exception($"Timed out after {msTimeout}ms invoking action on control {ctrl.Name}.");
             }
+        }
+
+        public static void AttemptInvoke(this Control ctrl, Action a, int msTimeout, int tries)
+        {
+            for (int i = tries; i > 0; i--)
+            {
+                var res = BeginInvokeIfRequired(ctrl, a);
+                if (res is null) return;
+
+                if (!res.AsyncWaitHandle.WaitOne(msTimeout))
+                {
+                    Debug.WriteLine($"Failed to invoke action on control {ctrl.Name} after {msTimeout}ms, {i - 1} tries left.");
+                    continue;
+                }
+                return;
+            }
+
+            throw ErrorDialog.Exception($"Failed to invoke action on control {ctrl.Name} after {tries} tries and with {msTimeout}ms timeout.");
         }
     }
 }

@@ -119,9 +119,10 @@ namespace LiveSplit.SourceSplit.GameHandling
 
         void DemoRecorder_TickUpdate(object sender, DemoMonitor.DemoTickUpdateArgs args)
         {
-            SendCurrentDemoInfoEvent(args.CurrentTick + 1, args.DemoName, true);
+            if (Settings.ShowCurDemo.Value)
+                SendCurrentDemoInfoEvent(args.CurrentTick + 1, args.DemoName, true);
 
-            if (!SourceSplitComponent.Settings.CountDemoInterop.Value)
+            if (!Settings.CountDemoInterop.Value)
                 return;
 
             var delta = args.CurrentTick - args.LastTick;
@@ -145,18 +146,15 @@ namespace LiveSplit.SourceSplit.GameHandling
 
         void DemoRecorder_StartRecording(object sender, DemoMonitor.DemoStartRecordingArgs args)
         {
-            if (!Settings.CountDemoInterop.Value)
-                return;
-
             SendCurrentDemoInfoEvent(1, args.DemoName, true);
         }
 
         void DemoRecorder_StopRecording(object sender, DemoMonitor.DemoStopRecordingArgs args)
         {
+            SendCurrentDemoInfoEvent(args.Demo.TotalTicks + 1, args.Demo.Name, false);
+
             if (!Settings.CountDemoInterop.Value)
                 return;
-
-            SendCurrentDemoInfoEvent(args.Demo.TotalTicks + 1, args.Demo.Name, false);
 
             if (!_blockDemoTime)
                 SendSessionTimeUpdateEvent(args.FinalDifference);

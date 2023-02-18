@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Remoting;
 using System.Security.Cryptography;
 using System.Text;
@@ -52,9 +53,16 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
         private T _default;
         private T _preLockValue;
         private bool _locked;
-        public T Value { get => GetValue(); set => SetValue(value); }
+        private T _value;
+        private object _valueLock = new object();
+        public T Value
+        {
+            get => GetValue();
+            set => SetValue(value);
+        }
 
-        public SettingUIRepresented(
+        public SettingUIRepresented
+        (
             string name, T @default, 
             Func<T> getFunc, Action<T> setFunc, 
             Control control,
@@ -69,21 +77,29 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
             if (getStorageValue != null) _getStorageValue = getStorageValue;
             if (parseStorageValue != null) _parseStorageValue = parseStorageValue;
 
+            _value = @default;
             SetValue(@default);
+        }
+
+        // this must always be called by the control.
+        public void UIValueChangedCallback()
+        {
+            lock (_valueLock) _value = _getFunc.Invoke();
         }
 
         public T GetValue()
         {
-            T val = _default;
-            //val = _getFunc.Invoke(); // FIXME: this is a bad idea....
-            _control.InvokeWithTimeout(5000, () => val = _getFunc.Invoke());
-            return val;
+            lock (_valueLock) return _value;
         }
 
         public void SetValue(T value)
         {
             if (_locked) _preLockValue = value;
-            else _control.InvokeWithTimeout(5000, () => _setFunc.Invoke(value));
+            else
+            {
+                _control.AttemptInvoke(() => _setFunc.Invoke(value), 100, 10);
+                lock (_valueLock) _value = value;
+            }
         }
 
         public void Lock(T value)
@@ -95,7 +111,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
 
             SetValue(value);
             _locked = true;
-            _control.InvokeWithTimeout(5000, () => _control.Enabled = false);
+            _control.AttemptInvoke(() => _control.Enabled = false, 100, 10);
         }
 
         public override void Unlock()
@@ -103,7 +119,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
             if (!_locked) return;
 
             Debug.WriteLine($"Unlocking {Name}...");
-            _control.InvokeWithTimeout(5000, () => _control.Enabled = true);
+            _control.AttemptInvoke(() => _control.Enabled = true, 100, 10);
 
             _locked = false;
             SetValue(_preLockValue);
@@ -135,7 +151,10 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
             (e) => { box.Checked = e; },
             box
         )
-        { }
+
+        {
+            box.CheckedChanged += (s, e) => this.UIValueChangedCallback();
+        }
     }
 
     public class SettingNumericUpDown : SettingUIRepresented<decimal>
@@ -148,7 +167,10 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
             (e) => { nud.Value = decimal.Parse(e.ToString()); },
             nud
         )
-        { }
+
+        {
+            nud.ValueChanged += (s, e) => this.UIValueChangedCallback();
+        }
     }
 
     public class SettingTextBox : SettingUIRepresented<string>
@@ -161,7 +183,10 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
             (e) => { box.Text = alwaysLowerCase ? e.ToLower() : e; },
             box
         )
-        { }
+
+        {
+            box.TextChanged += (s, e) => this.UIValueChangedCallback();
+        }
     }
 
     public class SettingComboBoxEnum<T> : SettingUIRepresented<T> where T : Enum
@@ -174,6 +199,9 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
             (e) => { box.Text = e.GetDescription(); },
             box
         )
-        { }
+        {
+            box.SelectedIndexChanged += (s, e) => this.UIValueChangedCallback();
+            box.TextChanged += (s, e) => this.UIValueChangedCallback();
+        }
     }
 }
