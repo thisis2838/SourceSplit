@@ -33,7 +33,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
             _altTimingComponent = new InternalTimeComponent(Settings.ShowGameTime.Value, "Game Time", "");
             _tickCountComponent = new InternalTextComponent(Settings.ShowTickCount.Value, "Tick Count", "");
-            _curDemoComponent = new InternalTextComponent(Settings.ShowCurDemo.Value, "Current Demo", "");
+            _curDemoComponent = new InternalTextComponent(Settings.ShowCurDemo.Value, "Cur. Demo", "");
 
             this.ContextMenuControls = new Dictionary<String, Action>();
             this.ContextMenuControls.Add("SourceSplit: Times", () => SettingControl.SessionsForm.Show());

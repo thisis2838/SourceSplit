@@ -131,9 +131,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         }
         private void _gameMemory_OnUpdateCurrentDemoInfoEvent(object sender, CurrentDemoInfoEvent e)
         {
-            if (!Settings.ShowCurDemo.Value)
-                return;
-
             // pad at most 4 spaces in front of tick count to align tick counts from 0 to 99999
             // doesn't always line up due to font...
             // todo: check if figure space breaks any font

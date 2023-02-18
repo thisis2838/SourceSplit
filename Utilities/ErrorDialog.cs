@@ -94,10 +94,10 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
             Process.Start("https://github.com/thisis2838/SourceSplit/issues");
         }
 
-        public static Exception Exception(string message, Exception e = null)
+        public static ErrorDialogException Exception(string message, Exception e = null)
         {
             var wnd = new ErrorDialog(message, true, e);
-            return wnd._ex;
+            return new ErrorDialogException(wnd._ex);
         }
 
         private void butClose_Click(object sender, EventArgs e)
@@ -105,4 +105,10 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
             this.Close();
         }
     }
+
+    public class ErrorDialogException : Exception
+    {
+        public ErrorDialogException(Exception e) : base("", e) { }
+    }
+
 }

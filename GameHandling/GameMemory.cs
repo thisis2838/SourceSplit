@@ -163,7 +163,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     if (cts.IsCancellationRequested)
                         goto ret;
                 }
-                catch (Exception ex) 
+                catch (ErrorDialogException) { Thread.Sleep(1000); }
+                catch (Exception ex)
                 {
                     Debug.WriteLine(ex.ToString());
 #if DEBUG
