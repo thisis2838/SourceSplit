@@ -14,9 +14,9 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
         public Evacuation()
         {
             AddFirstMap("evacuation_2");
+            this.StartOnFirstLoadMaps.AddRange(this.FirstMaps);
             AddLastMap("evacuation_5");
 
-            WhenCameraSwitchesToPlayer(ActionType.AutoStart, "blackout_viewcontroller");
             WhenOutputIsFired(ActionType.AutoEnd, "speed_player", clamp: 1000);
         }
     }
