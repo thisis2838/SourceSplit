@@ -25,6 +25,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             {
                 case "hl2oe":
                 case "hl2":
+                case "hl2_mirrored":
                 case "ghosting":
                 case "ghostingmod":
                 case "ghostingmod2": //hl2 category extensions, NOTE: these are only guesses for the folder name

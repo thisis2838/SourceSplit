@@ -252,4 +252,12 @@
       <change>Changed Evacuation's Auto-Start to comply with rule changes.</change>
     </changelog>
   </update>
+  <update version="3.3.4">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Added support for Half-Life 2: Mirrored</change>
+    </changelog>
+  </update>
 </updates>
