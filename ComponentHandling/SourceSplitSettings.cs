@@ -298,16 +298,18 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                 {
                     try
                     {
+                        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sourcesplit_log_temp.txt");
                         lock (TimedTraceListener.Instance.LogWriteLock)
                         {
                             File.Copy
                             (
                                 Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sourcesplit_log.txt"),
-                                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sourcesplit_log_temp.txt"),
+                                path,
                                 true
                             );
                         }
-                        Process.Start("notepad.exe", Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sourcesplit_log_temp.txt"));
+
+                        Process.Start("explorer.exe", $"/select, \"{path}\"");
                     }
                     catch (Exception ex)
                     {
