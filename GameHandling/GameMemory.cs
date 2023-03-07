@@ -110,7 +110,7 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             _cancelSource = new CancellationTokenSource();
             _uiThread = new SourceSplitSynchronizationContext(SynchronizationContext.Current);
-            TimerActions = new TimerActions(); TimerActions.Init(_uiThread);
+            TimerActions.Init(_uiThread);
             _thread = Task.Factory.StartNew(() => MemoryReadThread(_cancelSource));
         }
         public void StopReading()
