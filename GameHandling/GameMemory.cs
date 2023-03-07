@@ -29,7 +29,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         public GameState _state;
 
         private Task _thread;
-        private SynchronizationContext _uiThread;
+        private SourceSplitSynchronizationContext _uiThread;
         private CancellationTokenSource _cancelSource;
 
         private SigScanTarget _gameDirTarget;
@@ -62,11 +62,6 @@ namespace LiveSplit.SourceSplit.GameHandling
             "synergy.exe",
             "sinepisodes.exe",
         };
-
-        // TODO: match tickrate as closely as possible without going over
-        // otherwise we will most likely read when the game isn't sleeping
-        // must also account for variance of windows scheduler
-        private const int TARGET_UPDATE_RATE = 13;
 
         public GameMemory(SourceSplitComponent component)
         {
@@ -114,12 +109,14 @@ namespace LiveSplit.SourceSplit.GameHandling
                 throw ErrorDialog.Exception("SynchronizationContext.Current is not a UI thread.");
 
             _cancelSource = new CancellationTokenSource();
-            _uiThread = SynchronizationContext.Current;
-            TimerActions.Init();
+            _uiThread = new SourceSplitSynchronizationContext(SynchronizationContext.Current);
+            TimerActions = new TimerActions(); TimerActions.Init(_uiThread);
             _thread = Task.Factory.StartNew(() => MemoryReadThread(_cancelSource));
         }
         public void StopReading()
         {
+            _uiThread.Stop = true;
+
             if (_cancelSource == null || _thread == null || _thread.Status != TaskStatus.Running)
                 return;
 
@@ -469,18 +466,20 @@ namespace LiveSplit.SourceSplit.GameHandling
                 state.AllSupport.ForEach(x => x.OnGenericUpdate(state, TimerActions));
                 this.CheckGameState(state);
 
+                int maxIterationTime = (int)(state.IntervalPerTick * 1000 - 2);
+
                 state.UpdateCount++;
                 TimedTraceListener.Instance.UpdateCount = state.UpdateCount;
 
-                if (profiler.ElapsedMilliseconds >= TARGET_UPDATE_RATE)
+                if (profiler.ElapsedMilliseconds >= maxIterationTime)
                 {
                     _timesOver++;
-                    _timeOverSpent += (int)profiler.ElapsedMilliseconds - TARGET_UPDATE_RATE;
-                    Debug.WriteLine($"**** PERFORAMCE WARNING: update took {profiler.ElapsedMilliseconds - TARGET_UPDATE_RATE}ms too long");
+                    _timeOverSpent += (int)profiler.ElapsedMilliseconds - maxIterationTime;
+                    Debug.WriteLine($"**** PERFORAMCE WARNING: update took {profiler.ElapsedMilliseconds - maxIterationTime}ms too long");
                     Debug.WriteLine($"**** exceeded limit: {_timesOver} times, totalling {_timeOverSpent}ms");
                 }
 
-                Thread.Sleep(Math.Max(TARGET_UPDATE_RATE - (int)profiler.ElapsedMilliseconds, 1));
+                Thread.Sleep(Math.Max(maxIterationTime - (int)profiler.ElapsedMilliseconds, 1));
                 profiler.Restart();
             }
 
@@ -626,16 +625,11 @@ namespace LiveSplit.SourceSplit.GameHandling
 
     public class TimerActions
     {
-        private SynchronizationContext _uiThread = new SynchronizationContext();
+        private SourceSplitSynchronizationContext _uiThread = null;
 
-        public TimerActions()
+        public void Init(SourceSplitSynchronizationContext ctx)
         {
-            Init();
-        }
-
-        public void Init()
-        {
-            _uiThread = SynchronizationContext.Current;
+            _uiThread = ctx;
         }
 
         public event EventHandler<TimerActionArgs> OnPlayerGainedControl;
@@ -644,23 +638,26 @@ namespace LiveSplit.SourceSplit.GameHandling
 
         public void Start(float msOffset = 0)
         {
-            _uiThread.Post(d => {
+            _uiThread.Post(d => 
+            {
                 this.OnPlayerGainedControl?.Invoke(this, new TimerActionArgs(msOffset));
-            }, null);
+            });
         }
 
         public void End(float msOffset = 0)
         {
-            _uiThread.Post(d => {
+            _uiThread.Post(d => 
+            {
                 this.OnPlayerLostControl?.Invoke(this, new TimerActionArgs(msOffset));
-            }, null);
+            });
         }
 
         public void Split(float msOffset = 0)
         {
-            _uiThread.Post(d => {
+            _uiThread.Post(d => 
+            {
                 this.ManualSplit?.Invoke(this, new TimerActionArgs(msOffset));
-            }, null);
+            });
         }
     }
 

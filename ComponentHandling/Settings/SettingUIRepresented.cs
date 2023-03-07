@@ -97,7 +97,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
             if (_locked) _preLockValue = value;
             else
             {
-                _control.AttemptInvoke(() => _setFunc.Invoke(value), 100, 10);
+                _control.AttemptInvoke(() => _setFunc.Invoke(value), 2000, 5);
                 lock (_valueLock) _value = value;
             }
         }
@@ -111,7 +111,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
 
             SetValue(value);
             _locked = true;
-            _control.AttemptInvoke(() => _control.Enabled = false, 100, 10);
+            _control.AttemptInvoke(() => _control.Enabled = false, 2000, 5);
         }
 
         public override void Unlock()
@@ -119,7 +119,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
             if (!_locked) return;
 
             Debug.WriteLine($"Unlocking {Name}...");
-            _control.AttemptInvoke(() => _control.Enabled = true, 100, 10);
+            _control.AttemptInvoke(() => _control.Enabled = true, 2000, 5);
 
             _locked = false;
             SetValue(_preLockValue);

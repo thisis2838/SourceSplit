@@ -111,18 +111,25 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             }
             addHelpCallback(this);
             SetSettingDescriptions();
-            Application.AddMessageFilter(this);
 
             this.Disposed += SourceSplitSettings_Disposed;
             this.VisibleChanged += SourceSplitSettings_VisibleChanged;
+
+            this.Load += SourceSplitSettings_Load;
+        }
+
+        private void SourceSplitSettings_Load(object sender, EventArgs e)
+        {
+            Application.RemoveMessageFilter(this);
+            Application.AddMessageFilter(this);
         }
 
         private void SourceSplitSettings_Disposed(object sender, EventArgs e)
         {
             Application.RemoveMessageFilter(this);
 
-            if (_help != null && !_help.IsDisposed) _help.Close();
-            if (SessionsForm != null && !SessionsForm.IsDisposed) SessionsForm.Close();
+            if (ControlUtils.IsValid(_help)) _help.Close();
+            if (ControlUtils.IsValid(SessionsForm)) SessionsForm.Close();
         }
 
         private void SourceSplitSettings_VisibleChanged(object sender, EventArgs e)
@@ -133,41 +140,69 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                 {
                     var f = FindForm();
                     if (f is null) return;
-                    f.FormClosing += (s, e) => _help.Close();
+                    f.FormClosing += (s, e) =>
+                    {
+                        if (ControlUtils.IsValid(_help)) _help.Close();
+                    };
                 }
                 catch { }
+            }
+            else
+            {
+                if (ControlUtils.IsValid(_help)) _help.Close();
             }
         }
 
         public bool PreFilterMessage(ref Message m)
         {
+            if (this.IsDisposed)
+            {
+                Application.RemoveMessageFilter(this);
+                //Debug.WriteLine("Tried to filter a message when the main control has been disposed.");
+                return false;
+            }
+
+            if (!this.IsValid() || !this.Visible) return false;
+
             if (m.Msg == 0x200) //WM_MOUSEMOVE = 0x200
             {
-                List<Control> controls = new List<Control>();
-
-                var mouse = MousePosition;
-
-                void check(Control ctrl)
+                if (ControlUtils.IsValid(_help) && _help.Visible)
                 {
-                    var rect = ctrl.DisplayRectangle;
-                    var pos = ctrl.PointToScreen(Point.Empty);
-                    rect.Location = pos;
+                    List<Control> controls = new List<Control>();
 
-                    if (rect.Contains(mouse) && !ctrl.Enabled)
+                    var mouse = MousePosition;
+
+                    void check(Control ctrl)
                     {
-                        controls.Add(ctrl);
+                        try
+                        {
+                            var rect = ctrl.DisplayRectangle;
+                            var pos = ctrl.PointToScreen(Point.Empty);
+                            rect.Location = pos;
+
+                            if (rect.Contains(mouse) && !ctrl.Enabled)
+                            {
+                                controls.Add(ctrl);
+                            }
+
+                            foreach (var c in ctrl.Controls.Cast<Control>())
+                            {
+                                check(c);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(ex);
+                            return;
+                        }
                     }
-                    
-                    foreach (var c in ctrl.Controls.Cast<Control>())
-                    {
-                        check(c);
-                    }
+
+                    check(tabCtrlMaster.SelectedTab);
+
+                    if (controls.Count > 0)
+                        _help.UpdateDescription(controls.Last());
                 }
 
-                check(tabCtrlMaster.SelectedTab);
-
-                if (controls.Count > 0)
-                    _help.UpdateDescription(controls.Last());
             }
             return false;
         }
@@ -200,7 +235,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             Version version = Assembly.GetExecutingAssembly().GetName().Version;
 
             if (this.Parent?.Parent?.Parent != null && this.Parent.Parent.Parent.GetType().ToString() == "LiveSplit.View.ComponentSettingsDialog")
-                this.Parent.Parent.Parent.Text = $"SourceSplit v{version.ToString(3)} - Settings";
+                this.Parent.Parent.Parent.Text = $"SourceSplit v{version} | Settings";
         }
 
         public void SetSettings(XmlNode settings)
