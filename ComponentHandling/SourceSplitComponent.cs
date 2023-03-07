@@ -54,6 +54,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         private SplitOperations _splitOperations = new SplitOperations();
         private bool _timerIsRunning => (_timer.CurrentState.CurrentPhase != TimerPhase.Ended 
             && _timer.CurrentState.CurrentPhase != TimerPhase.NotRunning);
+        private bool _hasGotSettings = false;
+        private bool _hasDecidedForcingGameTime = false;
 
         private TimeSpan GameTime
         {
@@ -144,6 +146,14 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
         public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode)
         {
+            if (!_hasDecidedForcingGameTime && _hasGotSettings)
+            {
+                if (Settings.SetGameTimeOnLaunch.Value) 
+                    state.CurrentTimingMethod = TimingMethod.GameTime;
+
+                _hasDecidedForcingGameTime = true;
+            }
+
             if (_countInactive && _addInactiveTime)
                 _inactiveTime += SourceSplitUtils.ActiveTime.Elapsed - _lastUpdate;
 
@@ -219,6 +229,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
         public void SetSettings(XmlNode settings)
         {
+            _hasGotSettings = true;
             var ui = Settings.GetUIRepresented();
             settings.ChildNodes.Cast<XmlNode>().ToList().ForEach(x =>
             {

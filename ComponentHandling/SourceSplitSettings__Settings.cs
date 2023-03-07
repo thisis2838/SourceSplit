@@ -61,6 +61,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             p.PrintDemoInfo = new("PrintDemoInfo", false, chkPrintDemoInfo);
             p.DemoParserPath = new("DemoParserPath", "", boxDemoParserPath);
 
+            p.SetGameTimeOnLaunch = new("SetGameTimeOnLaunch", true, chkForceGameTime);
+
             p.MapTransitionList = new Settings.SettingUIRepresented<string[][]>
             (
                 "MapTransitionList",

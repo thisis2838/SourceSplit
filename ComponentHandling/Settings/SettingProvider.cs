@@ -52,6 +52,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
         public SettingCheckBox PrintDemoInfo;
         public SettingTextBox DemoParserPath;
 
+        public SettingCheckBox SetGameTimeOnLaunch;
+
         public SettingUIRepresented<string[][]> MapTransitionList;
 
         public List<SettingUIRepresented> GetUIRepresented()

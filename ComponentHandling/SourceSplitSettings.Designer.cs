@@ -127,6 +127,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.labCurrentGame = new System.Windows.Forms.Label();
             this.labVersion = new System.Windows.Forms.Label();
             this.butHelp = new System.Windows.Forms.Button();
+            this.chkForceGameTime = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.nudSLPenalty)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudDecimalPlaces)).BeginInit();
             this.tabCtrlMaster.SuspendLayout();
@@ -824,11 +825,11 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.tableLayoutPanel8.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel8.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel8.Name = "tableLayoutPanel8";
-            this.tableLayoutPanel8.RowCount = 4;
+            this.tableLayoutPanel8.RowCount = 3;
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 126F));
             this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 102F));
-            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 225F));
-            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 12F));
+            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel8.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel8.Size = new System.Drawing.Size(447, 480);
             this.tableLayoutPanel8.TabIndex = 30;
             // 
@@ -918,6 +919,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             // gTimerBehavior
             // 
             this.tableLayoutPanel8.SetColumnSpan(this.gTimerBehavior, 2);
+            this.gTimerBehavior.Controls.Add(this.chkForceGameTime);
             this.gTimerBehavior.Controls.Add(this.chkFirstMapReset);
             this.gTimerBehavior.Controls.Add(this.chkResetMapTransitions);
             this.gTimerBehavior.Controls.Add(this.boxSplitInstead);
@@ -927,7 +929,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.gTimerBehavior.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gTimerBehavior.Location = new System.Drawing.Point(3, 231);
             this.gTimerBehavior.Name = "gTimerBehavior";
-            this.gTimerBehavior.Size = new System.Drawing.Size(441, 219);
+            this.gTimerBehavior.Size = new System.Drawing.Size(441, 246);
             this.gTimerBehavior.TabIndex = 28;
             this.gTimerBehavior.TabStop = false;
             this.gTimerBehavior.Text = "Timer Behavior";
@@ -1336,6 +1338,18 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.butHelp.UseVisualStyleBackColor = true;
             this.butHelp.Click += new System.EventHandler(this.butHelp_Click);
             // 
+            // chkForceGameTime
+            // 
+            this.chkForceGameTime.AutoSize = true;
+            this.chkForceGameTime.Checked = true;
+            this.chkForceGameTime.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkForceGameTime.Location = new System.Drawing.Point(6, 216);
+            this.chkForceGameTime.Name = "chkForceGameTime";
+            this.chkForceGameTime.Size = new System.Drawing.Size(296, 17);
+            this.chkForceGameTime.TabIndex = 33;
+            this.chkForceGameTime.Text = "Set LiveSplit\'s Timing Method to Game Time upon launch";
+            this.chkForceGameTime.UseVisualStyleBackColor = true;
+            // 
             // SourceSplitSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -1514,5 +1528,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         private System.Windows.Forms.Button butHelp;
         private System.Windows.Forms.GroupBox gDebugFeatures;
         private System.Windows.Forms.Button butOpenDebug;
+        private System.Windows.Forms.CheckBox chkForceGameTime;
     }
 }

@@ -130,7 +130,7 @@
             this.MinimumSize = new System.Drawing.Size(604, 576);
             this.Name = "SourceSplitSettingsHelp";
             this.Padding = new System.Windows.Forms.Padding(7);
-            this.Text = "SourceSplit Help";
+            this.Text = "SourceSplit | Help";
             this.tlpMain.ResumeLayout(false);
             this.tlpMain.PerformLayout();
             this.groupBox1.ResumeLayout(false);
