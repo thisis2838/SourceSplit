@@ -345,7 +345,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     if (xy && entPos.DistanceXY(pos) <= d)
                     {
 #if DEBUG
-                        Debug.WriteLine($"found entity with pos xy dist <= {d} from {pos} @ {ent.ToString("X")}");
+                        //Debug.WriteLine($"found entity with pos xy dist <= {d} from {pos} @ {ent.ToString("X")}");
 #endif
                         yield return ent;
 
@@ -353,7 +353,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     else if (entPos.Distance(pos) <= d)
                     {
 #if DEBUG
-                        Debug.WriteLine($"found entity with pos dist <= {d} from {pos} @ {ent.ToString("X")}");
+                        //Debug.WriteLine($"found entity with pos dist <= {d} from {pos} @ {ent.ToString("X")}");
 #endif
                         yield return ent;
 

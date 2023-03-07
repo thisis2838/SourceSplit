@@ -263,9 +263,5 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
             this.DoSplit(MillisecondsToTicks(e.MillisecondOffset), true);
         }
-
-
-
-
     }
 }

@@ -12,6 +12,8 @@ using System.Linq;
 using System.CodeDom;
 using System.Threading.Tasks;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -46,12 +48,34 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 Position.Update(proc);
             }
         }
-
+        private struct Blocker
+        {
+            public IntPtr EntityPointer;
+            public int Chamber;
+        }
+        private readonly Dictionary<int, int[]> _chamberMaps = new Dictionary<int, int[]>()
+        {
+            { 00, new int[] { 00, 01 } },
+            { 01, new int[] { 02, 03 } },
+            { 02, new int[] { 04, 05 } },
+            { 03, new int[] { 06, 07 } },
+            { 04, new int[] { 08 } },
+            { 05, new int[] { 09 } },
+            { 06, new int[] { 10 } },
+            { 07, new int[] { 11, 12 } },
+            { 08, new int[] { 13 } },
+            { 09, new int[] { 14 } },
+            { 10, new int[] { 15 } },
+            { 11, new int[] { 16 } },
+            { 13, new int[] { 17 } },
+            { 14, new int[] { 18 } },
+            { 15, new int[] { 19 } },
+        };
         private int _baseModelNameOffset = -1;
         private int _baseVelocityOffset = -1;
         private int _baseSolidFlagsOffset = -1;
         private List<Elevator> _elevatorSpeeds = new List<Elevator>();
-        private List<IntPtr> _elevatorBlockers = new List<IntPtr>();
+        private List<Blocker> _elevatorBlockers = new List<Blocker>();
 
         private List<string> _vaultHashes = new List<string>()
         {
@@ -61,7 +85,18 @@ namespace LiveSplit.SourceSplit.GameSpecific
         };
 
         private CustomCommand _newStart = new CustomCommand("newstart", "0", "Start the timer upon portal open");
-        private CustomCommand _elevSplit = new CustomCommand("elevsplit", "0", "Split when an elevator starts moving from the ends of the shaft.");
+        private CustomCommand _elevSplit = new CustomCommand("elevsplit", "0", "Split when an elevator starts moving from the ends of the shaft. Also check out the SourceSplit command 'elevsplit_on'.");
+        private CustomCommand _elevSplitWhitelist = new CustomCommand
+        (
+            "elevsplit_only",
+            "*",
+@"This option is only effective when Elevator Splitting is enabled. 
+ONLY when an elevator is at the end of one of the specified chambers, and it begins moving from the ends of its shaft, an Auto-Split will be triggered. Entries are separated by a comma.
+For example: 
+- Entering '1' will only Auto-Split when the elevator at the end of chamber 01 begins moving from the ends of its shaft.
+- Entering '1,2,03' will only Auto-Split when the elevators at the end of chamber 01, 02, and 03 begins moving from the ends of their shafts.
+- Entering '*' will Auto-Split on any valid elevator movement."
+        );
         private CustomCommand _deathSplit = new CustomCommand("deathsplit", "0", "Death category extension ending");
 #if DEBUG
         private CustomCommand _enduranceTesting = new CustomCommand("endurancetesting", "", "Do endurance testing");
@@ -76,7 +111,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
             CommandHandler.Commands.AddRange
             (
                 _newStart, 
-                _elevSplit, 
+                _elevSplit,
+                _elevSplitWhitelist,
                 _deathSplit
 #if DEBUG
                 , _enduranceTesting
@@ -138,7 +174,64 @@ namespace LiveSplit.SourceSplit.GameSpecific
                         if (!targetName.Contains("block_crazy_player")) goto skip;
 
                         Debug.WriteLine($"Found potential blocking entity @ 0x{ent.ToString("X")}");
-                        _elevatorBlockers.Add(ent); 
+
+                        List<string> names = new List<string>();
+                        foreach (var close in engine.GetEntitiesByPos(engine.GetEntityPos(ent), 100))
+                        {
+                            var name = state.GameProcess.ReadString(proc.ReadPointer(close + state.GameEngine.BaseEntityTargetNameOffset), 255);
+                            if (string.IsNullOrWhiteSpace(name)) continue;
+
+                            Debug.WriteLine("\t near: " + name);
+                            names.Add(name);
+                        }
+
+                        int chamber = -1;
+                        var curChamberMatch = Regex.Match(state.Map.Current, @"^testchmb_a_([0-9]+)");
+                        if (curChamberMatch.Success)
+                        {
+                            var curChamber = int.Parse(curChamberMatch.Groups[1].Value);
+                            // only 1 chamber...
+                            if (_chamberMaps.ContainsKey(curChamber) && _chamberMaps[curChamber].Length == 1)
+                            {
+                                chamber = _chamberMaps[curChamber][0];
+                                goto skip_blocker_owner;
+                            }
+                        }
+                        var processedNames = names
+                            .Select(x => (name: x, match: Regex.Match(x, "^a([0-9]{2})(?:-|_)(?:a([0-9]{2}))?")))
+                            .Where(x => x.match.Success)
+                            .Select(x => 
+                            (
+                                name: x.name,
+                                match: x.match,
+                                map: int.Parse(x.match.Groups[1].Value)
+                            ))
+                            .Where(x => _chamberMaps.ContainsKey(x.map));
+                        if (processedNames.Any())
+                        {
+                            if (!processedNames.Any(x =>
+                            {
+                                if (x.match.Groups[2].Success)
+                                {
+                                    chamber = _chamberMaps[x.map].Last();
+                                    return true;
+                                }
+                                return false;
+                            }))
+                            {
+                                chamber = _chamberMaps[processedNames.First().map][0];
+                            }
+                        }
+
+                        skip_blocker_owner:
+
+                        Debug.WriteLine($"Blocker belongs to chamber {chamber}");
+                        _elevatorBlockers.Add(new Blocker()
+                        {
+                            Chamber = chamber,
+                            EntityPointer = ent
+                        });
+
                         continue;
 
                         skip:;     
@@ -263,14 +356,26 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     {
                         foreach (var blocker in _elevatorBlockers)
                         {
-                            var blockerPos = state.GameEngine.GetEntityPos(blocker);
+                            var blockerPos = state.GameEngine.GetEntityPos(blocker.EntityPointer);
                             if (blockerPos.Distance(pos) > 200f) continue;
 
                             // is the blocker enabled? (i.e is it solid)
-                            if ((state.GameProcess.ReadValue<ushort>(blocker + _baseSolidFlagsOffset) & 0x0004) != 0) continue;
+                            if ((state.GameProcess.ReadValue<ushort>(blocker.EntityPointer + _baseSolidFlagsOffset) & 0x0004) != 0) continue;
+                            
+                            // this is the correct elevator that the player's going on, don't bother doing this check again...
+                            splitAlready = true;
+
+                            // is this a correct chamber?
+                            string whitelist = _elevSplitWhitelist.String;
+                            if (whitelist != "*" && 
+                                !whitelist.Split(',').Any(x => int.TryParse(x.ToString().Trim(), out int chamber) && blocker.Chamber == chamber))
+                            {
+                                Debug.WriteLine($"Ignoring elevator split due to incorrect chamber (current: {blocker.Chamber}, target: {whitelist})");
+                                splitAlready = true;
+                                continue;
+                            }
 
                             Debug.WriteLine($"Elevator split (@ {pos})");
-                            splitAlready = true;
                             actions.Split();
                         }
                     }
