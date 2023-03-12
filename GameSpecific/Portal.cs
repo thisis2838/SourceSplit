@@ -382,9 +382,6 @@ For example:
                 }
             }
 
-            if (OnceFlag)
-                return;
-
             if (IsFirstMap)
             {
                 if (_deathSplit.Boolean && _playerHP != null)
@@ -397,7 +394,13 @@ For example:
                         actions.Split();
                     }
                 }
+            }
 
+            if (OnceFlag)
+                return;
+
+            if (IsFirstMap)
+            {
                 bool isInside = state.PlayerPosition.Current.InsideBox(-636, -452, -412, -228, 383, 158);
                 if (_newStart.Boolean)
                 {
