@@ -4,7 +4,7 @@ using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific.BMSMods
 {
-    class FurtherData : GameSupport
+    class FurtherData : BMSBase
     {
         // start: on first map
         // end: when the final output is queued 

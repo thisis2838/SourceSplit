@@ -6,10 +6,19 @@ using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
 using WinUtils = LiveSplit.SourceSplit.Utilities.WinUtils;
 using System.Threading;
+using LiveSplit.SourceSplit.ComponentHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
-    class BMSRetail : GameSupport
+    abstract class BMSBase : GameSupport
+    {
+        public BMSBase()
+        {
+            SourceSplitComponent.Settings.SLPenalty.Lock(1);
+        }
+    }
+
+    class BMSRetail : BMSBase
     {
         // start: on map load
         // xen start: when view entity changes back to the player's

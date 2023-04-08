@@ -4,7 +4,7 @@ using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific.BMSMods
 {
-    class HazardCourse : GameSupport
+    class HazardCourse : BMSBase
     {
         // start: when the tram door is opening
         // end: when the flash sprites disappears
