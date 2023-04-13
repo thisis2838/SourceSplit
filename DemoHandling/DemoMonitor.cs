@@ -1,22 +1,12 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Threading;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using LiveSplit.ComponentUtil;
-using LiveSplit.SourceSplit.GameSpecific;
-using LiveSplit.SourceSplit.ComponentHandling;
 using LiveSplit.SourceSplit.Utilities;
 using System.Collections.Generic;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Reflection;
-using System.ComponentModel;
 using LiveSplit.SourceSplit.GameHandling;
-using WinUtils = LiveSplit.SourceSplit.Utilities.WinUtils;
 using System.Text.RegularExpressions;
 using static LiveSplit.SourceSplit.ComponentHandling.SourceSplitComponent;
 
@@ -221,7 +211,7 @@ namespace LiveSplit.SourceSplit.DemoHandling
 
             bool switched = _demoIsRecording.Current && (_demoIndex.Changed && _demoIndex.Current > 1);
 
-            //Debug.WriteLine($"cur {_index.Current} host {_hostTick.Current} start {_startTick.Current} rec {_demoIsRecording.Current} ind {_demoIndex.Current} swc {switched} frm {_demoFrame.Current}");
+            //Logging.WriteLine($"cur {_index.Current} host {_hostTick.Current} start {_startTick.Current} rec {_demoIsRecording.Current} ind {_demoIndex.Current} swc {switched} frm {_demoFrame.Current}");
 
             if (switched || (!_demoIsRecording.Current && _demoIsRecording.Old))
             {
@@ -231,7 +221,7 @@ namespace LiveSplit.SourceSplit.DemoHandling
                 if (File.Exists(path) && DemoFile.FromFilePath(path, out var demo))
                 {
                     _index.Current = (int)demo.TotalTicks;
-                    Debug.WriteLine($"Demo finished: {demo.Name} ({demo.TotalTicks} ticks), differ by {_index.Current - _index.Old} ticks");
+                    Logging.WriteLine($"Demo finished: {demo.Name} ({demo.TotalTicks} ticks), differ by {_index.Current - _index.Old} ticks");
 
                     DemoStopRecording.Invoke(null, new DemoStopRecordingArgs()
                     {
@@ -254,7 +244,7 @@ namespace LiveSplit.SourceSplit.DemoHandling
                     State = state
                 });
 
-                Debug.WriteLine($"Demo recording start");
+                Logging.WriteLine($"Demo recording start");
             }
 
             if (_demoIsRecording.Current && state.SignOnState.Current == SignOnState.Full)

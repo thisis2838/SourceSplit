@@ -1,20 +1,8 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using System.Threading;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using LiveSplit.ComponentUtil;
-using LiveSplit.SourceSplit.GameSpecific;
 using LiveSplit.SourceSplit.Utilities;
-using System.Collections.Generic;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Reflection;
-using System.ComponentModel;
-using static LiveSplit.SourceSplit.GameHandling.GameMemory;
 
 namespace LiveSplit.SourceSplit.GameHandling
 {

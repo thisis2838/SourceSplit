@@ -1,18 +1,7 @@
-﻿using LiveSplit.SourceSplit.GameSpecific;
-using LiveSplit.SourceSplit.Utilities;
+﻿using LiveSplit.SourceSplit.Utilities;
 using LiveSplit.SourceSplit.Utilities.Forms;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Runtime.Remoting;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace LiveSplit.SourceSplit.ComponentHandling.Settings
@@ -106,7 +95,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
         {
             if (_locked) return;
 
-            Debug.WriteLine($"Locking {Name} to {value}...");
+            Logging.WriteLine($"Locking {Name} to {value}...");
             _preLockValue = GetValue();
 
             SetValue(value);
@@ -118,7 +107,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling.Settings
         {
             if (!_locked) return;
 
-            Debug.WriteLine($"Unlocking {Name}...");
+            Logging.WriteLine($"Unlocking {Name}...");
             _control.AttemptInvoke(() => _control.Enabled = true, 2000, 5);
 
             _locked = false;

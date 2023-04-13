@@ -1,11 +1,5 @@
-﻿using LiveSplit.SourceSplit.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.Linq;
-using LiveSplit.SourceSplit.GameSpecific;
-using LiveSplit.SourceSplit.ComponentHandling;
-using System.Diagnostics.Eventing;
 
 namespace LiveSplit.SourceSplit.GameHandling
 {

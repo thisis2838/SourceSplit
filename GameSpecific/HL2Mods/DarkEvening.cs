@@ -1,9 +1,6 @@
-﻿using LiveSplit.ComponentUtil;
-using System.Diagnostics;
-using LiveSplit.SourceSplit.GameHandling;
+﻿using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
 using System.IO;
-using System.Windows.Forms;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
@@ -32,7 +29,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             {
                 actions.Start(-6657 * 15f);
                 OnceFlag = true;
-                Debug.WriteLine($"dark evening vault save start");
+                Logging.WriteLine($"dark evening vault save start");
                 return;
             }
         }

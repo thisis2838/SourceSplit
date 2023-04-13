@@ -2,9 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.Utilities
 {
@@ -57,11 +54,11 @@ namespace LiveSplit.SourceSplit.Utilities
             {
                 if ((ptr = scanner.Scan(target.Item2)) != IntPtr.Zero)
                 {
-                    Debug.WriteLine($"Found {targets.Name} : 0x{ptr.ToString("x")} through sig {target.Item1}");
+                    Logging.WriteLine($"Found {targets.Name} : 0x{ptr.ToString("x")} through sig {target.Item1}");
                     return true;
                 }
             }
-            Debug.WriteLine($"Couldn't find {targets.Name} through any sig!");
+            Logging.WriteLine($"Couldn't find {targets.Name} through any sig!");
             return false;
         }
     }

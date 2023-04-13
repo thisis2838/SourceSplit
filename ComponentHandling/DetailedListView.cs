@@ -1,13 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Windows.Forms.ListViewItem;
 
@@ -97,9 +91,8 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
             try { Clipboard.SetText(sb.ToString()); }
             catch (Exception ex)
             {
-                Trace.WriteLine(ex.Message);
+                Logging.WriteLine(ex);
             }
-
         }
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using LiveSplit.ComponentUtil;
 using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
@@ -36,7 +34,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
                 string md5 = FileUtils.GetMD5(path);
                 if (md5 == "3b3a18c32a9a9de68a178e759db80104")
                 {
-                    Debug.WriteLine("tfv start");
+                    Logging.WriteLine("tfv start");
                     actions.Start(-((3803 + 1) * 15));
                 }
             }
@@ -54,7 +52,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
                 state.GameProcess.ReadValue(state.PlayerEntInfo.EntityPtr + _laggedMovementOffset, out laggedMovementValue);
                 if (laggedMovementValue == 0.4f)
                 {
-                    Debug.WriteLine("tfv end");
+                    Logging.WriteLine("tfv end");
                     OnceFlag = true;
                     actions.End(EndOffsetMilliseconds); 
                 }

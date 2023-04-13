@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using LiveSplit.ComponentUtil;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -57,7 +57,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                 if (laggedMovementValue.BitEquals(1.0f) && !_prevLaggedMovementValue.BitEquals(1.0f))
                 {
-                    Debug.WriteLine("ep2 start");
+                    Logging.WriteLine("ep2 start");
                     OnceFlag = true;
                     actions.Start(StartOffsetMilliseconds); return;
                 }
@@ -70,7 +70,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                 if (state.PlayerParentEntityHandle.Current != 0xFFFFFFFF && state.PlayerParentEntityHandle.Old == 0xFFFFFFFF)
                 {
-                    Debug.WriteLine("ep2 end");
+                    Logging.WriteLine("ep2 end");
                     OnceFlag = true;
                     actions.End(); 
                 }

@@ -1,13 +1,5 @@
 ﻿using LiveSplit.SourceSplit.Utilities.Forms;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Sockets;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace LiveSplit.SourceSplit.Utilities
@@ -143,7 +135,7 @@ namespace LiveSplit.SourceSplit.Utilities
 
                 if (!res.AsyncWaitHandle.WaitOne(msTimeout))
                 {
-                    Debug.WriteLine($"Failed to invoke action on control {ctrl.Name} after {msTimeout}ms, {i - 1} tries left.");
+                    Logging.WriteLine($"Failed to invoke action on control {ctrl.Name} after {msTimeout}ms, {i - 1} tries left.");
                     continue;
                 }
                 return;

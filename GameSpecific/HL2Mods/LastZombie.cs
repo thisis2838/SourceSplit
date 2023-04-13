@@ -1,11 +1,6 @@
 ﻿using LiveSplit.ComponentUtil;
 using LiveSplit.SourceSplit.GameHandling;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
@@ -49,7 +44,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
                 if (_currentSequence.Current != 23 && _currentSequence.Old == 23)
                 {
-                    Debug.WriteLine("last zombie start");
+                    Logging.WriteLine("last zombie start");
                     actions.Start();
                 }
             }

@@ -1,7 +1,6 @@
 ﻿using LiveSplit.ComponentUtil;
-using System;
-using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
@@ -49,7 +48,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
                 if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
                 {
-                    Debug.WriteLine("wdp ce ending");
+                    Logging.WriteLine("wdp ce ending");
                     _splitTime = 0f;
                     state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 }
@@ -67,7 +66,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
                 if (_crashButtonPos.Current.X > _crashButtonPos.Old.X && _crashButtonPos.Old.X != 0)
                 {
-                    Debug.WriteLine("wpd ice end");
+                    Logging.WriteLine("wpd ice end");
                     OnceFlag = true;
                     actions.End(EndOffsetMilliseconds); 
                 }
@@ -78,7 +77,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
                 if (_colorCorrectEnabled.Current == 0 && _colorCorrectEnabled.Old == 1)
                 {
-                    Debug.WriteLine("wpd ee end");
+                    Logging.WriteLine("wpd ee end");
                     OnceFlag = true;
                     actions.End(EndOffsetMilliseconds); 
                 }

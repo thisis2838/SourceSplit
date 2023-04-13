@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using LiveSplit.ComponentUtil;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -29,7 +29,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 _entityIndex = state.GameEngine.GetEntIndexByName("razortrain1");
 
             if (IsFirstMap || IsLastMap)
-                Debug.WriteLine($"_entityIndex is {_entityIndex}");
+                Logging.WriteLine($"_entityIndex is {_entityIndex}");
         }
 
         protected override void OnUpdateInternal(GameState state, TimerActions actions)
@@ -44,7 +44,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 var newEntity = state.GameEngine.GetEntityByIndex(_entityIndex);
                 if (newEntity == IntPtr.Zero)
                 {
-                    Debug.WriteLine($"ep1 {(this.IsFirstMap ? "start" : "end")}");
+                    Logging.WriteLine($"ep1 {(this.IsFirstMap ? "start" : "end")}");
                     OnceFlag = true;
                     _entityIndex = -1;
                     if (this.IsFirstMap)

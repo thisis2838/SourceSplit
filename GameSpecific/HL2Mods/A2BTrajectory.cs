@@ -1,8 +1,5 @@
-﻿using LiveSplit.ComponentUtil;
-using System.Diagnostics;
-using LiveSplit.SourceSplit.GameHandling;
+﻿using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
-using System.IO;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
@@ -37,7 +34,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                 {
                     OnceFlag = true;
                     actions.End();
-                    Debug.WriteLine("ajb end");
+                    Logging.WriteLine("ajb end");
                 }
             }
         }

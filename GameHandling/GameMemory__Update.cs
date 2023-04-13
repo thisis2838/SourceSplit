@@ -1,20 +1,9 @@
 ﻿using System;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using System.Threading;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using LiveSplit.ComponentUtil;
-using LiveSplit.SourceSplit.GameSpecific;
 using LiveSplit.SourceSplit.Utilities;
 using LiveSplit.SourceSplit.DemoHandling;
-using System.Collections.Generic;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Reflection;
-using System.ComponentModel;
 using LiveSplit.SourceSplit.ComponentHandling;
 using static LiveSplit.SourceSplit.ComponentHandling.SourceSplitComponent;
 
@@ -50,7 +39,7 @@ namespace LiveSplit.SourceSplit.GameHandling
 
                     // start rebasing from this tick
                     state.TickBase = state.RawTickCount.Current;
-                    Debug.WriteLine("rebasing ticks from " + state.TickBase);
+                    Logging.WriteLine("rebasing ticks from " + state.TickBase);
 
                     // player was just spawned, get it's ptr
                     state.PlayerEntInfo = state.GameEngine.GetEntityInfoByIndex(GameState.ENT_INDEX_PLAYER);
@@ -60,16 +49,16 @@ namespace LiveSplit.SourceSplit.GameHandling
                 }
                 if (state.RawTickCount.Current - state.TickBase < 0)
                 {
-                    Debug.WriteLine("based ticks is wrong by " + (state.RawTickCount.Current - state.TickBase) + " rebasing from " + state.TickBase);
+                    Logging.WriteLine("based ticks is wrong by " + (state.RawTickCount.Current - state.TickBase) + " rebasing from " + state.TickBase);
                     state.TickBase = state.RawTickCount.Current;
                 }
 
                 // update time and rebase it against the first signon state full tick
                 if (state.RawTickCount.Current < state.RawTickCount.Old)
-                    Debug.WriteLine($"tick count undershot by {state.RawTickCount.Current - state.RawTickCount.Old}");
+                    Logging.WriteLine($"tick count undershot by {state.RawTickCount.Current - state.RawTickCount.Old}");
                 state.TickCount.Current = state.RawTickCount.Current - state.TickBase;
                 state.TickTime = state.TickCount.Current * state.IntervalPerTick;
-                TimedTraceListener.Instance.TickCount = state.TickCount.Current;
+                Logging.TickCount = state.TickCount.Current;
 
                 // update player related things
                 if (state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
@@ -127,13 +116,13 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             var delta = args.CurrentTick - args.LastTick;
             var state = args.State;
-            //Debug.WriteLine($"{_blockIGTTime} {_hostUpdateCount.Current - _hostUpdateCount.Old} {delta}");
+            //Logging.WriteLine($"{_blockIGTTime} {_hostUpdateCount.Current - _hostUpdateCount.Old} {delta}");
 
             if (!_gamePausedMidDemoRec)
             {
                 _gamePausedMidDemoRec = (state.ServerState.Current == ServerState.Paused);
                 if (_gamePausedMidDemoRec)
-                    Debug.WriteLine($"Game paused mid-demo!");
+                    Logging.WriteLine($"Game paused mid-demo!");
             }
 
             if (!_blockDemoTime)
@@ -176,7 +165,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 return;
 
             _demoMonitor.Update(state);
-            //Debug.WriteLine($"mid |{_gamePausedMidDemoRec}| block demo |{_blockDemoTime}| block igt |{_blockIGTTime}|");
+            //Logging.WriteLine($"mid |{_gamePausedMidDemoRec}| block demo |{_blockDemoTime}| block igt |{_blockIGTTime}|");
         }
 
         void CheckGameState(GameState state)
@@ -186,9 +175,9 @@ namespace LiveSplit.SourceSplit.GameHandling
             GameEngine engine = state.GameEngine;
 
             // announce changes
-            Debug.WriteLineIf(state.SignOnState.Changed, "SignOnState changed to " + state.SignOnState.Current);
-            Debug.WriteLineIf(state.HostState.Changed, "HostState changed to " + state.HostState.Current);
-            Debug.WriteLineIf(state.ServerState.Changed, "ServerState changed to " + state.ServerState.Current);
+            Logging.WriteLineIf(state.SignOnState.Changed, "SignOnState changed to " + state.SignOnState.Current);
+            Logging.WriteLineIf(state.HostState.Changed, "HostState changed to " + state.HostState.Current);
+            Logging.WriteLineIf(state.ServerState.Changed, "ServerState changed to " + state.ServerState.Current);
 
             // set tickrate if not already
             if (state.IntervalPerTick > 0 && !_gotTickRate)
@@ -221,7 +210,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 {
                     // mostly for safety, new session definitely means the previous demo has been stopped
                     _gamePausedMidDemoRec = false;
-                    Debug.WriteLine("session started");
+                    Logging.WriteLine("session started");
                     this.SendSessionStartedEvent(state.Map.Current);
                     state.MainSupport?.OnSessionStart(state, TimerActions);
                 }
@@ -248,7 +237,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 if (state.HostState.Old == HostState.Run)
                 {
                     // the map changed or a quicksave was loaded
-                    Debug.WriteLine("session ended");
+                    Logging.WriteLine("session ended");
                     state.TickBase = -1;
 
                     // the map changed or a save was loaded
@@ -263,7 +252,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 if (state.HostState.Current == HostState.LoadGame)
                 {
                     saveName = Path.GetFileNameWithoutExtension(saveName);
-                    Debug.WriteLine($"loading save: {saveName}");
+                    Logging.WriteLine($"loading save: {saveName}");
 
                     state.MainSupport?.OnSaveLoaded(state, TimerActions, saveName);
 
@@ -271,7 +260,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                         Settings.AddAutoStartType.Value == AdditionalAutoStartType.Save &&
                         Path.GetFileNameWithoutExtension(Settings.AddAutoStartName.Value) == saveName)
                     {
-                        Debug.WriteLine("start on save " + saveName);
+                        Logging.WriteLine("start on save " + saveName);
                         TimerActions.Start();
                     }
                 }
@@ -282,7 +271,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     || state.HostState.Current == HostState.ChangeLevelMP
                     || state.HostState.Current == HostState.NewGame)
                 {
-                    Debug.WriteLine("host state m_levelName changed to " + levelName);
+                    Logging.WriteLine("host state m_levelName changed to " + levelName);
 
                     if (state.HostState.Current == HostState.NewGame)
                     {
@@ -291,7 +280,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                             Settings.AllowAdditionalAutoStart.Value &&
                             Settings.AddAutoStartType.Value == AdditionalAutoStartType.NewGame)
                         {
-                            Debug.WriteLine("additional autostart, new game: " + levelName);
+                            Logging.WriteLine("additional autostart, new game: " + levelName);
                             TimerActions.Start();
                         }
                         else
@@ -315,7 +304,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                             Settings.AddAutoStartName.Value == levelName &&
                             Settings.AddAutoStartType.Value == AdditionalAutoStartType.Transition)
                         {
-                            Debug.WriteLine("additional autostart, transition: " + levelName);
+                            Logging.WriteLine("additional autostart, transition: " + levelName);
                             TimerActions.Start();
                         }
                         else

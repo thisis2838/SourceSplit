@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LiveSplit.SourceSplit.Utilities
+﻿namespace LiveSplit.SourceSplit.Utilities
 {
     // simple value watcher keeping track of values, one feature away from being an undo-able value class
     public class ValueWatcher<T>

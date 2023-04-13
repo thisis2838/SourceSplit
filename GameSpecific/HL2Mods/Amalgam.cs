@@ -1,8 +1,5 @@
-﻿using LiveSplit.ComponentUtil;
-using System.Diagnostics;
-using LiveSplit.SourceSplit.GameHandling;
+﻿using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
-using System.IO;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
@@ -32,7 +29,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                 {
                     if (state.GameEngine.GetEntIndexByName("introcamera2") == -1)
                     {
-                        Debug.WriteLine("amalgam cutsceneless start");
+                        Logging.WriteLine("amalgam cutsceneless start");
                         actions.Start();
                     }
                 }

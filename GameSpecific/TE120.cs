@@ -1,7 +1,6 @@
 ﻿using LiveSplit.ComponentUtil;
-using System;
-using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -44,7 +43,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (_playerLaggedMoveValue.Old == 1 && _playerLaggedMoveValue.Current == 0.3f)
                 {
                     OnceFlag = true;
-                    Debug.WriteLine("te120 end");
+                    Logging.WriteLine("te120 end");
                     actions.End(EndOffsetMilliseconds);
                 }
             }

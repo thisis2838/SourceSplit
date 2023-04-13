@@ -1,9 +1,9 @@
 ﻿using LiveSplit.ComponentUtil;
-using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
-{      
+{
     class Logistique : GameSupport
     {
         // start: on first map
@@ -49,7 +49,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                     && _yResolution.Current / _creditsYPos.Old < 1.0175f)
                 {
                     OnceFlag = true;
-                    Debug.WriteLine("logistique end");
+                    Logging.WriteLine("logistique end");
                     actions.End(EndOffsetMilliseconds); 
                 }
             }

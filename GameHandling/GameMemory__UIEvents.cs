@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading;
 using LiveSplit.SourceSplit.Utilities;
 
@@ -18,7 +17,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         {
             if (Stop)
             {
-                Debug.WriteLine("Tried to invoke UI thread when it has been closed. Callback: " + callback.Method.Name.ToString());
+                Logging.WriteLine("Tried to invoke UI thread when it has been closed. Callback: " + callback.Method.Name.ToString());
                 return;
             }
             _sync.Post(callback, null);

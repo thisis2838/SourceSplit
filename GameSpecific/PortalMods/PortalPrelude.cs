@@ -1,8 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using LiveSplit.SourceSplit.GameHandling;
-
-namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
+﻿namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
 {
     class PortalPrelude : PortalBase
     {

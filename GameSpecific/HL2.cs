@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using LiveSplit.ComponentUtil;
 using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
@@ -47,7 +45,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 // first tick player is moveable and on the train
                 if (state.PlayerPosition.Current.DistanceXY(_startPos) <= 1.0)
                 {
-                    Debug.WriteLine("hl2 start");
+                    Logging.WriteLine("hl2 start");
                     OnceFlag = true;
                     actions.Start(StartOffsetMilliseconds); return;
                 }
@@ -57,7 +55,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 _splitTime.Current = state.GameEngine.GetOutputFireTime("sprite_end_final_explosion_1", "ShowSprite", "");
                 if (_splitTime.Current > 0 && _splitTime.Old == 0)
                 {
-                    Debug.WriteLine("hl2 end");
+                    Logging.WriteLine("hl2 end");
                     OnceFlag = true;
                     actions.End(EndOffsetMilliseconds); 
                 }

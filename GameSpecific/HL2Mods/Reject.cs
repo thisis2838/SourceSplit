@@ -1,9 +1,4 @@
-﻿using LiveSplit.ComponentUtil;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using LiveSplit.SourceSplit.GameHandling;
+﻿using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {

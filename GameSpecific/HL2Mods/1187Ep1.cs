@@ -1,9 +1,9 @@
 ﻿using LiveSplit.ComponentUtil;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
@@ -61,7 +61,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                 {
                     _vortPtr[i] = IntPtr.Zero;
                     _spawnersPtr[i] = state.GameEngine.GetEntityByName(_vortsList.ElementAt(i).Value);
-                    Debug.WriteLine(_vortsList.ElementAt(i).Value + " ptr is 0x" + _spawnersPtr[i].ToString("X"));
+                    Logging.WriteLine(_vortsList.ElementAt(i).Value + " ptr is 0x" + _spawnersPtr[i].ToString("X"));
                 }
             }
         }
@@ -90,7 +90,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                         if (_vortPtr[i] == IntPtr.Zero)
                         {
                             _vortPtr[i] = state.GameEngine.GetEntityByName(_vortsList.ElementAt(i).Key);
-                            Debug.WriteLine(_vortsList.ElementAt(i).Key + " ptr is 0x" + _vortPtr[i].ToString("X"));
+                            Logging.WriteLine(_vortsList.ElementAt(i).Key + " ptr is 0x" + _vortPtr[i].ToString("X"));
                         }
                         // now get its health
                         _vortHP[i] = state.GameProcess.ReadValue<int>(_vortPtr[i] + _baseEntityHealthOffset);
@@ -99,7 +99,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
                 if (_curMaxNPCs.All(x => x == 0) && _vortHPOld.Any(x => x > 0) && _vortHP.All(x => x <= 0))
                 {
-                    Debug.WriteLine("1187ep1 end");
+                    Logging.WriteLine("1187ep1 end");
                     OnceFlag = true;
                     actions.End(EndOffsetMilliseconds);
                 }

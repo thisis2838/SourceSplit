@@ -1,6 +1,6 @@
 ﻿using LiveSplit.ComponentUtil;
-using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
@@ -36,7 +36,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
                 if (splitTime != 0f && _fadeListSize.Old == 0 && _fadeListSize.Current == 1)
                 {
-                    Debug.WriteLine("terminal 7 end");
+                    Logging.WriteLine("terminal 7 end");
                     OnceFlag = true;
                     actions.End(EndOffsetMilliseconds);
                 }

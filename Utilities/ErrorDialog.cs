@@ -1,58 +1,69 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Media;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection.Emit;
 using System.Windows.Forms;
 
 namespace LiveSplit.SourceSplit.Utilities.Forms
 {
     public partial class ErrorDialog : Form
     {
-        public bool Fatal = false;
-        private Exception _ex = null;
+        private bool _fatal = false;
+        private List<Exception> _ex = new List<Exception>();
 
-        public ErrorDialog(string msg = "", bool fatal = false, Exception e = null)
+        public ErrorDialog(string msg = "", bool fatal = false, params Exception[] e)
         {
             InitializeComponent();
 
-            Fatal = fatal;
+            _fatal = fatal;
 
             string text = "";
-            if (e is null)
+            if (e is null || e.Count() == 0)
             {
-                e = new Exception(msg);
-                e.GetType()
+                var newEx = new Exception(msg);
+                e = e.Append(newEx).ToArray();
+                newEx.GetType()
                     .GetField("_stackTraceString", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                    .SetValue(e, Environment.StackTrace);
+                    .SetValue(newEx, Environment.StackTrace);
             }
             else if (!string.IsNullOrWhiteSpace(msg)) 
-                text = msg.Replace("\r\n", "\n").Trim('\n') + "\n\n------EXCEPTIONS------\n";
+                text = msg.Replace("\r\n", "\n").Trim('\n') + "\n\n------EXCEPTIONS------\n\n";
 
-            _ex = e;
+            _ex.AddRange(e);
 
-            Exception iter = e;
-            int level = 0;
-            while (iter != null)
+            void iterate(Exception e, int[] indexes)
             {
-                text += $@"
-[{level++}] {iter.GetType().Name}";
+                if (e is AggregateException)
+                {
+                    var list = ((e as AggregateException).InnerExceptions).ToList();
+                    list.ForEach(x => iterate(x, indexes));
+                }
+                else
+                {
+                    text += $"[{string.Join(".", indexes)}] {e.GetType().FullName}";
 
-                if (!string.IsNullOrWhiteSpace(iter.Message)) text += "\n\t" + "Message: " + iter.Message;
-                if (!string.IsNullOrWhiteSpace(iter.Source)) text += "\n\t" + "Source: " + iter.Source;
-                if (!string.IsNullOrWhiteSpace(iter.StackTrace)) 
-                    text += "\n\t" + "Stacktrace: " + string.Join("", iter.StackTrace.Split('\n').Select(x => "\n\t\t" + x));
+                    if (!string.IsNullOrWhiteSpace(e.Message)) 
+                        text += "\n\t" + "Message: " + e.Message;
+                    if (!string.IsNullOrWhiteSpace(e.Source)) 
+                        text += "\n\t" + "Source: " + e.Source;
+                    if (!string.IsNullOrWhiteSpace(e.StackTrace))
+                        text += "\n\t" + "Stacktrace: " + string.Join("", e.StackTrace.Split('\n').Select(x => "\n\t\t" + x));
 
-                text += "\n";
+                    text += "\n\n";
 
-                iter = iter.InnerException;
+                    if (e.InnerException != null) iterate(e.InnerException, indexes.Append(0).ToArray());
+                }
+
+                indexes[indexes.Count() - 1]++;
             }
 
+            for (int i = 0; i < _ex.Count; i++)
+            {
+                iterate(e[i], new int[] { i });
+            }
 
             boxMsg.Text = text.Replace("\t", "    ").Replace("\n", "\r\n");
             boxMsg.SelectionLength = 0;
@@ -79,7 +90,7 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
 
         private void ErrorDialog_Load(object sender, EventArgs e)
         {
-            if (Fatal)
+            if (_fatal)
             {
                 SystemSounds.Hand.Play();
             }
@@ -94,10 +105,10 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
             Process.Start("https://github.com/thisis2838/SourceSplit/issues");
         }
 
-        public static ErrorDialogException Exception(string message, Exception e = null)
+        public static ErrorDialogException Exception(string message, params Exception[] e)
         {
             var wnd = new ErrorDialog(message, true, e);
-            return new ErrorDialogException(wnd._ex);
+            return new ErrorDialogException(wnd._ex.ToArray());
         }
 
         private void butClose_Click(object sender, EventArgs e)
@@ -108,7 +119,12 @@ namespace LiveSplit.SourceSplit.Utilities.Forms
 
     public class ErrorDialogException : Exception
     {
-        public ErrorDialogException(Exception e) : base("", e) { }
+        public ErrorDialogException(params Exception[] e) : base
+        (
+            "", 
+            e.Count() == 0 ? new Exception() : (e.Count() == 1 ? e.First() : new AggregateException(e))
+        ) 
+        { }
     }
 
 }

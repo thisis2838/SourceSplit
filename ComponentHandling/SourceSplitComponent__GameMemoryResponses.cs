@@ -1,21 +1,10 @@
-﻿using System.Diagnostics;
-using LiveSplit.Model;
-using LiveSplit.Options;
-using LiveSplit.TimeFormatters;
+﻿using LiveSplit.Model;
 using LiveSplit.UI.Components;
-using LiveSplit.UI;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Xml;
-using System.Windows.Forms;
-using LiveSplit.SourceSplit.GameSpecific;
 using static LiveSplit.SourceSplit.GameHandling.GameMemory;
 using LiveSplit.SourceSplit.GameHandling;
-using System.Reflection;
 using LiveSplit.SourceSplit.Utilities;
-using LiveSplit.SourceSplit.ComponentHandling;
 using System.IO;
 
 namespace LiveSplit.SourceSplit.ComponentHandling
@@ -53,8 +42,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             // if we keep the ticks from the previous session, a tick rate change may happen due to 
             // different game versions, causing the existing ticks to produce the wrong time
             // so store this time and reset the total tick count
-            Debug.WriteLine("tickrate " + e.IntervalPerTick);
-            Debug.WriteLine($"cumulative time = {TimeSpan.FromTicks(_cumulativeTime)} + {TimeSpan.FromTicks(GameTime.Ticks - _cumulativeTime)}");
+            Logging.WriteLine("tickrate " + e.IntervalPerTick);
+            Logging.WriteLine($"cumulative time = {TimeSpan.FromTicks(_cumulativeTime)} + {TimeSpan.FromTicks(GameTime.Ticks - _cumulativeTime)}");
             _cumulativeTime += GameTime.Ticks - _cumulativeTime;
 
             _inactiveTime = TimeSpan.Zero;
@@ -78,7 +67,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         void gameMemory_OnSessionTimeUpdate(object sender, SessionTicksUpdateEventArgs e)
         {
             if (e.TickDifference < 0)
-                Debug.WriteLine($"session update tick difference under 0!! ({e.TickDifference})");
+                Logging.WriteLine($"session update tick difference under 0!! ({e.TickDifference})");
             else if (e.TickDifference == 0)
                 return;
 
@@ -89,7 +78,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             {
                 _sessions.Current.ActiveTicks += e.TickDifference;
                 if (_sessions.Current.Ended)
-                    Debug.WriteLine($"adding {e.TickDifference} active ticks to session that's ended!");
+                    Logging.WriteLine($"adding {e.TickDifference} active ticks to session that's ended!");
             }
 
             _holdingFirstPause = false;
@@ -97,7 +86,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
         void gameMemory_OnMiscTime(object sender, MiscTimeEventArgs e)
         {
             if (e.TickDifference < 0)
-                Debug.WriteLine($"misc time update tick difference under 0! ({e.TickDifference})");
+                Logging.WriteLine($"misc time update tick difference under 0! ({e.TickDifference})");
             else if (e.TickDifference == 0)
                 return;
 
@@ -112,7 +101,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                         {
                             _sessions.Current.PausedTicks += e.TickDifference;
                             if (_sessions.Current.Ended)
-                                Debug.WriteLine($"adding {e.TickDifference} paused ticks to session that's ended!");
+                                Logging.WriteLine($"adding {e.TickDifference} paused ticks to session that's ended!");
                         }
                         break;
                     }
@@ -144,7 +133,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             if (e.Map == e.PrevMap) return;
             if (e.Map == "" || e.PrevMap == "") return;
 
-            Debug.WriteLine("gameMemory_OnMapChanged " + e.Map + " " + e.PrevMap);
+            Logging.WriteLine("gameMemory_OnMapChanged " + e.Map + " " + e.PrevMap);
 
             if (!(Settings.AutoSplitOnLevelTrans.Value && !e.IsGeneric))
                 if (!(Settings.AutoSplitOnGenericMap.Value && e.IsGeneric))
@@ -202,9 +191,9 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
             _sessions.Current.Ended = true;
 
-            Debug.WriteLine($"session ended, total time: {_sessions.Current.TotalTicks} ticks = " +
+            Logging.WriteLine($"session ended, total time: {_sessions.Current.TotalTicks} ticks = " +
                 $"{TicksToTime(_sessions.Current.TotalTicks)}");
-            Debug.WriteLine($"current time: {_sessions.Count} ses. : {TicksToTime(_sessions.TotalTicks)} | {GameTime}");
+            Logging.WriteLine($"current time: {_sessions.Count} ses. : {TicksToTime(_sessions.TotalTicks)} | {GameTime}");
         }
 
         void gameMemory_OnPlayerGainedControl(object sender, TimerActionArgs e)

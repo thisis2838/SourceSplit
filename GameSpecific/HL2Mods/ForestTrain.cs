@@ -1,8 +1,6 @@
 ﻿using LiveSplit.ComponentUtil;
-using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
-using System.IO;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
@@ -48,7 +46,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                 _playerLaggedMoveValue.Update(state.GameProcess);
                 if (_playerLaggedMoveValue.Current == 1 && _playerLaggedMoveValue.Old == 0)
                 {
-                    Debug.WriteLine("forest train start");
+                    Logging.WriteLine("forest train start");
                     actions.Start();
                 }
             }

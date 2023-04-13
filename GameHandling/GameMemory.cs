@@ -5,18 +5,14 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Threading;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using LiveSplit.ComponentUtil;
-using LiveSplit.SourceSplit.GameSpecific;
 using LiveSplit.SourceSplit.Utilities;
 using LiveSplit.SourceSplit.DemoHandling;
 using System.Collections.Generic;
-using System.ComponentModel;
 using LiveSplit.SourceSplit.ComponentHandling;
 using LiveSplit.SourceSplit.Utilities.Forms;
 using System.Management;
-using System.Diagnostics.Eventing.Reader;
 
 namespace LiveSplit.SourceSplit.GameHandling
 {
@@ -96,7 +92,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         ~GameMemory()
         {
             // sometimes this throws a dud cannot access disposed object exception
-            try { Debug.WriteLine("GameMemory finalizer"); }
+            try { Logging.WriteLine("GameMemory finalizer"); }
             catch { }
         }
 #endif
@@ -122,6 +118,8 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             _cancelSource.Cancel();
             _thread.Wait();
+
+            Logging.StopLogging();
         }
         void MemoryReadThread(CancellationTokenSource cts)
         {
@@ -137,7 +135,7 @@ namespace LiveSplit.SourceSplit.GameHandling
 
                 try
                 {
-                    Debug.WriteLine("Waiting for process");
+                    Logging.WriteLine("Waiting for process");
 
                     GameState state;
                     while (!this.TryGetGameProcess(out state))
@@ -155,7 +153,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     SendSetTimingSpecificsEvent(new TimingSpecifics());
                     SourceSplitComponent.Settings.GetUIRepresented().ForEach(x => x.Unlock());
 
-                    Debug.WriteLine($"Process exited");
+                    Logging.WriteLine($"Process exited");
 
                     if (cts.IsCancellationRequested)
                         goto ret;
@@ -163,7 +161,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 catch (ErrorDialogException) { Thread.Sleep(1000); }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine(ex.ToString());
+                    Logging.WriteLine(ex);
 #if DEBUG
 #else
                     if (!(ex is InvalidOperationException || ex is Win32Exception))
@@ -198,7 +196,7 @@ namespace LiveSplit.SourceSplit.GameHandling
 
                 if (!Directory.Exists(absoluteGameDir))
                 {
-                    Debug.WriteLine($"Bogus absolute game directory: {absoluteGameDir}");
+                    Logging.WriteLine($"Bogus absolute game directory: {absoluteGameDir}");
                     try
                     {
                         ManagementClass mngmtClass = new ManagementClass("Win32_Process");
@@ -266,7 +264,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                                         Directory.Exists(possible = Path.Combine(baseGameFolder, possible)))
                                     {
                                         absoluteGameDir = possible;
-                                        Debug.WriteLine($"Found absolute game directory through WMI: {possible}");
+                                        Logging.WriteLine($"Found absolute game directory through WMI: {possible}");
                                         goto success;
                                     }
 
@@ -278,11 +276,11 @@ namespace LiveSplit.SourceSplit.GameHandling
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine("Error while trying to retrieve absolute file path: " + ex.ToString());
+                        Logging.WriteLine("Error while trying to retrieve absolute file path: " + ex.ToString());
                     }
 
                     // don't return false as we can still function without absolute game directory.
-                    Debug.WriteLine("Couldn't retrieve absolute game directory!");
+                    Logging.WriteLine("Couldn't retrieve absolute game directory!");
                     success:;
                 }
 
@@ -313,7 +311,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         {
             bool error(string reason)
             {
-                Debug.WriteLine($"Couldn't get game process: {reason}");
+                Logging.WriteLine($"Couldn't get game process: {reason}");
                 return false;
             }
 
@@ -369,7 +367,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             bool scanForPtr(ref IntPtr ptr, SigScanTarget target, SignatureScanner scanner, string ptrName, string sigName = " ")
             {
                 bool found = (ptr = scanner.Scan(target)) != IntPtr.Zero;
-                Debug.WriteLine($"{ptrName} = {(found ? $"0x{ptr.ToString("X")}" : "NOT FOUND")} through sig {sigName}");
+                Logging.WriteLine($"{ptrName} = {(found ? $"0x{ptr.ToString("X")}" : "NOT FOUND")} through sig {sigName}");
                 return found;
             }
 
@@ -404,7 +402,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                         if (scanner.IsWithin(candidateNextPtr) && candidateNextPtr - candidateHostFrameCount <= 0x8)
                         {
                             _hostUpdateCountPtr = (IntPtr)candidateHostFrameCount;
-                            Debug.WriteLine($"host_runframe host_tickcount ptr is 0x{_hostUpdateCountPtr.ToString("X")}");
+                            Logging.WriteLine($"host_runframe host_tickcount ptr is 0x{_hostUpdateCountPtr.ToString("X")}");
                             goto foundTimeHooks;
                         }
                     }
@@ -417,11 +415,11 @@ namespace LiveSplit.SourceSplit.GameHandling
             _hostUpdateCount = new ValueWatcher<long>(state.GameProcess.ReadValue<int>(_hostUpdateCountPtr));
             #endregion
 
-            Debug.WriteLine("TryGetGameProcess took: " + sw.Elapsed);
+            Logging.WriteLine("TryGetGameProcess took: " + sw.Elapsed);
 
             _state = state;
             state.MainSupport?.OnGameAttached(_state, TimerActions);
-            Debug.WriteLine($"EntInfoSize = {state.GameEngine.EntInfoSize}");
+            Logging.WriteLine($"EntInfoSize = {state.GameEngine.EntInfoSize}");
 
             _settings.InvokeWithTimeout(10000, () =>
             {
@@ -434,7 +432,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         void HandleProcess(GameState state, CancellationTokenSource cts)
         {
             var game = state.GameProcess;
-            Debug.WriteLine("HandleProcess " + game.ProcessName);
+            Logging.WriteLine("HandleProcess " + game.ProcessName);
 
             this.InitGameState(state);
             _gotTickRate = false;
@@ -451,7 +449,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 {
                     forceExit = !Process.GetProcesses().Any(x => x.ProcessName == game.ProcessName);
                     if (forceExit && !game.HasExited)
-                        Debug.WriteLine("HasExited was wrong!!!!");
+                        Logging.WriteLine("HasExited was wrong!!!!");
                     Thread.Sleep(7500);
                 }
             }));
@@ -469,14 +467,14 @@ namespace LiveSplit.SourceSplit.GameHandling
                 int maxIterationTime = (int)(state.IntervalPerTick * 1000 - 2);
 
                 state.UpdateCount++;
-                TimedTraceListener.Instance.UpdateCount = state.UpdateCount;
+                Logging.UpdateCount = state.UpdateCount;
 
                 if (profiler.ElapsedMilliseconds >= maxIterationTime)
                 {
                     _timesOver++;
                     _timeOverSpent += (int)profiler.ElapsedMilliseconds - maxIterationTime;
-                    Debug.WriteLine($"**** PERFORAMCE WARNING: update took {profiler.ElapsedMilliseconds - maxIterationTime}ms too long");
-                    Debug.WriteLine($"**** exceeded limit: {_timesOver} times, totalling {_timeOverSpent}ms");
+                    Logging.WriteLine($"**** PERFORAMCE WARNING: update took {profiler.ElapsedMilliseconds - maxIterationTime}ms too long");
+                    Logging.WriteLine($"**** exceeded limit: {_timesOver} times, totalling {_timeOverSpent}ms");
                 }
 
                 Thread.Sleep(Math.Max(maxIterationTime - (int)profiler.ElapsedMilliseconds, 1));
@@ -496,7 +494,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         void InitGameState(GameState state)
         {
             state.Map.Current = (String.Empty);
-            Debug.WriteLine($"running game-specific code for: {state.GameDir} : {state.MainSupport}");
+            Logging.WriteLine($"running game-specific code for: {state.GameDir} : {state.MainSupport}");
             this.SendSetTimingSpecificsEvent(state.MainSupport.TimingSpecifics);
             this.SendGameAttachedEvent(state.MainSupport.GetType());
         }
@@ -548,12 +546,12 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             if (offset == -1)
             {
-                Debug.WriteLine($"Couldn't find {member} offset.");
+                Logging.WriteLine($"Couldn't find {member} offset.");
                 return false;
             }
             else
             {
-                Debug.WriteLine($"{member} offset is 0x{offset.ToString("X")}");
+                Logging.WriteLine($"{member} offset is 0x{offset.ToString("X")}");
                 return true;
             }
         }
@@ -589,25 +587,25 @@ namespace LiveSplit.SourceSplit.GameHandling
                         removedList += Enum.GetName(typeof(FL), flag) + " ";
                 }
                 if (addedList.Length > 0)
-                    Debug.WriteLine("player flags added: " + addedList);
+                    Logging.WriteLine("player flags added: " + addedList);
                 if (removedList.Length > 0)
-                    Debug.WriteLine("player flags removed: " + removedList);
+                    Logging.WriteLine("player flags removed: " + removedList);
             }
 
             if (state.PlayerViewEntityIndex.Current != state.PlayerViewEntityIndex.Old)
             {
-                Debug.WriteLine("player view entity changed: " + state.PlayerViewEntityIndex.Current);
+                Logging.WriteLine("player view entity changed: " + state.PlayerViewEntityIndex.Current);
             }
 
             if (state.PlayerParentEntityHandle.Current != state.PlayerParentEntityHandle.Old)
             {
-                Debug.WriteLine("player parent entity changed: " + state.PlayerParentEntityHandle.Current.ToString("X"));
+                Logging.WriteLine("player parent entity changed: " + state.PlayerParentEntityHandle.Current.ToString("X"));
             }
 
 #if false
             if (!state.PlayerPosition.Current.BitEquals(state.PlayerPosition.Old))
             {
-                Debug.WriteLine("player pos changed: " + state.PlayerParentEntityHandle.Current);
+                Logging.WriteLine("player pos changed: " + state.PlayerParentEntityHandle.Current);
             }
 #endif
         }

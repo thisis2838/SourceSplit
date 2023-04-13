@@ -5,15 +5,10 @@ using LiveSplit.ComponentUtil;
 using LiveSplit.SourceSplit.Utilities;
 using LiveSplit.SourceSplit.GameHandling;
 using System.IO;
-using System.Security.Cryptography;
 using LiveSplit.SourceSplit.ComponentHandling;
-using System.Drawing.Printing;
 using System.Linq;
-using System.CodeDom;
-using System.Threading.Tasks;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Runtime.InteropServices;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -150,7 +145,7 @@ For example:
                 if (strRef == IntPtr.Zero) goto skip;
 
                 _baseSolidFlagsOffset = collisionPropOffset + state.GameProcess.ReadValue<byte>(strRef);
-                Debug.WriteLine("Found CCollisionProperty::m_usSolidFlags offset = 0x" + _baseSolidFlagsOffset.ToString("X"));
+                Logging.WriteLine("Found CCollisionProperty::m_usSolidFlags offset = 0x" + _baseSolidFlagsOffset.ToString("X"));
 
                 skip:;
             }
@@ -173,7 +168,7 @@ For example:
                         if (!state.GameProcess.ReadString(proc.ReadPointer(ent + state.GameEngine.BaseEntityTargetNameOffset), 255, out string targetName)) goto skip;
                         if (!targetName.Contains("block_crazy_player")) goto skip;
 
-                        Debug.WriteLine($"Found potential blocking entity @ 0x{ent.ToString("X")}");
+                        Logging.WriteLine($"Found potential blocking entity @ 0x{ent.ToString("X")}");
 
                         List<string> names = new List<string>();
                         foreach (var close in engine.GetEntitiesByPos(engine.GetEntityPos(ent), 100))
@@ -181,7 +176,7 @@ For example:
                             var name = state.GameProcess.ReadString(proc.ReadPointer(close + state.GameEngine.BaseEntityTargetNameOffset), 255);
                             if (string.IsNullOrWhiteSpace(name)) continue;
 
-                            Debug.WriteLine("\t near: " + name);
+                            Logging.WriteLine("\t near: " + name);
                             names.Add(name);
                         }
 
@@ -225,7 +220,7 @@ For example:
 
                         skip_blocker_owner:
 
-                        Debug.WriteLine($"Blocker belongs to chamber {chamber}");
+                        Logging.WriteLine($"Blocker belongs to chamber {chamber}");
                         _elevatorBlockers.Add(new Blocker()
                         {
                             Chamber = chamber,
@@ -246,7 +241,7 @@ For example:
                         var parent = engine.GetEntityByIndex(engine.GetEntIndexFromHandle(proc.ReadValue<uint>(ent + engine.BaseEntityParentHandleOffset)));
                         if (parent == IntPtr.Zero) goto skip;
 
-                        Debug.WriteLine($"Found potential elevator @ 0x{ent.ToString("X")}, parent @ 0x{parent.ToString("X")}");
+                        Logging.WriteLine($"Found potential elevator @ 0x{ent.ToString("X")}, parent @ 0x{parent.ToString("X")}");
                         var w = new Elevator()
                         {
                             Speed = new MemoryWatcher<Vector3f>(parent + _baseVelocityOffset),
@@ -284,7 +279,7 @@ For example:
             {
                 actions.Start(-(53010 + 15));
                 OnceFlag = true;
-                Debug.WriteLine($"portal vault save start");
+                Logging.WriteLine($"portal vault save start");
                 return;
             }
         }
@@ -370,12 +365,12 @@ For example:
                             if (whitelist != "*" && 
                                 !whitelist.Split(',').Any(x => int.TryParse(x.ToString().Trim(), out int chamber) && blocker.Chamber == chamber))
                             {
-                                Debug.WriteLine($"Ignoring elevator split due to incorrect chamber (current: {blocker.Chamber}, target: {whitelist})");
+                                Logging.WriteLine($"Ignoring elevator split due to incorrect chamber (current: {blocker.Chamber}, target: {whitelist})");
                                 splitAlready = true;
                                 continue;
                             }
 
-                            Debug.WriteLine($"Elevator split (@ {pos})");
+                            Logging.WriteLine($"Elevator split (@ {pos})");
                             actions.Split();
                         }
                     }
@@ -390,7 +385,7 @@ For example:
 
                     if (_playerHP.Old > 0 && _playerHP.Current <= 0)
                     {
-                        Debug.WriteLine("Death% end");
+                        Logging.WriteLine("Death% end");
                         actions.Split();
                     }
                 }
@@ -407,7 +402,7 @@ For example:
                     _splitTime.Current = state.GameEngine.GetOutputFireTime("relay_portal_cancel_room1");
                     if (_splitTime.ChangedTo(0) && isInside)
                     {
-                        Debug.WriteLine("portal portal open start");
+                        Logging.WriteLine("portal portal open start");
                         OnceFlag = true;
                         actions.Start(-57045);
                     }
@@ -415,7 +410,7 @@ For example:
                 if (isInside && state.PlayerViewEntityIndex.ChangedTo(1))
                 {
                     OnceFlag = true;
-                    Debug.WriteLine("portal bed start");
+                    Logging.WriteLine("portal bed start");
                     actions.Start(); 
                     return;
                 }
@@ -425,7 +420,7 @@ For example:
                 _splitTime.Current = state.GameEngine.GetOutputFireTime("cable_detach_04");
                 if (_splitTime.ChangedFrom(0))
                 {
-                    Debug.WriteLine("portal delayed end");
+                    Logging.WriteLine("portal delayed end");
                     OnceFlag = true;
                     actions.End(-state.IntervalPerTick * 1000); // -1 for unknown reasons
                 }

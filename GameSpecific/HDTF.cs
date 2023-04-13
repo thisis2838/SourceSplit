@@ -1,8 +1,8 @@
 ﻿using LiveSplit.ComponentUtil;
 using System;
-using System.Diagnostics;
 using System.IO;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -66,7 +66,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 _playerLaggedMovementValue.Update(state.GameProcess);
 
                 _blockerIndex = state.GameEngine.GetEntIndexByName("blocker");
-                Debug.WriteLine("blocker entity index is " + _blockerIndex);
+                Logging.WriteLine("blocker entity index is " + _blockerIndex);
             }
         }
 
@@ -85,7 +85,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     (ifIntroNotDeleted && _isInCutscene.Current - _isInCutscene.Old == -1) ^ 
                     (!ifIntroNotDeleted && !_resetFlag && state.TickCount.Current <= 1 && state.RawTickCount.Current <= 150))
                 {
-                    Debug.WriteLine("hdtf start");
+                    Logging.WriteLine("hdtf start");
                     OnceFlag = true;
                     _resetFlag = true;
                     actions.Start(StartOffsetMilliseconds); return;
@@ -97,7 +97,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                 if (_playerLaggedMovementValue.Current == 1.0f && _playerLaggedMovementValue.Old == 0f)
                 {
-                    Debug.WriteLine("hdtf tutorial start");
+                    Logging.WriteLine("hdtf tutorial start");
                     actions.Start(StartOffsetMilliseconds); return;
                 }
 
@@ -106,7 +106,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     OnceFlag = true;
                     _blockerIndex = -1; 
-                    Debug.WriteLine("hdtf tutorial end");
+                    Logging.WriteLine("hdtf tutorial end");
                     _tutResetFlag = false;
                     actions.End(EndOffsetMilliseconds); return;
                 }
@@ -116,7 +116,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (_playerHP.Old > 0 && _playerHP.Current <= 0)
                 {
                     OnceFlag = true;
-                    Debug.WriteLine("hdtf end");
+                    Logging.WriteLine("hdtf end");
                     actions.End(EndOffsetMilliseconds); return;
                 }
             }

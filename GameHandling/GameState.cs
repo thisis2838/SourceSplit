@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Media;
-using System.Runtime.InteropServices;
 using LiveSplit.ComponentUtil;
-using LiveSplit.SourceSplit.GameSpecific;
 using LiveSplit.SourceSplit.Utilities;
 using System.Collections.Generic;
 
@@ -82,7 +79,7 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             float curRawTime = RawTickCount.Current * IntervalPerTick;
             float oldRawTime = RawTickCount.Old * IntervalPerTick;
-            //Debug.WriteLine($"{curRawTime} {oldRawTime} {splitTime} {epsilon}");
+            //Logging.WriteLine($"{curRawTime} {oldRawTime} {splitTime} {epsilon}");
 
             if (epsilon == 0f)
             {

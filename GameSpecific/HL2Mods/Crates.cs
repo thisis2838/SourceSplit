@@ -1,6 +1,6 @@
 ﻿using LiveSplit.ComponentUtil;
-using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
@@ -26,7 +26,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             {
                 _counterSkin = new MemoryWatcher<int>(state.GameEngine.GetEntityByName("EndWords") + _baseSkinOffset);
                 _camIndex = state.GameEngine.GetEntIndexByName("EndCamera");
-                //Debug.WriteLine("found end cam index at " + _camIndex);
+                //Logging.WriteLine("found end cam index at " + _camIndex);
             }
         }
 
@@ -42,7 +42,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                 if (_counterSkin.Current == 10 && state.PlayerViewEntityIndex.Current == _camIndex && state.PlayerViewEntityIndex.Old == 1)
                 {
                     OnceFlag = true;
-                    Debug.WriteLine("toomanycrates end");
+                    Logging.WriteLine("toomanycrates end");
                     actions.End(EndOffsetMilliseconds);
                 }
             }

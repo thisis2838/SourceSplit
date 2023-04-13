@@ -1,8 +1,4 @@
-﻿using System.Diagnostics;
-using LiveSplit.SourceSplit.GameHandling;
-using LiveSplit.SourceSplit.Utilities;
-
-namespace LiveSplit.SourceSplit.GameSpecific.BMSMods
+﻿namespace LiveSplit.SourceSplit.GameSpecific.BMSMods
 {
     class FurtherData : BMSBase
     {

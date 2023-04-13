@@ -1,10 +1,6 @@
-﻿using LiveSplit.ComponentUtil;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
 using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
-using LiveSplit.Server;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -38,7 +34,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     this.OnSessionStart(state, actions);
                     this.AdditionalGameSupport.ForEach(x => x.OnSessionStart(state, actions));
-                    Debug.WriteLine("synergy session start");
+                    Logging.WriteLine("synergy session start");
                 }    
             }
 

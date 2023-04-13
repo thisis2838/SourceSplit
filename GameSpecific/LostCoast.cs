@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Drawing.Printing;
-using System.Resources;
-using System.Windows.Forms.VisualStyles;
 using LiveSplit.ComponentUtil;
 using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
@@ -75,10 +71,10 @@ namespace LiveSplit.SourceSplit.GameSpecific
                         var ind = _activeWeaponIndex.Current & 0xfff;
                         var ptr = state.GameEngine.GetEntityByIndex(ind);
                         var type = state.GameProcess.ReadValue<int>(ptr + _weaponAmmoTypeOffset);
-                        Debug.WriteLine
+                        Logging.WriteLine
                         (
                             $"Index is {ind}, " +
-                            $"ptr is {ptr.ToInt32():X}, ",
+                            $"ptr is {ptr.ToInt32():X}, " +
                             $"ammo type is {type}, "
                         );
 
@@ -110,7 +106,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     if (_rpgFireCount.Current - _rpgFireCount.Old == 1)
                     {
                         _onceRpgFire = true;
-                        Debug.WriteLine($"lostcoast extra - rpg firing");
+                        Logging.WriteLine($"lostcoast extra - rpg firing");
                         actions.Split();
                     }
                 }
@@ -128,7 +124,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (reachable && _extraSplits.Boolean && !_onceVelocity && _onceRpgFire)
                 {
                     _onceVelocity = true;
-                    Debug.WriteLine($"lostcoast extra - up to speed");
+                    Logging.WriteLine($"lostcoast extra - up to speed");
                     actions.Split();
                 }
             }
@@ -139,7 +135,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _splitTime.Current = state.GameEngine.GetOutputFireTime("blackout", "Kill", "");
             if (_splitTime.ChangedFrom(0))
             {
-                Debug.WriteLine("lostcoast start");
+                Logging.WriteLine("lostcoast start");
                 // no once flag because the end wont trigger otherwise
                 actions.Start(StartOffsetMilliseconds); 
             }
@@ -147,7 +143,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _splitTime2.Current = state.GameEngine.GetOutputFireTime("csystem_sound_start", "PlaySound", "");
             if (_splitTime2.ChangedFrom(0))
             {
-                Debug.WriteLine("lostcoast end");
+                Logging.WriteLine("lostcoast end");
                 OnceFlag = true;
                 actions.End(EndOffsetMilliseconds);
             }

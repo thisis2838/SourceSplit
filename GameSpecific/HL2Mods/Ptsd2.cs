@@ -1,8 +1,7 @@
 ﻿using LiveSplit.ComponentUtil;
-using System;
 using System.Diagnostics;
-using System.Linq;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
@@ -32,7 +31,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             target.OnFound = (proc, scanner, ptr) => 
             {
                 ptr = proc.ReadPointer(ptr) + 0xC;
-                Debug.WriteLine("bink is video playing pointer found at 0x" + ptr.ToString("X"));
+                Logging.WriteLine("bink is video playing pointer found at 0x" + ptr.ToString("X"));
                 return ptr;
             };
 
@@ -48,7 +47,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 
                 if (_videoPlaying.Old == 0 && _videoPlaying.Current == 1)
                 {
-                    Debug.WriteLine("ptsd end");
+                    Logging.WriteLine("ptsd end");
                     OnceFlag = true;
                     state.QueueOnNextSessionEnd = () => actions.End(EndOffsetMilliseconds);
                 }

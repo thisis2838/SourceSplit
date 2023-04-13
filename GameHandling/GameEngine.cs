@@ -1,19 +1,9 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using System.Threading;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using LiveSplit.ComponentUtil;
-using LiveSplit.SourceSplit.GameSpecific;
 using LiveSplit.SourceSplit.Utilities;
 using System.Collections.Generic;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Reflection;
-using System.ComponentModel;
 using static LiveSplit.SourceSplit.GameHandling.GameMemory;
 
 namespace LiveSplit.SourceSplit.GameHandling
@@ -124,7 +114,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         {
             var scanner = new SignatureScanner(GameProcess, ServerModule.BaseAddress, ServerModule.ModuleMemorySize);
             if (!scanner.Scan(_eventQueueTarget, out EventQueuePtr))
-                Debug.WriteLine("Event Queue ptr not found!");
+                Logging.WriteLine("Event Queue ptr not found!");
 
             var clientScanner = new SignatureScanner(GameProcess, ClientModule.BaseAddress, ClientModule.ModuleMemorySize);
             if (!clientScanner.Scan(_fadeListTarget, out FadeListPtr))
@@ -147,7 +137,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 target = new SigScanTarget(2, "8B 0D ?? ?? ?? ??"); // push m_FadeList
                 target.OnFound = (proc, scanner, ptr) => !proc.ReadPointer(proc.ReadPointer(ptr), out ptr) ? IntPtr.Zero : ptr;
                 FadeListPtr = clientScanner.Scan(target);
-                Debug.WriteLine($"Fade list ptr is 0x{FadeListPtr.ToString("X")}");
+                Logging.WriteLine($"Fade list ptr is 0x{FadeListPtr.ToString("X")}");
             }
         }
         public virtual void GetOtherOffsets() 

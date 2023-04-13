@@ -1,8 +1,5 @@
-﻿using LiveSplit.ComponentUtil;
-using System;
-using System.Diagnostics;
-using System.Linq;
-using LiveSplit.SourceSplit.GameHandling;
+﻿using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -28,7 +25,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             if (state.CompareToInternalTimer(splitTime, 0.05f))
             {
                 OnceFlag = true;
-                Debug.WriteLine("infra " + ending + " ending");
+                Logging.WriteLine("infra " + ending + " ending");
                 actions.Split();
                 return true;
             }

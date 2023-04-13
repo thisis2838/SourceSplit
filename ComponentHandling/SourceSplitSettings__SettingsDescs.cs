@@ -1,17 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-using System.Windows.Forms;
-using LiveSplit.SourceSplit.Utilities;
-using System.Xml;
-using System.Drawing;
-using static LiveSplit.SourceSplit.ComponentHandling.SourceSplitSettingsHelp;
-using LiveSplit.SourceSplit.ComponentHandling;
-using System.Security;
+﻿using System.Windows.Forms;
 
 namespace LiveSplit.SourceSplit.ComponentHandling
 {

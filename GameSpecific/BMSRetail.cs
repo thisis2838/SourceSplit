@@ -1,11 +1,7 @@
 ﻿using LiveSplit.ComponentUtil;
 using System;
-using System.Diagnostics;
-using System.Speech.Synthesis;
 using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
-using WinUtils = LiveSplit.SourceSplit.Utilities.WinUtils;
-using System.Threading;
 using LiveSplit.SourceSplit.ComponentHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific
@@ -113,7 +109,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             else if (this.IsLastMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
                 IntPtr nihiPtr = state.GameEngine.GetEntityByName("nihilanth");
-                Debug.WriteLine("Nihilanth pointer = 0x" + nihiPtr.ToString("X"));
+                Logging.WriteLine("Nihilanth pointer = 0x" + nihiPtr.ToString("X"));
 
                 _nihiHP = new MemoryWatcher<int>(nihiPtr + _baseEntityHealthOffset);
                 _nihiPhaseCounter = new MemoryWatcher<int>(nihiPtr + _nihiPhaseCounterOffset);
@@ -125,7 +121,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         public void DefaultEnd(string endingname, TimerActions actions)
         {
             OnceFlag = true;
-            Debug.WriteLine(endingname);
+            Logging.WriteLine(endingname);
             actions.End();
         }
 
@@ -149,7 +145,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
                     if (_nihiPhaseCounter.Current - _nihiPhaseCounter.Old == 1 && _nihiPhaseCounter.Old != 0)
                     {
-                        Debug.WriteLine("black mesa nihilanth phase " + _nihiPhaseCounter.Old + " end");
+                        Logging.WriteLine("black mesa nihilanth phase " + _nihiPhaseCounter.Old + " end");
                         actions.Split();
                     }
                 }
@@ -164,7 +160,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.PlayerViewEntityIndex.Current == 1 && state.PlayerViewEntityIndex.Old == _xenCamIndex)
                 {
                     OnceFlag = true;
-                    Debug.WriteLine("bms xen start");
+                    Logging.WriteLine("bms xen start");
 
                     if (_xenStartCommand.Boolean && _getGlobalNameFuncPtr != IntPtr.Zero)
                     {

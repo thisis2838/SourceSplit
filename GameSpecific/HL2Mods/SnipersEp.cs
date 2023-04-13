@@ -1,6 +1,4 @@
 ﻿using LiveSplit.ComponentUtil;
-using System.Diagnostics;
-using System.Linq;
 using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods

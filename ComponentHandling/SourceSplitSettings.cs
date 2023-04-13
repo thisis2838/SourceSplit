@@ -8,11 +8,7 @@ using System.Threading;
 using System.Windows.Forms;
 using LiveSplit.SourceSplit.Utilities;
 using System.Xml;
-using static LiveSplit.SourceSplit.Utilities.XMLUtils;
 using System.Drawing;
-using LiveSplit.SourceSplit.ComponentHandling;
-using static LiveSplit.SourceSplit.ComponentHandling.SourceSplitComponent;
-using System.Drawing.Imaging;
 using System.IO;
 using LiveSplit.SourceSplit.Utilities.Forms;
 using System.Threading.Tasks;
@@ -158,7 +154,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             if (this.IsDisposed)
             {
                 Application.RemoveMessageFilter(this);
-                //Debug.WriteLine("Tried to filter a message when the main control has been disposed.");
+                //Logging.WriteLine("Tried to filter a message when the main control has been disposed.");
                 return false;
             }
 
@@ -192,7 +188,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                         }
                         catch (Exception ex)
                         {
-                            Debug.WriteLine(ex);
+                            Logging.WriteLine(ex);
                             return;
                         }
                     }
@@ -333,17 +329,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                 {
                     try
                     {
-                        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sourcesplit_log_temp.txt");
-                        lock (TimedTraceListener.Instance.LogWriteLock)
-                        {
-                            File.Copy
-                            (
-                                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sourcesplit_log.txt"),
-                                path,
-                                true
-                            );
-                        }
-
+                        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sourcesplit_log.txt");
                         Process.Start("explorer.exe", $"/select, \"{path}\"");
                     }
                     catch (Exception ex)

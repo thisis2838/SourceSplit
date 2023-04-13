@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Media;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -130,7 +129,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     if (scanner.IsWithin(val))
                     {
                         _cmdBufferPtr = (IntPtr)val;
-                        Debug.WriteLine("Command buffer found at 0x" + _cmdBufferPtr.ToString("X"));
+                        Logging.WriteLine("Command buffer found at 0x" + _cmdBufferPtr.ToString("X"));
                         break;
                     }
                 }
@@ -153,7 +152,7 @@ There are {Commands.Count()} command(s) available.
 
             fail:
             _cmdBufferPtr = IntPtr.Zero;
-            Debug.WriteLine("Failed to initialize custom command handler!");
+            Logging.WriteLine("Failed to initialize custom command handler!");
             return;
         }
 
@@ -176,12 +175,12 @@ There are {Commands.Count()} command(s) available.
             } 
             catch (Exception ex)
             {
-                Debug.WriteLine($"Couldn't find ConMsg pointer: {ex}");
+                Logging.WriteLine($"Couldn't find ConMsg pointer: {ex}");
                 _conMsgPtr = IntPtr.Zero;   
             }
 
             if (_conMsgPtr != IntPtr.Zero) 
-                Debug.WriteLine($"ConMsg found at {_conMsgPtr.ToString("X")}");
+                Logging.WriteLine($"ConMsg found at {_conMsgPtr.ToString("X")}");
         }
 
         public void Update(GameState state)
@@ -230,7 +229,7 @@ There are {Commands.Count()} command(s) available.
             }
             catch (ArgumentNullException ex)
             {
-                Trace.WriteLine(ex);
+                Logging.WriteLine(ex);
             }
 
         }

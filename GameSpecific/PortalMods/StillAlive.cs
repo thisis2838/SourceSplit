@@ -1,6 +1,6 @@
 ﻿using LiveSplit.ComponentUtil;
-using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
 {
@@ -55,7 +55,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
             if (state.CompareToInternalTimer(_splitTime, GameState.IO_EPSILON, false, true))
             {
                 _splitTime = 0f;
-                Debug.WriteLine("portal still alive " + (!this.IsLastMap ? "split" : "end"));
+                Logging.WriteLine("portal still alive " + (!this.IsLastMap ? "split" : "end"));
                 OnceFlag = true;
 
                 state.QueueOnNextSessionEnd = this.IsLastMap ?

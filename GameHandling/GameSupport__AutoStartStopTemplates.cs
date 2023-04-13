@@ -2,15 +2,11 @@
 using LiveSplit.SourceSplit.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Threading.Tasks;
-using LiveSplit.TimeFormatters;
-using System.Security.AccessControl;
-using System.Drawing.Printing;
 
 namespace LiveSplit.SourceSplit.GameHandling
 {
@@ -60,11 +56,11 @@ namespace LiveSplit.SourceSplit.GameHandling
                 {
                     case ActionType.AutoStart:
                         timer.Start(Parent.StartOffsetMilliseconds);
-                        Debug.WriteLine($"{Parent.GetType().Name} start (triggered by {this.GetType().Name})");
+                        Logging.WriteLine($"{Parent.GetType().Name} start (triggered by {this.GetType().Name})");
                         break;
                     case ActionType.AutoEnd:
                         timer.End(Parent.EndOffsetMilliseconds);
-                        Debug.WriteLine($"{Parent.GetType().Name} end (triggered by {this.GetType().Name})");
+                        Logging.WriteLine($"{Parent.GetType().Name} end (triggered by {this.GetType().Name})");
                         break;
                 }
             }
@@ -496,7 +492,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     lock (_lockCurIOs)
                     {
                         _currentIOs = targetIOs;
-                        Debug.WriteLine
+                        Logging.WriteLine
                         (
                             $"Disconnect commands for {Path.GetFileNameWithoutExtension(mapPath)}:\n" + 
                             string.Join("", targetIOs.Select(x => "\t" + x.ToString() + "\n")).Trim('\n')

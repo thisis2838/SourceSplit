@@ -1,6 +1,6 @@
 ﻿using LiveSplit.ComponentUtil;
-using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific.BMSMods
 {
@@ -56,7 +56,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.BMSMods
                     && _hcStartDoorPos.Current.Distance(_hcStartDoorTargPos) <= 0.05f)
                 {
                     OnceFlag = true;
-                    Debug.WriteLine("bms hc mod start");
+                    Logging.WriteLine("bms hc mod start");
                     actions.Start(StartOffsetMilliseconds);
                 }
             }
@@ -68,7 +68,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.BMSMods
                     (_hcEndSpriteFlags.Current & 0x20) != 0)
                 {
                     OnceFlag = true;
-                    Debug.WriteLine("bms hc mod end");
+                    Logging.WriteLine("bms hc mod end");
                     actions.End(EndOffsetMilliseconds);
                 }
             }

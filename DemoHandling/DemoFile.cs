@@ -1,14 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 using static System.Text.Encoding;
-using static System.Math;
-using static System.BitConverter;
-using static System.Globalization.CultureInfo;
-using System.Windows.Forms;
 using System.Text.RegularExpressions;
 
 namespace LiveSplit.SourceSplit.DemoHandling

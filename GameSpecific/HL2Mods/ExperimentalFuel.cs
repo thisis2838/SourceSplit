@@ -1,7 +1,7 @@
 ﻿using LiveSplit.ComponentUtil;
 using System;
-using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
@@ -50,7 +50,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                     && state.PlayerPosition.Old.DistanceXY(_startPos) < 2
                     && newBrush == IntPtr.Zero && !_resetFlag)
                 {
-                    Debug.WriteLine("exp fuel start");
+                    Logging.WriteLine("exp fuel start");
                     _resetFlag = true;
                     actions.Start(StartOffsetMilliseconds); return;
                 }

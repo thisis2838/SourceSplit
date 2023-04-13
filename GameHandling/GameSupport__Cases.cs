@@ -1,14 +1,9 @@
 ﻿using LiveSplit.SourceSplit.Utilities;
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using LiveSplit.SourceSplit.GameSpecific;
-using LiveSplit.SourceSplit.GameSpecific.BMSMods;
 using LiveSplit.SourceSplit.GameSpecific.HL2Mods;
 using LiveSplit.SourceSplit.GameSpecific.PortalMods;
-using LiveSplit.SourceSplit.ComponentHandling;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.IO;
 
 namespace LiveSplit.SourceSplit.GameHandling
@@ -297,7 +292,7 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             if (File.Exists(Path.Combine(state.AbsoluteGameDir, "maplab.fgd")))
             {
-                Debug.WriteLine("maplab fgd file found");
+                Logging.WriteLine("maplab fgd file found");
                 return new RTSLPack();
             }
 
@@ -311,7 +306,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 };
                 if (targets.Any(x => gameinfo.ToLower().Contains(x)))
                 {
-                    Debug.WriteLine("gameinfo.txt contains strings related to RTSL map challeneges");
+                    Logging.WriteLine("gameinfo.txt contains strings related to RTSL map challeneges");
                     return new RTSLPack();
                 }
             }

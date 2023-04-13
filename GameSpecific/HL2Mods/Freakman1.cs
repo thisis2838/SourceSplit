@@ -1,8 +1,4 @@
-﻿using LiveSplit.ComponentUtil;
-using System;
-using System.Diagnostics;
-using LiveSplit.SourceSplit.GameHandling;
-using static System.Windows.Forms.AxHost;
+﻿using LiveSplit.SourceSplit.GameHandling;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {

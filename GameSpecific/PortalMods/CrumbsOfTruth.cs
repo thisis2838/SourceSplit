@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using LiveSplit.ComponentUtil;
-using LiveSplit.SourceSplit.Utilities;
+﻿using LiveSplit.SourceSplit.Utilities;
 using LiveSplit.SourceSplit.GameHandling;
 using System.IO;
-using System.Security.Cryptography;
 
 namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
 {
@@ -28,7 +23,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
             if (md5 == "c6c02f3fd37234f67115c67f3416a0c4")
             {
                 actions.Start(0);
-                Debug.WriteLine($"portal cot vault save start");
+                Logging.WriteLine($"portal cot vault save start");
                 return;
             }
         }

@@ -1,13 +1,10 @@
 ﻿using LiveSplit.ComponentUtil;
-using LiveSplit.SourceSplit.GameSpecific;
 using LiveSplit.SourceSplit.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
-using System.Security.Policy;
 
 namespace LiveSplit.SourceSplit.GameHandling
 {
@@ -172,7 +169,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 if (n.CompareWildcard(nameCond))
                 {
 #if DEBUG
-                    Debug.WriteLine($"found entity \"{n}\" index : {ent.Index}");
+                    Logging.WriteLine($"found entity \"{n}\" index : {ent.Index}");
 #endif
                     yield return ent.Index;
                 }
@@ -213,7 +210,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     if (entPos.BitEquals(pos))
                     {
 #if DEBUG
-                        Debug.WriteLine($"found entity with pos = {pos} @ {i}");
+                        Logging.WriteLine($"found entity with pos = {pos} @ {i}");
 #endif
                         yield return i;
                     }
@@ -223,7 +220,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     if (xy && entPos.DistanceXY(pos) <= d)
                     {
 #if DEBUG
-                        Debug.WriteLine($"found entity with pos xy dist <= {d} from {pos} @ {i}");
+                        Logging.WriteLine($"found entity with pos xy dist <= {d} from {pos} @ {i}");
 #endif
                         yield return i;
 
@@ -231,7 +228,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     else if (entPos.Distance(pos) <= d)
                     {
 #if DEBUG
-                        Debug.WriteLine($"found entity with pos dist <= {d} from {pos} @ {i}");
+                        Logging.WriteLine($"found entity with pos dist <= {d} from {pos} @ {i}");
 #endif
                         yield return i;
 
@@ -295,7 +292,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 if (n.CompareWildcard(nameCond))
                 {
 #if DEBUG
-                    Debug.WriteLine($"found entity \"{n}\" ptr : {ent.ToString("X")}");
+                    Logging.WriteLine($"found entity \"{n}\" ptr : {ent.ToString("X")}");
 #endif
                     yield return ent;
                 }
@@ -335,7 +332,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     if (entPos.BitEquals(pos))
                     {
 #if DEBUG
-                        Debug.WriteLine($"found entity with pos = {pos} @ {ent.ToString("X")}");
+                        Logging.WriteLine($"found entity with pos = {pos} @ {ent.ToString("X")}");
 #endif
                         yield return ent;
                     }
@@ -345,7 +342,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     if (xy && entPos.DistanceXY(pos) <= d)
                     {
 #if DEBUG
-                        //Debug.WriteLine($"found entity with pos xy dist <= {d} from {pos} @ {ent.ToString("X")}");
+                        //Logging.WriteLine($"found entity with pos xy dist <= {d} from {pos} @ {ent.ToString("X")}");
 #endif
                         yield return ent;
 
@@ -353,7 +350,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                     else if (entPos.Distance(pos) <= d)
                     {
 #if DEBUG
-                        //Debug.WriteLine($"found entity with pos dist <= {d} from {pos} @ {ent.ToString("X")}");
+                        //Logging.WriteLine($"found entity with pos dist <= {d} from {pos} @ {ent.ToString("X")}");
 #endif
                         yield return ent;
 
@@ -496,7 +493,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             end:
 
 #if false
-            Debug.WriteLine($"found fade with speed {speed} end time : {ret}");
+            Logging.WriteLine($"found fade with speed {speed} end time : {ret}");
 #endif
             return ret;
         }
@@ -537,7 +534,7 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             end:
 #if false
-            Debug.WriteLine($"found fade with speed {speed} and color {r}, {g}, {b} end time : {ret}");
+            Logging.WriteLine($"found fade with speed {speed} and color {r}, {g}, {b} end time : {ret}");
 #endif
             return ret;
         }
@@ -622,7 +619,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             }))
             {
 #if false
-                Debug.WriteLine($"found output with target name \"{targetName}\" command \"{command}\" param \"{param}\" fire time : {ret}");
+                Logging.WriteLine($"found output with target name \"{targetName}\" command \"{command}\" param \"{param}\" fire time : {ret}");
 #endif
                 return ret;
             }
@@ -635,7 +632,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 sw.Stop();
                 if (sw.ElapsedMilliseconds > 5)
                 {
-                    Debug.WriteLine($"Last output search took too long : {sw.ElapsedMilliseconds}ms, {total} outputs found");
+                    Logging.WriteLine($"Last output search took too long : {sw.ElapsedMilliseconds}ms, {total} outputs found");
                 }
             }
 #endif

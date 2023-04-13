@@ -1,21 +1,7 @@
-﻿using System.Diagnostics;
-using LiveSplit.Model;
-using LiveSplit.Options;
-using LiveSplit.TimeFormatters;
+﻿using LiveSplit.Model;
 using LiveSplit.UI.Components;
-using LiveSplit.UI;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Xml;
-using System.Windows.Forms;
-using LiveSplit.SourceSplit.GameSpecific;
-using static LiveSplit.SourceSplit.GameHandling.GameMemory;
-using LiveSplit.SourceSplit.GameHandling;
-using System.Reflection;
 using LiveSplit.SourceSplit.Utilities;
-using LiveSplit.SourceSplit.ComponentHandling;
 
 namespace LiveSplit.SourceSplit.ComponentHandling
 {
@@ -66,7 +52,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
         void state_OnSplit(object sender, EventArgs e)
         {
-            Debug.WriteLine("split at time " + this.GameTime);
+            Logging.WriteLine("split at time " + this.GameTime);
 
             if (_splitOperations.HasJustAutoSplit)
                 _splitOperations.HasJustAutoSplit = false;

@@ -1,8 +1,6 @@
 ﻿using LiveSplit.ComponentUtil;
 using System;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
 
@@ -87,7 +85,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             ptr = scanner2.Scan(target);
 
             _nihiDeadOffset = state.GameProcess.ReadValue<int>(ptr);
-            Debug.WriteLine("nihi dead bool offset is 0x" + _nihiDeadOffset.ToString("x"));
+            Logging.WriteLine("nihi dead bool offset is 0x" + _nihiDeadOffset.ToString("x"));
         }
 
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
@@ -112,7 +110,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (!_nihiDead.Old && _nihiDead.Current)
                 {
                     OnceFlag = true;
-                    Debug.WriteLine("hls end");
+                    Logging.WriteLine("hls end");
                     actions.End();
                 }
             }

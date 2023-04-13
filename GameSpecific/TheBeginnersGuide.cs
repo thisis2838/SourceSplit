@@ -1,6 +1,4 @@
 ﻿using LiveSplit.ComponentUtil;
-using System;
-using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
 using System.Collections.Generic;
@@ -124,7 +122,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     _points[map].ForEach(x => x.Update(state));
                     if (_points[map].FirstOrDefault(x => x.CheckSplit(state)) is var done && done != null)
                     {
-                        Debug.WriteLine($"split on extra split: {done.Description}");
+                        Logging.WriteLine($"split on extra split: {done.Description}");
                         actions.Split();
                     }
                 }
@@ -137,7 +135,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (_playerMoveSpeed.Old != 0 && _playerMoveSpeed.Current == 0)
                 {
                     OnceFlag = true;
-                    Debug.WriteLine("tbg end");
+                    Logging.WriteLine("tbg end");
                     actions.End(EndOffsetMilliseconds);
                 }
             }

@@ -1,12 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using System.Windows.Forms;
-using LiveSplit.SourceSplit;
 using LiveSplit.UI.Components;
 using System;
 using LiveSplit.Model;
-using System.Linq;
 using LiveSplit.SourceSplit.ComponentHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 [assembly: ComponentFactory(typeof(SourceSplitFactory))]
 
@@ -43,7 +42,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                         "Splits Editor";
 
                     MessageBox.Show(msg, $"SourceSplit Warning | {source}", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    Debug.WriteLine("unload splits instance");
+                    Logging.WriteLine("unload splits instance");
                     state.Run.AutoSplitter.Component?.Dispose();
                     state.Run.AutoSplitter.Deactivate();
                     state.Settings.ActiveAutoSplitters.Remove(state.Run.GameName);
@@ -74,7 +73,9 @@ namespace LiveSplit.SourceSplit.ComponentHandling
                 throw new Exception($">:( )\n(Component already loaded in the {(_instance.IsLayoutComponent ? "Layout Editor" : "Splits Editor")}");
 */
             
-            SourceSplit.Utilities.SourceSplitUtils.ActiveTime.Restart();
+            SourceSplitUtils.ActiveTime.Restart();
+            Logging.StartLogging();
+
             return (_instance = new SourceSplitComponent(state, createAsLayoutComponent));
         }
 

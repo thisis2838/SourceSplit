@@ -1,5 +1,5 @@
-﻿using System.Diagnostics;
-using LiveSplit.SourceSplit.GameHandling;
+﻿using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -27,7 +27,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             if (this.IsLastMap)
             {
                 _finalCamIndex = state.GameEngine.GetEntIndexByName("cam02");
-                //Debug.WriteLine("found final camera's entity index at " + _finalCamIndex);
+                //Logging.WriteLine("found final camera's entity index at " + _finalCamIndex);
             }
 
             _startFlag = false;
@@ -63,7 +63,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 {
                     // can't have onceflag here as it'd negate the splitting code on this map
                     _startFlag = true;
-                    Debug.WriteLine("hl2 survivor start");
+                    Logging.WriteLine("hl2 survivor start");
                     actions.Start(StartOffsetMilliseconds); return;
                 }
             }
@@ -72,7 +72,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 if (state.PlayerViewEntityIndex.Old == 1 && state.PlayerViewEntityIndex.Current == _finalCamIndex)
                 {
                     OnceFlag = true;
-                    Debug.WriteLine("hl2 survivor end");
+                    Logging.WriteLine("hl2 survivor end");
                     actions.End(EndOffsetMilliseconds); return;
                 }
             }

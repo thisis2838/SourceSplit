@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
@@ -23,7 +23,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
             if (IsLastMap)
             {
                 _trigIndex = state.GameEngine.GetEntIndexByName("triggerEndSequence");
-                //Debug.WriteLine("trigger index is " + _trigIndex);
+                //Logging.WriteLine("trigger index is " + _trigIndex);
             }
         }
 
@@ -39,7 +39,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                 if (newTrig == IntPtr.Zero)
                 {
                     OnceFlag = true;
-                    Debug.WriteLine("dearesther end");
+                    Logging.WriteLine("dearesther end");
                     actions.End(0.1f * 1000f);
                 }
             }

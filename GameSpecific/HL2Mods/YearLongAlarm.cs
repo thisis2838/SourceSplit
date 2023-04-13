@@ -1,8 +1,7 @@
 ﻿using LiveSplit.ComponentUtil;
 using System;
-using System.Diagnostics;
-using System.Linq;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
 {
@@ -50,7 +49,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                     else 
                         _gunshipHP[i] = -1;
 
-                    Debug.WriteLine(_gunshipName[i] + " index is " + _gunshipIndex[i]);
+                    Logging.WriteLine(_gunshipName[i] + " index is " + _gunshipIndex[i]);
                 }
 
             }
@@ -87,8 +86,8 @@ namespace LiveSplit.SourceSplit.GameSpecific.HL2Mods
                         // now compare
                         if (_gunshipOldHP[i] > 0 && _gunshipHP[i] <= 0)
                         {
-                            Debug.WriteLine("year long alarm end");
-                            Debug.WriteLine(_gunshipName[i] + " died at hp " + _gunshipHP[i] + " and old hp " + _gunshipOldHP[i]);
+                            Logging.WriteLine("year long alarm end");
+                            Logging.WriteLine(_gunshipName[i] + " died at hp " + _gunshipHP[i] + " and old hp " + _gunshipOldHP[i]);
                             OnceFlag = true;
                             actions.End(EndOffsetMilliseconds); return;
                         }

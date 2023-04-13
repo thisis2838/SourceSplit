@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Linq;
 using LiveSplit.ComponentUtil;
 using LiveSplit.SourceSplit.GameHandling;
+using LiveSplit.SourceSplit.Utilities;
 
 namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
 {
@@ -45,7 +44,7 @@ namespace LiveSplit.SourceSplit.GameSpecific.PortalMods
                 if (!_crosshairSuppressed.Old && _crosshairSuppressed.Current)
                 {
                     OnceFlag = true;
-                    Debug.WriteLine("porto crosshair detected");
+                    Logging.WriteLine("porto crosshair detected");
                     actions.End(EndOffsetMilliseconds);
                 }
             }

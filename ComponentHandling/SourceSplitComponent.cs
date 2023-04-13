@@ -1,21 +1,15 @@
-﻿using System.Diagnostics;
-using LiveSplit.Model;
+﻿using LiveSplit.Model;
 using LiveSplit.Options;
-using LiveSplit.TimeFormatters;
 using LiveSplit.UI.Components;
 using LiveSplit.UI;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Xml;
 using System.Windows.Forms;
-using LiveSplit.SourceSplit.GameSpecific;
-using static LiveSplit.SourceSplit.GameHandling.GameMemory;
 using LiveSplit.SourceSplit.GameHandling;
-using System.Reflection;
 using LiveSplit.SourceSplit.Utilities;
-using LiveSplit.SourceSplit.ComponentHandling;
+using System.Reflection;
 using static LiveSplit.SourceSplit.Utilities.XMLUtils;
 using LiveSplit.SourceSplit.ComponentHandling.Settings;
 
@@ -87,14 +81,6 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
         public SourceSplitComponent(LiveSplitState state, bool isLayoutComponent)
         {
-#if DEBUG
-            // make Debug.WriteLine prepend update count and tick count
-            Debug.Listeners.Clear();
-            Debug.Listeners.Add(TimedTraceListener.Instance);
-            Trace.Listeners.Clear();
-            Trace.Listeners.Add(TimedTraceListener.Instance);
-#endif
-
             SettingControl = new SourceSplitSettings(isLayoutComponent);
             _sessions = new SessionList(SettingControl.SessionsForm);
 
@@ -118,7 +104,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 #if DEBUG
         ~SourceSplitComponent()
         {
-            try { Debug.WriteLine("SourceSplitComponent finalizer"); }
+            try { Logging.WriteLine("SourceSplitComponent finalizer"); }
             catch { }
         }
 #endif
@@ -160,7 +146,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             _lastUpdate = SourceSplitUtils.ActiveTime.Elapsed;
 
             state.SetGameTime(this.GameTime);
-            //Debug.WriteLine(this.GameTime);
+            //Logging.WriteLine(this.GameTime);
 
             // hack to prevent flicker, doesn't actually pause anything
             state.IsGameTimePaused = true;
@@ -174,7 +160,7 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             if (!Settings.AutoSplitEnabled.Value)
                 return false;
 
-            Debug.WriteLine("AutoSplit " + map);
+            Logging.WriteLine("AutoSplit " + map);
             map = map.ToLower();
 
             if (Settings.UseSplitInterval.Value)

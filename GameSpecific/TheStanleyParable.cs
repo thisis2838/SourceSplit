@@ -1,8 +1,5 @@
 ﻿using LiveSplit.ComponentUtil;
 using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Text;
 using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
@@ -134,7 +131,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         {
             EndOffsetMilliseconds = endoffset * (1f / 60f) * 1000f;
             OnceFlag = true;
-            Debug.WriteLine(endingname + " ending");
+            Logging.WriteLine(endingname + " ending");
 
             if (EndOffsetMilliseconds == 0) actions.End(endoffset);
             else actions.Split(endoffset);
@@ -210,7 +207,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                     return IntPtr.Zero;
                 
                 proc.ReadPointer(ptrPtr, out IntPtr ret);
-                Debug.WriteLine("CVEngineServer::ClientCommand szOut ptr is 0x" + ret.ToString("X"));
+                Logging.WriteLine("CVEngineServer::ClientCommand szOut ptr is 0x" + ret.ToString("X"));
                 return ret;
             };
 
@@ -331,7 +328,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                             if ((hasPlayerJustLeftStartPoint || hasPlayerMovedView) && isViewEntityCorrect)
                             {
                                 _resetFlagDemo = true;
-                                Debug.WriteLine("mod start");
+                                Logging.WriteLine("mod start");
                                 actions.Start(StartOffsetMilliseconds); return;
                             }
                         }
@@ -401,7 +398,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                             if ((hasPlayerJustLeftStartPoint || hasPlayerMovedView || isViewAngleChangedEarly) && isPlayerViewEntityCorrect)
                             {
                                 _resetFlagDemo = true;
-                                Debug.WriteLine("stanley demo start");
+                                Logging.WriteLine("stanley demo start");
                                 actions.Start(StartOffsetMilliseconds); return;
                             }
                         }
@@ -435,7 +432,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                                 if ((wasPlayerInStartPoint && (isPlayerOutsideStartPoint || hasDoorAngleChanged)) || hasPlayerViewAngleChanged && isPlayerTeleported)
                                 {
                                     _resetFlag = true;
-                                    Debug.WriteLine("stanley start");
+                                    Logging.WriteLine("stanley start");
                                     actions.Start(StartOffsetMilliseconds); return;
                                 }
                             }
@@ -592,7 +589,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                         if (!_noSpaceEnd.Boolean && state.PlayerPosition.Old.X <= -7000 &&
                             state.PlayerPosition.Current.X >= -400)
                         {
-                            Debug.WriteLine("space ending");
+                            Logging.WriteLine("space ending");
                             actions.End(EndOffsetMilliseconds); return;
                         }
 

@@ -1,11 +1,5 @@
 ﻿using LiveSplit.SourceSplit.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using LiveSplit.SourceSplit.GameSpecific;
-using LiveSplit.SourceSplit.ComponentHandling;
-using static System.Windows.Forms.AxHost;
 
 
 namespace LiveSplit.SourceSplit.GameHandling
@@ -123,7 +117,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         {
             if (StartOnFirstLoadMaps.Contains(newMapName))
             {
-                Debug.WriteLine(state.GameDir + " new game start on " + newMapName);
+                Logging.WriteLine(state.GameDir + " new game start on " + newMapName);
                 actions.Start();
                 return false;
             }
