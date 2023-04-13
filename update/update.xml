@@ -260,6 +260,7 @@
       <change>Added support for Half-Life 2: Mirrored</change>
       <change>Added extra checks to prevent UI thread exceptions</change>
       <change>Forced LiveSplit's Timing Method to Game Time upon launch, and added an option to disable it.</change>
+      <change>Forced logging to file.</change>
       <change>Added Elevator Split whitelisting for Portal.</change>
       <change>Fixed Death Split for Portal not working.</change>
       <change>Forced 0th tick for Black Mesa to comply with rule changes.</change>

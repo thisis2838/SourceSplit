@@ -57,11 +57,9 @@ namespace LiveSplit.SourceSplit.ComponentHandling
             this.labVersionCredits.Text = $"{versionString} ({buildDate})";
             this.Name = "SourceSplit " + this.labVersionCredits.Text;
 
+            this.gDebugFeatures.Visible = true;
 #if DEBUG
             this.labDescription.Text = "This is a Debug build. Please excuse the poor performance and stability...";
-            this.gDebugFeatures.Visible = true;
-#else
-            this.gDebugFeatures.Visible = false;
 #endif
 
             this.gbAdditionalTimer.Enabled = isLayout;
@@ -321,29 +319,18 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
         public void butOpenDebug_Click(object sender, EventArgs e)
         {
-#if DEBUG
             if (File.Exists("sourcesplit_log.txt"))
             {
-                this.butOpenDebug.Enabled = false;
-                Task.Run(() =>
+                try
                 {
-                    try
-                    {
-                        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sourcesplit_log.txt");
-                        Process.Start("explorer.exe", $"/select, \"{path}\"");
-                    }
-                    catch (Exception ex)
-                    {
-                        new ErrorDialog("Encountered exception while trying to open debug log", false, ex);
-                    }
-
-                    butOpenDebug.InvokeIfRequired(() =>
-                    {
-                        butOpenDebug.Enabled = true;
-                    });
-                });
+                    var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sourcesplit_log.txt");
+                    Process.Start("explorer.exe", $"/select, \"{path}\"");
+                }
+                catch (Exception ex)
+                {
+                    new ErrorDialog("Encountered exception while trying to open debug log", false, ex);
+                }
             }
-#endif
         }
     }
 

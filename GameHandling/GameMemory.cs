@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using LiveSplit.SourceSplit.ComponentHandling;
 using LiveSplit.SourceSplit.Utilities.Forms;
 using System.Management;
+using System.ComponentModel;
 
 namespace LiveSplit.SourceSplit.GameHandling
 {
@@ -45,18 +46,18 @@ namespace LiveSplit.SourceSplit.GameHandling
 
         private readonly string[] _targetProccesNames = new string[]
         {
-            "hl2.exe",
-            "portal2.exe",
-            "dearesther.exe",
-            "mm.exe",
-            "EYE.exe",
-            "bms.exe",
-            "infra.exe",
-            "stanley.exe",
-            "hdtf.exe",
-            "beginnersguide.exe",
-            "synergy.exe",
-            "sinepisodes.exe",
+            "hl2",
+            "portal2",
+            "dearesther",
+            "mm",
+            "eye",
+            "bms",
+            "infra",
+            "stanley",
+            "hdtf",
+            "beginnersguide",
+            "synergy",
+            "sinepisodes",
         };
 
         public GameMemory(SourceSplitComponent component)
@@ -319,13 +320,14 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             _state = state = null;
 
-            string[] procs = _targetProccesNames.Select(x => x.ToLower().Replace(".exe", "")).ToArray();
-            var p = Process.GetProcesses().FirstOrDefault(x =>
+            var procs = Process.GetProcesses();
+            if (procs.Length == 0) return error("No processes found");
+            var p = procs.FirstOrDefault(x =>
             {
                 return
                     Utilities.WinUtils.FindWindow("Valve001", x.MainWindowTitle) != IntPtr.Zero ||
                     // todo: test on edge cases like hl2 survivor to see if this is still needed
-                    procs.Contains(x.ProcessName.ToLower()); 
+                    _targetProccesNames.Contains(x.ProcessName.ToLower()); 
             });
             if (p == null || p.HasExited || SourceSplitUtils.IsVACProtectedProcess(p))
                 return false;
@@ -372,24 +374,35 @@ namespace LiveSplit.SourceSplit.GameHandling
             }
 
             #region HOST_RUNFRAME TICK COUNT
-
             // find the beginning of _host_runframe
             // find string pointer and reference
-            SigScanTarget _hrfStringTarg = new SigScanTarget("_Host_RunFrame (top):  _heapchk() != _HEAPOK\n".ConvertToHex() + "00");
-            IntPtr _hrfStringPtr = IntPtr.Zero;
-            if (!scanForPtr(ref _hrfStringPtr, _hrfStringTarg, scanner, "host_runframe string pointer")
-                || !scanForPtr(ref _hrfStringPtr, new SigScanTarget("68" + _hrfStringPtr.GetByteString()), scanner, "host_runframe string reference")
+            SigScanTarget hrfStringTarg = new SigScanTarget("_Host_RunFrame (top):  _heapchk() != _HEAPOK\n".ConvertToHex() + "00");
+            IntPtr hrfStringPtr = IntPtr.Zero;
+            if 
+            (
+                !scanForPtr(ref hrfStringPtr, hrfStringTarg, scanner, "host_runframe string pointer")
+                || !scanForPtr
+                    (
+                        ref hrfStringPtr, 
+                        new SigScanTarget("68" + hrfStringPtr.GetByteString()), 
+                        scanner, 
+                        "host_runframe string reference"
+                    )
                 // then find the target jl of the update loop
-                || !scanForPtr(ref _hrfStringPtr,
-                    new SigScanTarget("0F 8C ?? ?? ?? FF"),
-                    new SignatureScanner(p, _hrfStringPtr, 0x700),
-                    "host_runframe target jump"))
+                || !scanForPtr
+                    (
+                        ref hrfStringPtr,
+                        new SigScanTarget("0F 8C ?? ?? ?? FF"),
+                        new SignatureScanner(p, hrfStringPtr, 0x700),
+                        "host_runframe target jump"
+                    )
+            )
                 return error("Couldn't find host_runframe target jump");
 
             // find out where the jl goes to, which should be the top of the update loop
-            IntPtr loopTo = _hrfStringPtr + p.ReadValue<int>(_hrfStringPtr + 0x2) + 0x6;
+            IntPtr loopTo = hrfStringPtr + p.ReadValue<int>(hrfStringPtr + 0x2) + 0x6;
 
-            while ((long)loopTo <= (long)_hrfStringPtr)
+            while ((long)loopTo <= (long)hrfStringPtr)
             {
                 loopTo = loopTo + 1;
                 uint candidateHostFrameCount = p.ReadValue<uint>(loopTo);
@@ -437,10 +450,9 @@ namespace LiveSplit.SourceSplit.GameHandling
             this.InitGameState(state);
             _gotTickRate = false;
 
-            bool forceExit = false;
-
-            CancellationTokenSource cancelForceExit = new CancellationTokenSource();
             /*
+            bool forceExit = false;
+            CancellationTokenSource cancelForceExit = new CancellationTokenSource();
             Thread checkGameProcess = new Thread( new ThreadStart(() => 
             {
                 // REALLY make sure the game has exited, as sometimes the splitter stops functioning
@@ -457,18 +469,17 @@ namespace LiveSplit.SourceSplit.GameHandling
             */
 
             var profiler = Stopwatch.StartNew();
-            while (!game.HasExited && !forceExit && !cts.IsCancellationRequested)
+            while (!game.HasExited) // && !forceExit && !cts.IsCancellationRequested)
             {
                 // iteration must never take longer than 1 tick
                 this.UpdateGameState(state);
                 state.AllSupport.ForEach(x => x.OnGenericUpdate(state, TimerActions));
                 this.CheckGameState(state);
 
-                int maxIterationTime = (int)(state.IntervalPerTick * 1000 - 2);
-
                 state.UpdateCount++;
                 Logging.UpdateCount = state.UpdateCount;
 
+                int maxIterationTime = (int)(state.IntervalPerTick * 1000 - 2);
                 if (profiler.ElapsedMilliseconds >= maxIterationTime)
                 {
                     _timesOver++;
@@ -481,8 +492,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                 profiler.Restart();
             }
 
-            cancelForceExit.Cancel();
-            forceExit = false;
+            //cancelForceExit.Cancel();
+            //forceExit = false;
 
             // if the game crashed, make sure session ends
             if (state.HostState.Current == HostState.Run)
