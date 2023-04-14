@@ -23,7 +23,8 @@ namespace LiveSplit.SourceSplit.GameHandling
     partial class GameMemory
     {
         public TimerActions TimerActions = new TimerActions();
-        public GameState _state;
+
+        private GameState _state;
 
         private Task _thread;
         private SourceSplitSynchronizationContext _uiThread;
@@ -153,6 +154,7 @@ namespace LiveSplit.SourceSplit.GameHandling
 
                     SendSetTimingSpecificsEvent(new TimingSpecifics());
                     SourceSplitComponent.Settings.GetUIRepresented().ForEach(x => x.Unlock());
+                    CustomCommandHandler.ResetAll();
 
                     Logging.WriteLine($"Process exited");
 
@@ -308,7 +310,7 @@ namespace LiveSplit.SourceSplit.GameHandling
         }
 
         // TODO: log fails
-        bool TryGetGameProcess(out GameState state)
+        bool TryGetGameProcess(out GameState state_)
         {
             bool error(string reason)
             {
@@ -318,129 +320,144 @@ namespace LiveSplit.SourceSplit.GameHandling
 
             var sw = Stopwatch.StartNew();
 
-            _state = state = null;
+            state_ = null;
+            GameState state = null;
 
             var procs = Process.GetProcesses();
             if (procs.Length == 0) return error("No processes found");
-            var p = procs.FirstOrDefault(x =>
+            var result = procs.Where(x =>
             {
                 return
                     Utilities.WinUtils.FindWindow("Valve001", x.MainWindowTitle) != IntPtr.Zero ||
                     // todo: test on edge cases like hl2 survivor to see if this is still needed
-                    _targetProccesNames.Contains(x.ProcessName.ToLower()); 
-            });
-            if (p == null || p.HasExited || SourceSplitUtils.IsVACProtectedProcess(p))
-                return false;
-
-            ProcessModuleWow64Safe engine = p.ModulesWow64SafeNoCache().FirstOrDefault(x => x.ModuleName.ToLower() == "engine.dll");
-            if (engine == null) return error("Engine hasn't loaded");
-
-            SendGameStatusEvent(true);
-
-            var scanner = new SignatureScanner(p, engine.BaseAddress, engine.ModuleMemorySize);
-            _gameDirPtr = scanner.Scan(_gameDirTarget);
-            if (_gameDirPtr == IntPtr.Zero)
-                return error("Couldn't find game directory path pointer");
-
-            state = new GameState();
-            if (!GetGameInfo(state, p))
-                return error("Failed to retrieve game information");
-            try
+                    _targetProccesNames.Contains(x.ProcessName.ToLower());
+            }).Any(p =>
             {
-                if (!state.GameEngine.Init(p)) return error("Coudln't initialize game engine");
-                if (!state.GameEngine.Scan()) return error("Couldn't find one or more necessary values");
-            }
-            catch (Exception e)
-            {
-                return error($"Encountered exception while initializing and scanning: {e}");
-            }
+                Logging.WriteLine($"Considering process: {p.ProcessName}");
 
-            state.GameEngine.GameDirPtr = _gameDirPtr;
+                if (p == null || p.HasExited)
+                    return false;
 
-            bool demoGood = (_demoMonitor.Scan(p, state.GameProcess.ReadString(_gameDirPtr, 260)));
-            _gamePausedMidDemoRec = !_demoMonitor.Functional;
-            if (!demoGood)
-            {
-                SourceSplitComponent.Settings.CountDemoInterop.Lock(false);
-                SourceSplitComponent.Settings.PrintDemoInfo.Lock(false);
-                SourceSplitComponent.Settings.ShowCurDemo.Lock(false);
-            }
+                if (SourceSplitUtils.IsVACProtectedProcess(p))
+                    return error($"VAC protected process!");
 
-            bool scanForPtr(ref IntPtr ptr, SigScanTarget target, SignatureScanner scanner, string ptrName, string sigName = " ")
-            {
-                bool found = (ptr = scanner.Scan(target)) != IntPtr.Zero;
-                Logging.WriteLine($"{ptrName} = {(found ? $"0x{ptr.ToString("X")}" : "NOT FOUND")} through sig {sigName}");
-                return found;
-            }
+                ProcessModuleWow64Safe engine = p.ModulesWow64SafeNoCache().FirstOrDefault(x => x.ModuleName.ToLower() == "engine.dll");
+                if (engine == null) return error("Engine hasn't loaded");
 
-            #region HOST_RUNFRAME TICK COUNT
-            // find the beginning of _host_runframe
-            // find string pointer and reference
-            SigScanTarget hrfStringTarg = new SigScanTarget("_Host_RunFrame (top):  _heapchk() != _HEAPOK\n".ConvertToHex() + "00");
-            IntPtr hrfStringPtr = IntPtr.Zero;
-            if 
-            (
-                !scanForPtr(ref hrfStringPtr, hrfStringTarg, scanner, "host_runframe string pointer")
-                || !scanForPtr
-                    (
-                        ref hrfStringPtr, 
-                        new SigScanTarget("68" + hrfStringPtr.GetByteString()), 
-                        scanner, 
-                        "host_runframe string reference"
-                    )
-                // then find the target jl of the update loop
-                || !scanForPtr
-                    (
-                        ref hrfStringPtr,
-                        new SigScanTarget("0F 8C ?? ?? ?? FF"),
-                        new SignatureScanner(p, hrfStringPtr, 0x700),
-                        "host_runframe target jump"
-                    )
-            )
-                return error("Couldn't find host_runframe target jump");
+                SendGameStatusEvent(true);
 
-            // find out where the jl goes to, which should be the top of the update loop
-            IntPtr loopTo = hrfStringPtr + p.ReadValue<int>(hrfStringPtr + 0x2) + 0x6;
+                var scanner = new SignatureScanner(p, engine.BaseAddress, engine.ModuleMemorySize);
+                _gameDirPtr = scanner.Scan(_gameDirTarget);
+                if (_gameDirPtr == IntPtr.Zero)
+                    return error("Couldn't find game directory path pointer");
 
-            while ((long)loopTo <= (long)hrfStringPtr)
-            {
-                loopTo = loopTo + 1;
-                uint candidateHostFrameCount = p.ReadValue<uint>(loopTo);
-
-                if (scanner.IsWithin(candidateHostFrameCount))
+                state = new GameState();
+                if (!GetGameInfo(state, p))
+                    return error("Failed to retrieve game information");
+                try
                 {
-                    for (int i = 1; i <= 2; i++)
-                    {
-                        uint candidateNextPtr = p.ReadValue<uint>(loopTo + 4 + i);
-                        if (scanner.IsWithin(candidateNextPtr) && candidateNextPtr - candidateHostFrameCount <= 0x8)
-                        {
-                            _hostUpdateCountPtr = (IntPtr)candidateHostFrameCount;
-                            Logging.WriteLine($"host_runframe host_tickcount ptr is 0x{_hostUpdateCountPtr.ToString("X")}");
-                            goto foundTimeHooks;
-                        }
-                    }
+                    if (!state.GameEngine.Init(p)) return error("Coudln't initialize game engine");
+                    if (!state.GameEngine.Scan()) return error("Couldn't find one or more necessary values");
+                }
+                catch (Exception e)
+                {
+                    return error($"Encountered exception while initializing and scanning: {e}");
                 }
 
-            }
-            return error("Can't find host_tickcount pointer");
+                state.GameEngine.GameDirPtr = _gameDirPtr;
 
-            foundTimeHooks:
-            _hostUpdateCount = new ValueWatcher<long>(state.GameProcess.ReadValue<int>(_hostUpdateCountPtr));
-            #endregion
+                bool demoGood = (_demoMonitor.Scan(p, state.GameProcess.ReadString(_gameDirPtr, 260)));
+                _gamePausedMidDemoRec = !_demoMonitor.Functional;
+                if (!demoGood)
+                {
+                    SourceSplitComponent.Settings.CountDemoInterop.Lock(false);
+                    SourceSplitComponent.Settings.PrintDemoInfo.Lock(false);
+                    SourceSplitComponent.Settings.ShowCurDemo.Lock(false);
+                }
 
-            Logging.WriteLine("TryGetGameProcess took: " + sw.Elapsed);
+                bool scanForPtr(ref IntPtr ptr, SigScanTarget target, SignatureScanner scanner, string ptrName, string sigName = " ")
+                {
+                    bool found = (ptr = scanner.Scan(target)) != IntPtr.Zero;
+                    Logging.WriteLine($"{ptrName} = {(found ? $"0x{ptr.ToString("X")}" : "NOT FOUND")} through sig {sigName}");
+                    return found;
+                }
 
-            _state = state;
-            state.MainSupport?.OnGameAttached(_state, TimerActions);
-            Logging.WriteLine($"EntInfoSize = {state.GameEngine.EntInfoSize}");
+                #region HOST_RUNFRAME TICK COUNT
+                // find the beginning of _host_runframe
+                // find string pointer and reference
+                SigScanTarget hrfStringTarg = new SigScanTarget("_Host_RunFrame (top):  _heapchk() != _HEAPOK\n".ConvertToHex() + "00");
+                IntPtr hrfStringPtr = IntPtr.Zero;
+                if
+                (
+                    !scanForPtr(ref hrfStringPtr, hrfStringTarg, scanner, "host_runframe string pointer")
+                    || !scanForPtr
+                        (
+                            ref hrfStringPtr,
+                            new SigScanTarget("68" + hrfStringPtr.GetByteString()),
+                            scanner,
+                            "host_runframe string reference"
+                        )
+                    // then find the target jl of the update loop
+                    || !scanForPtr
+                        (
+                            ref hrfStringPtr,
+                            new SigScanTarget("0F 8C ?? ?? ?? FF"),
+                            new SignatureScanner(p, hrfStringPtr, 0x700),
+                            "host_runframe target jump"
+                        )
+                )
+                    return error("Couldn't find host_runframe target jump");
 
-            _settings.InvokeWithTimeout(10000, () =>
-            {
-                _settings.Invalidate();
-                _settings.Update();
+                // find out where the jl goes to, which should be the top of the update loop
+                IntPtr loopTo = hrfStringPtr + p.ReadValue<int>(hrfStringPtr + 0x2) + 0x6;
+
+                while ((long)loopTo <= (long)hrfStringPtr)
+                {
+                    loopTo = loopTo + 1;
+                    uint candidateHostFrameCount = p.ReadValue<uint>(loopTo);
+
+                    if (scanner.IsWithin(candidateHostFrameCount))
+                    {
+                        for (int i = 1; i <= 2; i++)
+                        {
+                            uint candidateNextPtr = p.ReadValue<uint>(loopTo + 4 + i);
+                            if (scanner.IsWithin(candidateNextPtr) && candidateNextPtr - candidateHostFrameCount <= 0x8)
+                            {
+                                _hostUpdateCountPtr = (IntPtr)candidateHostFrameCount;
+                                Logging.WriteLine($"host_runframe host_tickcount ptr is 0x{_hostUpdateCountPtr.ToString("X")}");
+                                goto foundTimeHooks;
+                            }
+                        }
+                    }
+
+                }
+                return error("Can't find host_tickcount pointer");
+
+                foundTimeHooks:
+                _hostUpdateCount = new ValueWatcher<long>(state.GameProcess.ReadValue<int>(_hostUpdateCountPtr));
+                #endregion
+
+                Logging.WriteLine("TryGetGameProcess took: " + sw.Elapsed);
+
+                state.MainSupport?.OnGameAttached(state, TimerActions);
+                Logging.WriteLine($"EntInfoSize = {state.GameEngine.EntInfoSize}");
+
+                _settings.InvokeWithTimeout(10000, () =>
+                {
+                    _settings.Invalidate();
+                    _settings.Update();
+                });
+
+                return true;
             });
 
-            return true;
+            if (result)
+            {
+                _state = state_ = state;
+                return true;
+            }
+
+            return false;
         }
         void HandleProcess(GameState state, CancellationTokenSource cts)
         {
@@ -469,7 +486,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             */
 
             var profiler = Stopwatch.StartNew();
-            while (!game.HasExited) // && !forceExit && !cts.IsCancellationRequested)
+            while (!game.HasExited && !cts.IsCancellationRequested) // && !forceExit)
             {
                 // iteration must never take longer than 1 tick
                 this.UpdateGameState(state);

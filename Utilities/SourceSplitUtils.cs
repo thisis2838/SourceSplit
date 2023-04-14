@@ -7,64 +7,112 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Text;
 using System.Windows.Forms;
+using LiveSplit.Web;
+using System.Security.Cryptography.X509Certificates;
+using System.Net;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.Utilities
 {
     public static class SourceSplitUtils
     {
         public static Stopwatch ActiveTime = new Stopwatch();
-
-        /// <summary>
-        /// Checks if the process is associated with a VAC protected game.
-        /// We don't want to touch them. Even though reading a VAC process'
-        /// memory is said to be perfectly fine and only writing is bad.
-        /// </summary>
+        private static Dictionary<string, bool> _vacQueriedExecs = new Dictionary<string, bool>();
+        
         public static bool IsVACProtectedProcess(Process p)
         {
-            // http://forums.steampowered.com/forums/showthread.php?t=2465755
-            // http://en.wikipedia.org/wiki/Valve_Anti-Cheat#Games_that_support_VAC
-            string[] badExes = 
-            { 
-                "csgo", "dota2", "swarm", "left4dead", 
-                "left4dead2",  "dinodday",  "insurgency", 
-                "nucleardawn", "ship" 
+            var mainProcPath = p.MainModule.FileName;
+
+            if (_vacQueriedExecs.TryGetValue(mainProcPath, out var res) && res)
+                return true;
+
+            try
+            {
+                if (IsVACProtectedProcessName(p.ProcessName) && IsVACProtectedGame(mainProcPath))
+                    return true;
+            }
+            catch (Exception e)
+            {
+                Logging.WriteLine($"Couldn't check process for VAC support: {e}");
+                return true;
+            }
+
+            try
+            {
+                res = IsVACProtectedSteamProduct(Path.GetDirectoryName(mainProcPath));
+                _vacQueriedExecs[mainProcPath] = res;
+
+                if (res) return true;
+            }
+            catch (Exception e)
+            {
+                Logging.WriteLine($"Couldn't check Steam API for VAC support: {e}");
+            }
+
+            return false;
+        }
+
+        public static bool IsVACProtectedProcessName(string p)
+        {
+            string[] badExes =
+            {
+                "csgo", "dota2", "swarm", "left4dead",
+                "left4dead2",  "dinodday",  "insurgency",
+                "nucleardawn", "ship"
             };
+
+            return badExes.Contains(p.ToLower());
+        }
+
+        public static bool IsVACProtectedGame(string path)
+        {
             string[] badMods = { "cstrike", "dods", "hl2mp", "insurgency", "tf", "zps" };
             string[] badRootDirs = { "Dark Messiah of Might and Magic Multi-Player" };
             string[] hl2SurvivorDirs = { "hl2mp_japanese", "hl2_japanese" };
 
-            if (badExes.Contains(p.ProcessName.ToLower()))
+            var dirInfo = new DirectoryInfo(path);
+
+            var dirs = dirInfo.GetDirectories();
+            if (dirs.Any(x => badMods.Contains(x.Name.ToLower())) && !dirs.Any(x => hl2SurvivorDirs.Contains(x.Name.ToLower())))
                 return true;
 
-            if (p.ProcessName.ToLower() == "hl2" || p.ProcessName.ToLower() == "mm")
-            {
-                // it's too difficult to get another process' start arguments, so let's scan the dir
-                // http://stackoverflow.com/questions/440932/reading-command-line-arguments-of-another-process-win32-c-code
-
-                try
-                {
-                    string dir = Path.GetDirectoryName(p.MainModule.FileName);
-                    if (dir == null)
-                        return true;
-
-                    var directories = new DirectoryInfo(dir).GetDirectories();
-                    if (directories.Any(di => badMods.Contains(di.Name.ToLower()))
-                         && !directories.Any(di => hl2SurvivorDirs.Contains(di.Name.ToLower())))
-                        return true;
-
-                    string root = new DirectoryInfo(dir).Name.ToLower();
-                    if (badRootDirs.Any(badRoot => badRoot.ToLower() == root))
-                        return true;
-                }
-                catch (Exception ex)
-                {
-                    Logging.WriteLine(ex.ToString());
-                    return true;
-                }
-            }
+            string root = dirInfo.Name.ToLower();
+            if (badRootDirs.Any(badRoot => badRoot.ToLower() == root))
+                return true;
 
             return false;
+        }
+
+        public static bool IsVACProtectedSteamProduct(string path)
+        {
+            bool result = false;
+
+            CancellationTokenSource cts = new CancellationTokenSource();
+
+            var task = Task.Run(() =>
+            {
+                int id = int.Parse(File.ReadAllText(Path.Combine(path, "steam_appid.txt").Trim(' ', '\t', '\r', '\n')));
+                var req = HttpWebRequest.Create($"https://store.steampowered.com/api/appdetails?appids=" + id);
+                var res = new StreamReader(Task.Run(() => req.GetResponseAsync(), cts.Token).Result.GetResponseStream()).ReadToEnd();
+
+                if (res.Contains(@"{""success"":false}")) throw new Exception("API request failed.");
+
+                res = res.Replace("\\\\", "//"); // help with managing escape sequences
+                var category = Regex.Match(res, @"""categories"":\[(\\]|[^\]])+\]");
+                if (!category.Success) throw new Exception("Couldn't find category information");
+
+                result = category.Value.Contains(@"{""id"":8");
+            }, cts.Token);
+
+            cts.CancelAfter(2000);
+            task.Wait();
+
+            if (task.Status == TaskStatus.Faulted) throw task.Exception;
+
+            return result;
         }
     }
 
