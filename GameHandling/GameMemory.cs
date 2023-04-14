@@ -437,8 +437,6 @@ namespace LiveSplit.SourceSplit.GameHandling
                 _hostUpdateCount = new ValueWatcher<long>(state.GameProcess.ReadValue<int>(_hostUpdateCountPtr));
                 #endregion
 
-                Logging.WriteLine("TryGetGameProcess took: " + sw.Elapsed);
-
                 state.MainSupport?.OnGameAttached(state, TimerActions);
                 Logging.WriteLine($"EntInfoSize = {state.GameEngine.EntInfoSize}");
 
@@ -454,6 +452,7 @@ namespace LiveSplit.SourceSplit.GameHandling
             if (result)
             {
                 _state = state_ = state;
+                sw.Stop(); Logging.WriteLine("TryGetGameProcess took: " + sw.Elapsed);
                 return true;
             }
 

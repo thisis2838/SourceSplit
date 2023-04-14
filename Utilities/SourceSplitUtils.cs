@@ -20,18 +20,14 @@ namespace LiveSplit.SourceSplit.Utilities
     public static class SourceSplitUtils
     {
         public static Stopwatch ActiveTime = new Stopwatch();
-        private static Dictionary<string, bool> _vacQueriedExecs = new Dictionary<string, bool>();
         
         public static bool IsVACProtectedProcess(Process p)
         {
             var mainProcPath = p.MainModule.FileName;
 
-            if (_vacQueriedExecs.TryGetValue(mainProcPath, out var res) && res)
-                return true;
-
             try
             {
-                if (IsVACProtectedProcessName(p.ProcessName) && IsVACProtectedGame(mainProcPath))
+                if (IsVACProtectedProcessName(p.ProcessName) || IsVACProtectedGame(Path.GetDirectoryName(mainProcPath)))
                     return true;
             }
             catch (Exception e)
@@ -42,13 +38,12 @@ namespace LiveSplit.SourceSplit.Utilities
 
             try
             {
-                res = IsVACProtectedSteamProduct(Path.GetDirectoryName(mainProcPath));
-                _vacQueriedExecs[mainProcPath] = res;
-
-                if (res) return true;
+                if (IsVACProtectedSteamProduct(Path.GetDirectoryName(mainProcPath)))
+                    return true;
             }
             catch (Exception e)
             {
+                // checking steam api only ensures that a game has vac support. if it fails, we assume it doesn't.
                 Logging.WriteLine($"Couldn't check Steam API for VAC support: {e}");
             }
 
@@ -71,6 +66,7 @@ namespace LiveSplit.SourceSplit.Utilities
         {
             string[] badMods = { "cstrike", "dods", "hl2mp", "insurgency", "tf", "zps" };
             string[] badRootDirs = { "Dark Messiah of Might and Magic Multi-Player" };
+            // hl2 survivor has a game folder of "hl2mp", but isn't covered by vac.
             string[] hl2SurvivorDirs = { "hl2mp_japanese", "hl2_japanese" };
 
             var dirInfo = new DirectoryInfo(path);
@@ -86,28 +82,102 @@ namespace LiveSplit.SourceSplit.Utilities
             return false;
         }
 
+        // this should be comprehensive enough...
+        private static Dictionary<int, bool> _appIDVACStatuses = new Dictionary<int, bool>()
+        {
+            { 211, false },
+            { 215, false },
+            { 218, false },
+            { 219, false },
+            { 220, false },
+            { 280, false },
+            { 340, false },
+            { 380, false },
+            { 400, false },
+            { 420, false },
+            { 1300, false },
+            { 2600, false },
+            { 10220, false },
+            { 17520, false }, // synergy is exempt
+            { 91700, false },
+            { 203810, false },
+            { 221910, false },
+            { 243730, false },
+            { 247750, false },
+            { 251110, false },
+            { 261820, false },
+            { 290930, false },
+            { 303210, false },
+            { 362890, false },
+            { 365300, false },
+            { 399120, false },
+            { 587650, false },
+            { 714070, false },
+            { 723390, false },
+            { 747250, false },
+            { 1154130, false },
+            { 1583720, false },
+            { 5438926, false },
+
+            { 240, true },
+            { 320, true },
+            { 360, true },
+            { 440, true },
+            { 500, true },
+            { 550, true },
+            { 570, true },
+            { 620, true },
+            { 630, true },
+            { 730, true },
+            { 1800, true },
+            { 2130, true },
+            { 4000, true },
+            { 17500, true},
+            { 17700, true },
+            { 17710, true },
+            { 222880, true },
+        };
+
         public static bool IsVACProtectedSteamProduct(string path)
         {
             bool result = false;
 
             CancellationTokenSource cts = new CancellationTokenSource();
-
             var task = Task.Run(() =>
             {
+                // find if game has an appid associated with it
                 int id = int.Parse(File.ReadAllText(Path.Combine(path, "steam_appid.txt").Trim(' ', '\t', '\r', '\n')));
+                // check if we have this already
+                if (_appIDVACStatuses.TryGetValue(id, out var cached))
+                {
+                    result = cached;
+                    return;
+                }
+
+                // if found, query for its information from the steam store api
                 var req = HttpWebRequest.Create($"https://store.steampowered.com/api/appdetails?appids=" + id);
-                var res = new StreamReader(Task.Run(() => req.GetResponseAsync(), cts.Token).Result.GetResponseStream()).ReadToEnd();
 
-                if (res.Contains(@"{""success"":false}")) throw new Exception("API request failed.");
+                // get a response, read to end. it should be in json format
+                var response = Task.Run(() => req.GetResponseAsync(), cts.Token).Result;
+                var responseStream = new StreamReader(response.GetResponseStream());
+                var responseContent = Task.Run(() => responseStream.ReadToEndAsync(), cts.Token).Result;
 
-                res = res.Replace("\\\\", "//"); // help with managing escape sequences
-                var category = Regex.Match(res, @"""categories"":\[(\\]|[^\]])+\]");
+                // this indicates if the api request has failed, maybe because the game doesn't exist or has been delisted
+                if (responseContent.Contains(@"{""success"":false}")) throw new Exception("API request failed.");
+
+                // remove double escaped backslashes to remove edge cases in regex detection
+                responseContent = responseContent.Replace("\\\\", "//");
+                // ideally, we'd wanna parse the json, but that'd require extra work or a dependancy
+                // so let's just regex search for the right node.
+                // find the category array
+                var category = Regex.Match(responseContent, @"""categories"":\[(\\]|[^\]])+\]");
                 if (!category.Success) throw new Exception("Couldn't find category information");
 
+                // vac being supported has a category of 8
                 result = category.Value.Contains(@"{""id"":8");
+                _appIDVACStatuses[id] = result;
             }, cts.Token);
-
-            cts.CancelAfter(2000);
+            cts.CancelAfter(2000); // don't wait for more than 2s
             task.Wait();
 
             if (task.Status == TaskStatus.Faulted) throw task.Exception;
@@ -163,13 +233,13 @@ namespace LiveSplit.SourceSplit.Utilities
             [MethodImpl(MethodImplOptions.Synchronized)]
             set;
         }
-        private static bool _writeFile = true;
+        private static bool _enabled = true;
 
         [MethodImpl(MethodImplOptions.Synchronized)]
         public static void StartLogging()
         {
             TickCount = UpdateCount = 0;
-            _writeFile = true;
+            _enabled = true;
 
             _cts = new CancellationTokenSource();
             _writeThread.Start();
@@ -196,7 +266,7 @@ namespace LiveSplit.SourceSplit.Utilities
                 $"{msg.Content}"
             );
 
-            if (!_writeFile) return;
+            if (!_enabled) return;
 
             var str =
                 $"[ " +
@@ -231,7 +301,7 @@ namespace LiveSplit.SourceSplit.Utilities
                 false,
                 errors.GroupBy(x => x.Message).Select(x => x.First()).ToArray()
             );
-            _writeFile = false;
+            _enabled = false;
         }
         public static void WriteLine(string msg = "")
         {
