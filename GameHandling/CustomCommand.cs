@@ -86,8 +86,8 @@ namespace LiveSplit.SourceSplit.GameHandling
     class CustomCommandHandler
     {
         public List<CustomCommand> Commands = new List<CustomCommand>();
-        private IntPtr _cmdBufferPtr = IntPtr.Zero;
-        private IntPtr _conMsgPtr = IntPtr.Zero;
+        private static IntPtr _cmdBufferPtr = IntPtr.Zero;
+        private static IntPtr _conMsgPtr = IntPtr.Zero;
         private Process _game;
         private byte[] _cmdBuffer;
         private const int BUFFER_SIZE = 512;
@@ -100,6 +100,12 @@ namespace LiveSplit.SourceSplit.GameHandling
             _cmdBuffer = new byte[BUFFER_SIZE];
         }
 
+        public static void ResetAll()
+        {
+            _cmdBufferPtr = IntPtr.Zero;
+            _conMsgPtr = IntPtr.Zero;
+        }
+
         public void Init(GameState state)
         {
             _gameDir = state.GameDir;
@@ -110,27 +116,29 @@ namespace LiveSplit.SourceSplit.GameHandling
                     x.Parse(setting);
             });
 
-            _cmdBufferPtr = IntPtr.Zero;
-            ProcessModuleWow64Safe engine = state.GetModule("engine.dll");
-
-            var scanner = new SignatureScanner(state.GameProcess, engine.BaseAddress, engine.ModuleMemorySize);
-            IntPtr ptr = scanner.Scan(new SigScanTarget("68" + scanner.Scan(new SigScanTarget("execing %s\n".ConvertToHex())).GetByteString()));
-
-            if (ptr == IntPtr.Zero)
-                goto fail;
-
-            byte[] bytes = state.GameProcess.ReadBytes(ptr, 100);
-            for (int i = 0; i < 100; i++)
+            if (_cmdBufferPtr == IntPtr.Zero)
             {
-                byte e = bytes[i];
-                if (e == 0xA1 || (bytes[i] >= 0xB8 && bytes[i] <= 0xBF))
+                ProcessModuleWow64Safe engine = state.GetModule("engine.dll");
+
+                var scanner = new SignatureScanner(state.GameProcess, engine.BaseAddress, engine.ModuleMemorySize);
+                IntPtr ptr = scanner.Scan(new SigScanTarget("68" + scanner.Scan(new SigScanTarget("execing %s\n".ConvertToHex())).GetByteString()));
+
+                if (ptr == IntPtr.Zero)
+                    goto fail;
+
+                byte[] bytes = state.GameProcess.ReadBytes(ptr, 100);
+                for (int i = 0; i < 100; i++)
                 {
-                    uint val = state.GameProcess.ReadValue<uint>(ptr + i + 1);
-                    if (scanner.IsWithin(val))
+                    byte e = bytes[i];
+                    if (e == 0xA1 || (bytes[i] >= 0xB8 && bytes[i] <= 0xBF))
                     {
-                        _cmdBufferPtr = (IntPtr)val;
-                        Logging.WriteLine("Command buffer found at 0x" + _cmdBufferPtr.ToString("X"));
-                        break;
+                        uint val = state.GameProcess.ReadValue<uint>(ptr + i + 1);
+                        if (scanner.IsWithin(val))
+                        {
+                            _cmdBufferPtr = (IntPtr)val;
+                            Logging.WriteLine("Command buffer found at 0x" + _cmdBufferPtr.ToString("X"));
+                            break;
+                        }
                     }
                 }
             }
@@ -166,6 +174,9 @@ There are {Commands.Count()} command(s) available.
 
         private void GetExecPtr(GameState state)
         {
+            if (_conMsgPtr != IntPtr.Zero)
+                return;
+
             try
             {
                 var tier0 = state.GetModule("tier0.dll");
