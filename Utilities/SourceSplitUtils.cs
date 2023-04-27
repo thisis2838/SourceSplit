@@ -204,7 +204,21 @@ namespace LiveSplit.SourceSplit.Utilities
         }
         private static ConcurrentQueue<Message> _messages = new ConcurrentQueue<Message>();
         private static CancellationTokenSource _cts;
-        private static Thread _writeThread = null;
+        private static Thread _writeThread = new Thread(() =>
+        {
+            while (true)
+            {
+                if (_cts.IsCancellationRequested) return;
+
+                while (_messages.Count > 0 && _messages.TryDequeue(out Message msg))
+                {
+                    if (_cts.IsCancellationRequested) return;
+                    WriteToFile(msg);
+                }
+
+                Thread.Sleep(10);
+            }
+        });
 
         public static int TickCount
         {
@@ -229,27 +243,6 @@ namespace LiveSplit.SourceSplit.Utilities
             _enabled = true;
 
             _cts = new CancellationTokenSource();
-
-            if (_writeThread != null)
-            {
-                try { _writeThread.Abort(); } 
-                catch { }
-            }
-            _writeThread = new Thread(() =>
-            {
-                while (true)
-                {
-                    if (_cts.IsCancellationRequested) return;
-
-                    while (_messages.Count > 0 && _messages.TryDequeue(out Message msg))
-                    {
-                        if (_cts.IsCancellationRequested) return;
-                        WriteToFile(msg);
-                    }
-
-                    Thread.Sleep(10);
-                }
-            });
             _writeThread.Start();
 
             WriteLine("Logging started");
