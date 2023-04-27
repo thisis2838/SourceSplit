@@ -267,4 +267,12 @@
       <change>Forced 0th tick for Black Mesa to comply with rule changes.</change>
     </changelog>
   </update>
+  <update version="3.3.4.1">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Fix potential SourceSplit crash when trying to reactivate it.</change>
+    </changelog>
+  </update>
 </updates>
