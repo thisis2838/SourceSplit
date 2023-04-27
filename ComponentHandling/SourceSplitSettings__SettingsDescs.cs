@@ -304,11 +304,6 @@ Version 3.3.0 introduced many new features and changes to code, which required e
                 @"This option decides whether SourceSplit should set LiveSplit's Timing Method to Game Time when SourceSplit is loaded.
 
 This is not a good decision from a software designing perspective, settings which are not part of SourceSplit's ownership shouldn't be forced. But you wouldn't believe how much time has been wasted on checking if people have this set when they come to ask why Game Time isn't working. Not only that, LiveSplit still hasn't made Game Time the default option yet, even when its development Discord mocks this fact, and timing falls back to Real Time when no Auto-Splitter is loaded anyway.");
-
-#if DEBUG
-            _help.SetDescription(gDebugFeatures,
-                @"You are a developer, or have been peskied by a developer into using this Debug build of SourceSplit.");
-#endif
         }
     }
 }

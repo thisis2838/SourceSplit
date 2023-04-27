@@ -83,6 +83,7 @@ namespace LiveSplit.SourceSplit.Utilities
         }
 
         // this should be comprehensive enough...
+        // false is without VAC, true is with VAC
         private static Dictionary<int, bool> _appIDVACStatuses = new Dictionary<int, bool>()
         {
             { 211, false },
@@ -212,7 +213,7 @@ namespace LiveSplit.SourceSplit.Utilities
                 while (_messages.Count > 0 && _messages.TryDequeue(out Message msg))
                 {
                     if (_cts.IsCancellationRequested) return;
-                    WriteLineInternal(msg);
+                    WriteToFile(msg);
                 }
 
                 Thread.Sleep(10);
@@ -252,10 +253,10 @@ namespace LiveSplit.SourceSplit.Utilities
             _cts.Cancel();
             _writeThread.Abort();
 
-            WriteLineInternal(new Message("Logging stopped"));
+            WriteToFile(new Message("Logging stopped"));
         }
 
-        private static void WriteLineInternal(Message msg)
+        private static void WriteToFile(Message msg)
         {
             Debug.WriteLine
             (
