@@ -1,18 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{EE96132E-A56A-4070-BE18-927DE5653906}</ProjectGuid>
+    <ProjectGuid>{E396F2F9-EF74-4898-B699-D28E0C369244}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LiveSplit.SourceSplit</RootNamespace>
     <AssemblyName>LiveSplit.SourceSplit</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile>
-    </TargetFrameworkProfile>
+    <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,10 +21,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -35,297 +30,79 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LiveSplit.Core">
-      <HintPath>..\..\public\LiveSplit\LiveSplit\bin\Debug\LiveSplit.Core.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="LiveSplit.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\LiveSplit.Core.dll</HintPath>
     </Reference>
-    <Reference Include="LiveSplit.View">
-      <HintPath>..\..\..\~Livesplits\LiveSplit_1.7.6\LiveSplit.View.dll</HintPath>
+    <Reference Include="LiveSplit.View, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\LiveSplit.View.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
+    <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Management" />
-    <Reference Include="System.Speech" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="UpdateManager">
-      <HintPath>..\..\public\LiveSplit\LiveSplit\bin\Debug\UpdateManager.dll</HintPath>
-      <Private>False</Private>
+    <Reference Include="UpdateManager, Version=0.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\UpdateManager.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ComponentHandling\DebugOutputForm.cs">
+    <Compile Include="Common\Settings.cs" />
+    <Compile Include="Component\Forms\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ComponentHandling\DebugOutputForm.Designer.cs">
-      <DependentUpon>DebugOutputForm.cs</DependentUpon>
+    <Compile Include="Component\Forms\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ComponentHandling\SessionsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ComponentHandling\SessionsForm.Designer.cs">
-      <DependentUpon>SessionsForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ComponentHandling\SourceSplitComponent__GameMemoryResponses.cs" />
-    <Compile Include="ComponentHandling\SourceSplitComponent__Graphics.cs" />
-    <Compile Include="ComponentHandling\SourceSplitComponent__SplitOperations.cs" />
-    <Compile Include="ComponentHandling\SourceSplitComponent__TimerResponses.cs" />
-    <Compile Include="ComponentHandling\SourceSplitSettingsHelp.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ComponentHandling\SourceSplitSettingsHelp.Designer.cs">
-      <DependentUpon>SourceSplitSettingsHelp.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ComponentHandling\SourceSplitSettings__SettingsDescs.cs">
+    <Compile Include="Component\Forms\DeferredSettingsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ComponentHandling\SourceSplitSettings__Settings.cs">
-      <SubType>UserControl</SubType>
+    <Compile Include="Component\Forms\DeferredSettingsControl.Designer.cs">
+      <DependentUpon>DeferredSettingsControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="DemoHandling\DemoFile.cs" />
-    <Compile Include="DemoHandling\DemoMonitor.cs" />
-    <Compile Include="GameHandling\GameEngine.cs" />
-    <Compile Include="GameHandling\GameEngine__Interactions.cs" />
-    <Compile Include="GameHandling\GameEngine__Signatures.cs" />
-    <Compile Include="GameHandling\GameMemory__UIEvents.cs" />
-    <Compile Include="GameHandling\GameMemory__Update.cs" />
-    <Compile Include="GameHandling\GameSupport__AutoStartStopTemplates.cs" />
-    <Compile Include="GameHandling\GameSupport__Functions.cs" />
-    <Compile Include="GameHandling\GameSupport__Cases.cs" />
-    <Compile Include="ComponentHandling\Session.cs" />
-    <Compile Include="GameSpecific\HL2Mods\ThundersLeaves.cs" />
-    <Compile Include="GameSpecific\HL2Mods\HumanError.cs" />
-    <Compile Include="GameSpecific\HL2Mods\SnowdropEscape.cs" />
-    <Compile Include="GameSpecific\HL2Mods\LastZombie.cs" />
-    <Compile Include="GameSpecific\HL2Mods\CausalityEffect.cs" />
-    <Compile Include="GameSpecific\HL2Mods\BearPartyAdventure.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Whoopservatory.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Tr1p.cs" />
-    <Compile Include="GameSpecific\HL2Mods\TheLighthouse.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Station51.cs" />
-    <Compile Include="GameSpecific\HL2Mods\SphericalNightmares.cs" />
-    <Compile Include="GameSpecific\HL2Mods\TheRoadToAbyss.cs" />
-    <Compile Include="GameSpecific\HL2Mods\ResearchAndDevelopment.cs" />
-    <Compile Include="GameSpecific\HL2Mods\PersonOfInterest.cs" />
-    <Compile Include="GameSpecific\HL2Mods\RavenholmTheLostChapter.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Penetration.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Overawe.cs" />
-    <Compile Include="GameSpecific\HL2Mods\MissileStrikeImminent.cs" />
-    <Compile Include="GameSpecific\HL2Mods\MountainCaves.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Siren.cs" />
-    <Compile Include="GameSpecific\HL2Mods\RiotAct.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Depot.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Expectation.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Daylight.cs" />
-    <Compile Include="GameSpecific\HL2Mods\CombineDestiny.cs" />
-    <Compile Include="GameSpecific\HL2Mods\CallIn.cs" />
-    <Compile Include="GameSpecific\HL2Mods\RTSLPacks.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Awakening.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Aberration.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Uzvara.cs" />
-    <Compile Include="GameSpecific\HL2Mods\CloneMachine.cs" />
-    <Compile Include="GameSpecific\HL2Mods\DangerousWorld.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Dark17.cs" />
-    <Compile Include="GameSpecific\HL2Mods\City17IsFarAway.cs" />
-    <Compile Include="GameSpecific\HL2Mods\DaBaby.cs" />
-    <Compile Include="GameSpecific\HL2Mods\EpisodeThree.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Exit2.cs" />
-    <Compile Include="GameSpecific\HL2Mods\GetALife.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Grey.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Precursor.cs" />
-    <Compile Include="GameSpecific\HL2Mods\SchoolAdventures.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Sebastian.cs" />
-    <Compile Include="GameSpecific\HL2Mods\SouthernmostCombine.cs" />
-    <Compile Include="GameSpecific\HL2Mods\NTKS_Demo.cs" />
-    <Compile Include="GameSpecific\HL2Mods\JollysHardcoreMod.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Offshore.cs" />
-    <Compile Include="GameSpecific\HL2Mods\VeryHardMod.cs" />
-    <Compile Include="GameSpecific\HL2Mods\UpmineStruggle.cs" />
-    <Compile Include="GameSpecific\HL2Mods\HellsMines.cs" />
-    <Compile Include="GameSpecific\HL2Mods\DarkIntervention.cs" />
-    <Compile Include="GameSpecific\HL2Mods\TheCitizen.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Reject.cs" />
-    <Compile Include="GameSpecific\HL2Mods\BackwardsMod.cs" />
-    <Compile Include="GameSpecific\HL2Mods\NightmareHouse.cs" />
-    <Compile Include="GameSpecific\HL2Mods\NightmareHouse2.cs" />
-    <Compile Include="GameSpecific\HL2Mods\AvenueOdessa.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Amalgam.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Evacuation.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Minerva.cs" />
-    <Compile Include="GameSpecific\HL2Mods\ForestTrain.cs" />
-    <Compile Include="GameSpecific\HL2Mods\A2BTrajectory.cs" />
-    <Compile Include="GameSpecific\HL2Mods\DarkEvening.cs" />
-    <Compile Include="GameSpecific\HL2Mods\EntropyZero2.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Localmotive.cs" />
-    <Compile Include="GameSpecific\PortalMods\CrumbsOfTruth.cs" />
-    <Compile Include="GameSpecific\TheBeginnersGuide__SplitPoints.cs" />
-    <Compile Include="GameSpecific\TheBeginnersGuide__Models.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="ComponentHandling\Settings\SettingProvider.cs" />
-    <Compile Include="ComponentHandling\Settings\SettingUIRepresented.cs" />
-    <Compile Include="Utilities\EnumUtils.cs" />
-    <Compile Include="Utilities\FileUtils.cs" />
-    <Compile Include="ComponentHandling\DetailedListView.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="ComponentHandling\DetailedListView.Designer.cs">
-      <DependentUpon>DetailedListView.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GameHandling\CustomCommand.cs" />
-    <Compile Include="GameSpecific\BMSMods\FurtherData.cs" />
-    <Compile Include="GameSpecific\BMSMods\HazardCourse.cs" />
-    <Compile Include="GameSpecific\SiNEpisodes.cs" />
-    <Compile Include="GameSpecific\PortalMods\TheFlashVersion.cs" />
-    <Compile Include="GameSpecific\PortalMods\ERROR.cs" />
-    <Compile Include="GameSpecific\PortalMods\EpicEdition.cs" />
-    <Compile Include="GameSpecific\Synergy.cs" />
-    <Compile Include="GameSpecific\BMSRetail.cs" />
-    <Compile Include="GameHandling\GameSupport.cs" />
-    <Compile Include="GameSpecific\HL2.cs" />
-    <Compile Include="GameSpecific\HL2Ep1.cs" />
-    <Compile Include="GameSpecific\HL2Ep2.cs" />
-    <Compile Include="GameSpecific\HDTF.cs" />
-    <Compile Include="GameSpecific\HL2Mods\1187Ep1.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Hangover.cs" />
-    <Compile Include="GameSpecific\HL2Mods\GGEFC13.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Ptsd2.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Terminal7.cs" />
-    <Compile Include="GameSpecific\HL2Mods\TheCitizen2AndReturns.cs" />
-    <Compile Include="GameSpecific\HL2Mods\EntropyZero.cs" />
-    <Compile Include="GameSpecific\HL2Mods\DeeperDown.cs" />
-    <Compile Include="GameSpecific\HL2Mods\ExperimentalFuel.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Tinje.cs" />
-    <Compile Include="GameSpecific\HL2Mods\TheLostCity.cs" />
-    <Compile Include="GameSpecific\HL2Survivor.cs" />
-    <Compile Include="GameSpecific\HLS.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Logistique.cs" />
-    <Compile Include="GameSpecific\HL2Mods\KillTheMonk.cs" />
-    <Compile Include="GameSpecific\HL2Mods\YearLongAlarm.cs" />
-    <Compile Include="GameSpecific\HL2Mods\ICE.cs" />
-    <Compile Include="GameSpecific\HL2Mods\DearEsther.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Crates.cs" />
-    <Compile Include="GameSpecific\HL2Mods\DayHard.cs" />
-    <Compile Include="GameSpecific\PortalMods\PortalPrelude.cs" />
-    <Compile Include="GameSpecific\PortalMods\PortalPro.cs" />
-    <Compile Include="GameSpecific\PortalMods\PCBORRR.cs" />
-    <Compile Include="GameSpecific\PortalMods\Rexaura.cs" />
-    <Compile Include="GameSpecific\PortalMods\StillAlive.cs" />
-    <Compile Include="GameSpecific\PortalMods\PRMO.cs" />
-    <Compile Include="GameSpecific\Prospekt.cs" />
-    <Compile Include="GameSpecific\Infra.cs" />
-    <Compile Include="GameSpecific\TheBeginnersGuide.cs" />
-    <Compile Include="GameSpecific\TE120.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Freakman2.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Freakman1.cs" />
-    <Compile Include="GameSpecific\HL2Mods\DankMemes.cs" />
-    <Compile Include="GameSpecific\HL2Mods\SnipersEp.cs" />
-    <Compile Include="GameSpecific\HL2Mods\WatchingPaintDry.cs" />
-    <Compile Include="GameSpecific\HL2Mods\UncertaintyPrinciple.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Downfall.cs" />
-    <Compile Include="GameSpecific\HL2Mods\MissionImprobable.cs" />
-    <Compile Include="GameSpecific\HL2Mods\Ptsd1.cs" />
-    <Compile Include="GameSpecific\HL2Mods\DeepDown.cs" />
-    <Compile Include="GameSpecific\EstrangedAct1.cs" />
-    <Compile Include="GameSpecific\LostCoast.cs" />
-    <Compile Include="GameSpecific\Portal.cs" />
-    <Compile Include="GameSpecific\TheStanleyParable.cs" />
-    <Compile Include="GameHandling\GameState.cs" />
-    <Compile Include="Utilities\ErrorDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Utilities\ErrorDialog.Designer.cs">
-      <DependentUpon>ErrorDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ComponentHandling\InternalComponent.cs" />
-    <Compile Include="ComponentHandling\SourceSplitFactory.cs" />
-    <Compile Include="GameHandling\GameMemory.cs" />
-    <Compile Include="ComponentHandling\EditableListBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="ComponentHandling\SourceSplitComponent.cs" />
-    <Compile Include="ComponentHandling\SourceSplitSettings.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="ComponentHandling\SourceSplitSettings.Designer.cs">
-      <DependentUpon>SourceSplitSettings.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Component\SourceSplitComponent.Settings.cs" />
+    <Compile Include="Component\SourceSplitComponent.Graphics.cs" />
+    <Compile Include="Component\SourceSplitComponent.cs" />
+    <Compile Include="Component\SourceSplitFactory.cs" />
+    <Compile Include="Game\GameMemory.cs" />
+    <Compile Include="Game\GameState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities\IEnumerableUtils.cs" />
-    <Compile Include="Utilities\ListUtils.cs" />
-    <Compile Include="Utilities\NumericUtils.cs" />
-    <Compile Include="Utilities\ProcUtils.cs" />
-    <Compile Include="Utilities\SigScannerUtils.cs" />
-    <Compile Include="Utilities\SigScanTargets.cs" />
-    <Compile Include="Utilities\StringUtils.cs" />
-    <Compile Include="Utilities\ControlUtils.cs" />
-    <Compile Include="Utilities\TimeSpanUtils.cs" />
-    <Compile Include="Utilities\TryMany.cs" />
-    <Compile Include="Utilities\SourceSplitUtils.cs" />
-    <Compile Include="Utilities\ValueWatcher.cs" />
+    <Compile Include="Common\Globals.cs" />
+    <Compile Include="Utilities\ErrorWIndow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Utilities\ErrorWindow.Designer.cs">
+      <DependentUpon>ErrorWIndow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\Extensions.cs" />
+    <Compile Include="Utilities\Helpers.cs" />
+    <Compile Include="Utilities\Logging.cs" />
     <Compile Include="Utilities\WinUtils.cs" />
-    <Compile Include="Utilities\XMLUtils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="ComponentHandling\DebugOutputForm.resx">
-      <DependentUpon>DebugOutputForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ComponentHandling\SessionsForm.resx">
-      <DependentUpon>SessionsForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ComponentHandling\SourceSplitSettings.resx">
-      <DependentUpon>SourceSplitSettings.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ComponentHandling\SourceSplitSettingsHelp.resx">
-      <DependentUpon>SourceSplitSettingsHelp.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Utilities\ErrorDialog.resx">
-      <DependentUpon>ErrorDialog.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ComponentHandling\DetailedListView.resx">
-      <DependentUpon>DetailedListView.cs</DependentUpon>
-    </EmbeddedResource>
+    <Folder Include="Game\GameSupport\" />
+    <Folder Include="Game\Source\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="license.txt" />
-    <None Include="CONFIGURING.md" />
-    <None Include="README.md" />
+    <EmbeddedResource Include="Component\Forms\DeferredSettingsControl.resx">
+      <DependentUpon>DeferredSettingsControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Component\Forms\MainForm.resx">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Utilities\ErrorWIndow.resx">
+      <DependentUpon>ErrorWIndow.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\date_time.txt" />
-    <Content Include="update\update.xml" />
-  </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>if exist "$(ProjectDir)\update\Components\$(TargetFileName)\$(TargetPath)" del "$(ProjectDir)\update\$(TargetFileName)\$(TargetPath)"
-copy "$(TargetPath)" "$(ProjectDir)update\Components\$(TargetFileName)"</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PreBuildEvent>@echo off
-if not exist "$(ProjectDir)\Resources" md "$(ProjectDir)\Resources"
-@for /f "skip=1" %25%25x in ('wmic os get localdatetime') do if not defined t set t=%25%25x
-echo %25t:~0,4%25-%25t:~4,2%25-%25t:~6,2%25 %25t:~8,2%25:%25t:~10,2%25:%25t:~12,2%25 &gt; "$(ProjectDir)\Resources\date_time.txt"
-</PreBuildEvent>
-  </PropertyGroup>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

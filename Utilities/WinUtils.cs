@@ -3,7 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.Utilities
 {
@@ -95,37 +98,37 @@ namespace LiveSplit.SourceSplit.Utilities
         [DllImport("dbghelp.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool SymInitialize(
-            [In] IntPtr hProcess, 
-            [In, Optional] string UserSearchPath, 
+            [In] IntPtr hProcess,
+            [In, Optional] string UserSearchPath,
             [In] bool fInvadeProcess
         );
 
         [DllImport("dbghelp.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.U8)]
         public static extern ulong SymLoadModuleEx(
-            [In] IntPtr hProcess, 
-            [In] IntPtr hFile, 
-            [In] string ImageName, 
-            [In] string ModuleName, 
-            [In, MarshalAs(UnmanagedType.U8)] ulong BaseOfDll, 
-            [In] uint DllSize, 
-            [In] IntPtr Data, 
+            [In] IntPtr hProcess,
+            [In] IntPtr hFile,
+            [In] string ImageName,
+            [In] string ModuleName,
+            [In, MarshalAs(UnmanagedType.U8)] ulong BaseOfDll,
+            [In] uint DllSize,
+            [In] IntPtr Data,
             [In] uint Flags
         );
 
         [DllImport("dbghelp.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool SymEnumSymbols(
-            [In] IntPtr hProcess, 
-            [In] ulong BaseOfDll, 
-            [In, Optional] string Mask, 
-            [In] PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback, 
+            [In] IntPtr hProcess,
+            [In] ulong BaseOfDll,
+            [In, Optional] string Mask,
+            [In] PSYM_ENUMERATESYMBOLS_CALLBACK EnumSymbolsCallback,
             [In, Optional] IntPtr UserContext
         );
 
         public delegate bool PSYM_ENUMERATESYMBOLS_CALLBACK(
-            [In] ref SYMBOL_INFO pSymInfo, 
-            [In] uint SymbolSize, 
+            [In] ref SYMBOL_INFO pSymInfo,
+            [In] uint SymbolSize,
             [In, Optional] IntPtr UserContext
         );
 
