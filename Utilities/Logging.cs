@@ -107,7 +107,7 @@ namespace LiveSplit.SourceSplit.Utilities
             {
                 try
                 {
-                    File.AppendAllText("sourcesplit_log.txt", str);
+                    File.AppendAllText("sourcesplit_log.txt", str + Environment.NewLine);
                     return;
                 }
                 catch (Exception e)
