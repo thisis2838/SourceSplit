@@ -13,7 +13,7 @@ namespace LiveSplit.SourceSplit.Utilities
 {
     public static class Logging
     {
-        private struct Message
+        public struct Message
         {
             public string Content;
             public TimeSpan ActiveTime;
@@ -21,8 +21,8 @@ namespace LiveSplit.SourceSplit.Utilities
 
             public Message(string msg)
             {
-                Content = msg;
-                ActiveTime = Common.Values.ActiveTime.Elapsed;
+                Content = msg.Replace(Environment.NewLine, "\n");
+                ActiveTime = Common.Globals.ActiveTime.Elapsed;
                 TimeOfCreation = DateTime.Now;
             }
         }
@@ -30,19 +30,17 @@ namespace LiveSplit.SourceSplit.Utilities
         private static CancellationTokenSource _cts = null;
         private static Thread _writeThread = null;
 
+        public static EventHandler<Message> MessageLogged;
+
         public static int TickCount
         {
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            get;
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            set;
+            [MethodImpl(MethodImplOptions.Synchronized)] get;
+            [MethodImpl(MethodImplOptions.Synchronized)] set;
         }
         public static int UpdateCount
         {
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            get;
-            [MethodImpl(MethodImplOptions.Synchronized)]
-            set;
+            [MethodImpl(MethodImplOptions.Synchronized)] get;
+            [MethodImpl(MethodImplOptions.Synchronized)] set;
         }
         private static bool _enabled = true;
 
@@ -61,6 +59,7 @@ namespace LiveSplit.SourceSplit.Utilities
 
                     while (_messages.Count > 0 && _messages.TryDequeue(out Message msg))
                     {
+                        MessageLogged?.BeginInvoke(null, msg, null, null);
                         if (_cts.IsCancellationRequested) return;
                         WriteToFile(msg);
                     }
@@ -86,7 +85,7 @@ namespace LiveSplit.SourceSplit.Utilities
             Debug.WriteLine
             (
                 $"SourceSplit " +
-                $"{Common.Values.ActiveTime.Elapsed} | " +
+                $"{Common.Globals.ActiveTime.Elapsed} | " +
                 $"{UpdateCount} | " +
                 $"{TickCount} : " +
                 $"{msg.Content}"
@@ -108,7 +107,7 @@ namespace LiveSplit.SourceSplit.Utilities
             {
                 try
                 {
-                    File.AppendAllText("sourcesplit_log.txt", str + Environment.NewLine);
+                    File.AppendAllText("sourcesplit_log.txt", str);
                     return;
                 }
                 catch (Exception e)
@@ -121,7 +120,7 @@ namespace LiveSplit.SourceSplit.Utilities
                 }
             }
 
-            new ErrorWindow
+            ErrorWindow.Show
             (
                 "Encountered one or more problems while writing to log file. Logging will be disabled for this session of SourceSplit!",
                 false,
@@ -129,16 +128,19 @@ namespace LiveSplit.SourceSplit.Utilities
             );
             _enabled = false;
         }
-        public static void WriteLine(string msg = "")
-        {
-            _messages.Enqueue(new Message(msg));
-        }
-        public static void WriteLine(object obj = null) => WriteLine(obj?.ToString() ?? "");
 
-        public static void WriteLineIf(bool cond, string msg)
+        public static void WriteLine(object msg = null)
+        {
+            string str = msg is null ? "" : msg.ToString();
+            _messages.Enqueue(new Message(str));
+        }
+        private static void WriteLineIf(bool cond, object msg)
         {
             if (cond) WriteLine(msg);
         }
-        public static void WriteLineIf(bool cond, object obj) => WriteLineIf(cond, obj?.ToString() ?? "");
+        public static void ErrorLine(string errorMsg)
+        {
+            WriteLine("!!! ERROR !!! " + errorMsg);
+        }
     }
 }

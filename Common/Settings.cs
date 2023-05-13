@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LiveSplit.SourceSplit.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -70,6 +71,7 @@ namespace LiveSplit.SourceSplit.Common
             if (_deserializer is null)
             {
                 SetValue(_default);
+                Logging.ErrorLine($"The settings \"{Name}\" does not have a corresponding deserializer!");
                 //throw ErrorWindow.Exception($"Setting {Name} has no deserializer to use!");
             }
             SetValue(_deserializer(serialized));

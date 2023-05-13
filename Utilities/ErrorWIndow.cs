@@ -19,7 +19,7 @@ namespace LiveSplit.SourceSplit.Utilities
         private bool _fatal = false;
         private List<Exception> _ex = new List<Exception>();
 
-        public ErrorWindow(string msg = "", bool fatal = false, params Exception[] exceptions)
+        private ErrorWindow(string msg = "", bool fatal = false, params Exception[] exceptions)
         {
             InitializeComponent();
 
@@ -89,8 +89,7 @@ namespace LiveSplit.SourceSplit.Utilities
 
             Load += ErrorWindow_Load;
 
-            this.Focus();
-            this.ShowDialog();
+            Logging.ErrorLine(boxMsg.Text);
         }
 
         private void ErrorWindow_Load(object sender, EventArgs e)
@@ -110,10 +109,17 @@ namespace LiveSplit.SourceSplit.Utilities
             Process.Start("https://github.com/thisis2838/SourceSplit/issues");
         }
 
+        public static void Show(string msg = "", bool fatal = false, params Exception[] exceptions)
+        {
+            var window = new ErrorWindow(msg, fatal, exceptions);
+            window.Focus();
+            window.ShowDialog();
+        }
+
         public static ErrorWindowException Exception(string message, params Exception[] e)
         {
-            var wnd = new ErrorWindow(message, true, e);
-            return new ErrorWindowException(wnd._ex.ToArray());
+            ErrorWindow.Show(message, true, e);
+            return new ErrorWindowException(e);
         }
 
         private void butClose_Click(object sender, EventArgs e)

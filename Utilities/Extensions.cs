@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -22,6 +23,13 @@ namespace LiveSplit.SourceSplit.Utilities
             {
                 func(item);
             }
+        }
+
+        public static string RemoveRepeats(this string input, params string[] targets)
+        {
+            return targets
+                .OrderByDescending(x => x.Length)
+                .Aggregate(input, (a, b) => Regex.Replace(a, $"({Regex.Escape(b)})(\\1+)", (e) => e.Groups[1].Value));
         }
     }
 }

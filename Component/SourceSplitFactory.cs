@@ -69,7 +69,7 @@ namespace LiveSplit.SourceSplit.Component
                 }
             }
 
-            Common.Values.ActiveTime = Stopwatch.StartNew();
+            Common.Globals.ActiveTime = Stopwatch.StartNew();
             Logging.Start();
             SettingsProvider.Init();
 

@@ -32,7 +32,7 @@ namespace LiveSplit.SourceSplit.Component
         {
             XmlElement node = document.CreateElement("Settings");
 
-            node.AppendChild(document.ToElement("Version", Values.Version));
+            node.AppendChild(document.ToElement("Version", Globals.Version));
             Settings.ForEach(x =>
             {
                 node.AppendChild(document.ToElement(x.Key, x.Value.Serialize()));

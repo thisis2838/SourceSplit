@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace LiveSplit.SourceSplit.Common
 {
-    public static class Values
+    public static class Globals
     {
         public static Stopwatch ActiveTime;
         public static string Version => Assembly.GetExecutingAssembly().GetName().Version.ToString();
