@@ -71,7 +71,7 @@ namespace LiveSplit.SourceSplit.Common
             if (_deserializer is null)
             {
                 SetValue(_default);
-                Logging.ErrorLine($"The settings \"{Name}\" does not have a corresponding deserializer!");
+                Logging.WarningLine($"The settings \"{Name}\" does not have a corresponding deserializer! Using default value.");
                 //throw ErrorWindow.Exception($"Setting {Name} has no deserializer to use!");
             }
             SetValue(_deserializer(serialized));

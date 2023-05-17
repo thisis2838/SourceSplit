@@ -142,5 +142,9 @@ namespace LiveSplit.SourceSplit.Utilities
         {
             WriteLine("!!! ERROR !!! " + errorMsg);
         }
+        public static void WarningLine(string warningMsg)
+        {
+            WriteLine("!! WARNING !! " + warningMsg);
+        }
     }
 }
