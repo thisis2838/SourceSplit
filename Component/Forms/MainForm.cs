@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Reflection;
 using System.Windows.Forms;
+using System.Configuration;
 
 namespace LiveSplit.SourceSplit.Component.Forms
 {
@@ -23,7 +24,7 @@ namespace LiveSplit.SourceSplit.Component.Forms
             this.Load += MainForm_Load;
 
             typeof(ListView).GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(listDebug, true);
-
+            listDebug.KeyDown += ListDebug_KeyDown;
             {
                 const int MAX_DEBUG_HISTORY = 2000;
                 bool bgSwitch = false;
@@ -58,6 +59,18 @@ namespace LiveSplit.SourceSplit.Component.Forms
                 };
             }
 
+        }
+
+        private void ListDebug_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (listDebug.SelectedItems.Count == 0) return;
+            if (e.Control && e.KeyCode == Keys.C)
+            {
+                string set = string.Join(Environment.NewLine, listDebug.SelectedItems.Cast<ListViewItem>()
+                    .Select(x => x.SubItems[colMessage.Index].Text));
+
+                try { Clipboard.SetText(set); } catch { }
+            }
         }
 
         private void MainForm_Load(object sender, EventArgs e)
