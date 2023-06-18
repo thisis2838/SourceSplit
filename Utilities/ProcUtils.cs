@@ -34,12 +34,12 @@ namespace LiveSplit.SourceSplit.Utilities
             for (int i = 0; i < numMods; i++)
             {
                 sb.Clear();
-                if (WinUtils.GetModuleFileNameEx(p.Handle, hModules[i], sb, sb.Capacity) == 0)
+                if (WinAPI.GetModuleFileNameExW(p.Handle, hModules[i], sb, (uint)sb.Capacity) == 0)
                     throw new Win32Exception();
                 string fileName = sb.ToString();
 
                 sb.Clear();
-                if (WinUtils.GetModuleBaseName(p.Handle, hModules[i], sb, (uint)sb.Capacity) == 0)
+                if (WinAPI.GetModuleBaseNameW(p.Handle, hModules[i], sb, (uint)sb.Capacity) == 0)
                     throw new Win32Exception();
                 string baseName = sb.ToString();
 
