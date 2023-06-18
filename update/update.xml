@@ -283,4 +283,12 @@
       <change>Fix a crash which prevents the component from being used on newer versions.</change>
     </changelog>
   </update>
+  <update version="3.3.4.3">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Hotfix fox 3.3.4.2. Sorry for having you update so much, I don't have a test team, besides Portal speedrunners.</change>
+    </changelog>
+  </update>
 </updates>
