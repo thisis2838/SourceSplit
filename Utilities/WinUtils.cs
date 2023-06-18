@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace LiveSplit.SourceSplit.Utilities
 {
@@ -218,6 +219,11 @@ namespace LiveSplit.SourceSplit.Utilities
             }
         }
         #endregion
+
+        [DllImport("coredll.dll", SetLastError = true)]
+        public static extern int GetModuleFileNameEx(IntPtr hProcess, IntPtr hModule, StringBuilder lpFilename, int nSize);
+        [DllImport("psapi.dll")]
+        public static extern uint GetModuleBaseName(IntPtr hProcess, IntPtr hModule, StringBuilder lpBaseName, uint nSize);
 
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);

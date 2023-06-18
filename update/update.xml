@@ -275,4 +275,12 @@
       <change>Fix potential SourceSplit crash when trying to reactivate it.</change>
     </changelog>
   </update>
+  <update version="3.3.4.2">
+    <files>
+      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+    </files>
+    <changelog>
+      <change>Fix a crash which prevents the component from being used on newer versions.</change>
+    </changelog>
+  </update>
 </updates>
