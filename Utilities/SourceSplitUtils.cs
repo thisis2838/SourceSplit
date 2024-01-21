@@ -250,6 +250,7 @@ namespace LiveSplit.SourceSplit.Utilities
                     Thread.Sleep(10);
                 }
             });
+            _writeThread.IsBackground = true;
             _writeThread.Start();
 
             WriteLine("Logging started");
@@ -305,7 +306,7 @@ namespace LiveSplit.SourceSplit.Utilities
 
             new ErrorDialog
             (
-                "Encountered one or more problems while writing to log file. Logging will be disabled for this session of SourceSplit!",
+                "Encountered one or more problems while writing to log file. Logging will be disabled for this session of SourceSplit.",
                 false,
                 errors.GroupBy(x => x.Message).Select(x => x.First()).ToArray()
             );
