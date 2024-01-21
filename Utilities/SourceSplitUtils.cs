@@ -24,11 +24,15 @@ namespace LiveSplit.SourceSplit.Utilities
         
         public static bool IsVACProtectedProcess(Process p)
         {
-            var mainProcPath = p.MainModule.FileName;
+            var mainProcPath = p.MainModule?.FileName;
+            if (mainProcPath == null)
+            {
+                return false;
+            }
 
             try
             {
-                if (IsVACProtectedProcessName(p.ProcessName) || IsVACProtectedGame(Path.GetDirectoryName(mainProcPath)))
+                if (IsVACProtectedProcessName(p.ProcessName) || IsVACProtectedGameDir(Path.GetDirectoryName(mainProcPath)))
                     return true;
             }
             catch (Exception e)
@@ -63,7 +67,7 @@ namespace LiveSplit.SourceSplit.Utilities
             return badExes.Contains(p.ToLower());
         }
 
-        public static bool IsVACProtectedGame(string path)
+        public static bool IsVACProtectedGameDir(string path)
         {
             string[] badMods = { "cstrike", "dods", "hl2mp", "insurgency", "tf", "zps" };
             string[] badRootDirs = { "Dark Messiah of Might and Magic Multi-Player" };
