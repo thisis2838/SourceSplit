@@ -1,294 +1,304 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <updates>
-  <update version="3.1">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Redesigned Map Transition Auto-Splitting evaluation to being one-way</change>
-      <change>Made Undo Split also affecting Auto-Splitting evaluation</change>
-      <change>Added Higher-Precision Time and Tick Count</change>
-      <change>Fixed a bug where leaving the Auto-Start map field empty resets the run upon game exit.</change>
-      <change>Fixed a bug where changing tickrates affects the existing time on the timer.</change>
-    </changelog>
-  </update>
-  <update version="3.1.1">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Added an option to start on portal open in Portal</change>
-      <change>Renovated Custom Commands</change>
-      <change>Modified Auto-End for Hell's Mines</change>
-    </changelog>
-  </update>
-  <update version="3.1.2">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Overhauled Custom Commands</change>
-      <change>Function to split on elevator starts and split on Death% ending in Portal (limited)</change>
-    </changelog>
-  </update>
-  <update version="3.1.3">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Minor fixes and changes to settings UI</change>
-    </changelog>
-  </update>
-  <update version="3.2.0">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Overhaul to timing methods to increase timing accuracies and fix issues related to pause spamming</change>
-      <change>Fixed double splitting in HL2 Survivor</change>
-      <change>Added an option to disable pausing timer when starting from game pause</change>
-      <change>Code cleanups and refactoring</change>
-    </changelog>
-  </update>
-  <update version="3.2.0.1">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Added some checks to prevent extra ticks being accounted into time</change>
-    </changelog>
-  </update>
-  <update version="3.2.1">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Added support for Southernmost Combine.</change>
-      <change>Fixed a problem with storing current / old player states upon map load leading to potential premature Auto-starts.</change>
-      <change>Allowed variable precision on the Higher Precision Timer.</change>
-      <change>Fixed Game Process List Default button not working.</change>
-      <change>Added a description field for the various Timing Method options.</change>
-      <change>Modified the Custom Command handler to use binary exports for console printing functions.</change>
-      <change>Changed Death% split in Portal to only happen on the first map.</change>
-      <change>Fixed the default value for TSP's No Space Ending Custom Command.</change>
-    </changelog>
-  </update>
-  <update version="3.2.2">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Added support for Very Hard Mod</change>
-      <change>Added an option to split upon intitial map loads</change>
-      <change>Fixed a bug where the splitter stops working if Livesplit crashes or closed unexpectedly when the game is running</change>
-      <change>Fixed a bug where typing into the Start Map textbox may cause an Exception to be tripped</change>
-      <change>Fixed a bug related to start time offset being added twice</change>
-      <change>Changed Black Mesa's xensplit in accordance with game rules</change>
-      <change>Modified Auto-End for Upmine Struggle</change>
-      <change>Unhandled or unexpected Exceptions will now be reported through a Warning popup</change>
-    </changelog>
-  </update>
-  <update version="3.2.2.1">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Added an option to have Real Time be affected by built-in Auto-start time offset</change>
-      <change>Added an option to disable splitting on special events.</change>
-      <change>Fixed some UI element sizing.</change>
-    </changelog>
-  </update>
-  <update version="3.2.2.2">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Fixed Save Deleting splitting when Splitting on Generic Map Split is enabled.</change>
-    </changelog>
-  </update>
-  <update version="3.2.3">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Added an option to count server initialization ticks</change>
-      <change>Added an option to add extra ticks per game load</change>
-      <change>Added an option to Auto-Split instead of Auto-Resetting the timer</change>
-      <change>Redesigned timer monitoring to no longer rely on memory injection</change>
-      <change>Fixed some issues with time keeping, particularly with decimal precision</change>
-      <change>Split Auto Start / Stop / Reset into 3 separate settings</change>
-      <change>Cleaned up Setting-handling code</change>
-      <change>Minor adjustments to settings UI</change>
-    </changelog>
-  </update>
-  <update version="3.2.3.1">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Made Auto-Reset reset split-related states, even if it is disabled.</change>
-    </changelog>
-  </update>
-  <update version="3.2.3.2">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Fixed Splitter sometimes missing splits.</change>
-    </changelog>
-  </update>
-  <update version="3.2.3.3">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Fixed Dangerous World's Auto-Start firing on loading a save anywhere on the first map.</change>
-    </changelog>
-  </update>
-  <update version="3.3.0">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Added Demo Recording interoperability for timing, so run time can more closely match demo time.</change>
-      <change>Added a feature to print the information of the latest Demo to the Console.</change>
-      <change>Added a feature to display the current Demo's name and tick count on the layout.</change>
-      <change>Added an option to open SourceSplit's settings under the Control drowdown in LiveSplit.</change>
-      <change>Added an option to add RTA to IGT when the game is not running.</change>
-      <change>Added an extra condition for Auto-Starting when transitioning to a map or loading a save with a particular name.</change>
-      <change>Added an option to disable Auto-Resetting when starting a New Game on the first map.</change>
-      <change>Added support for Local Motive, Portal: Crumbs of Truth.</change>
-      <change>Added extra split points for The Beginner's Guide.</change>
-      <change>Redesigned map whitelist/blacklisting to allow/disallow specific transitions.</change>
-      <change>Redesigned Map Times window.</change>      
-      <change>Redesigned settings and added an About page.</change>      
-      <change>Changed the timing for all Portal games/mods to abide by new rules.</change>
-      <change>Changed the method for detecting Auto-Start in Portal to use file hash.</change>
-      <change>Made Auto-Splitting history roll back when undoing splits.</change>
-      <change>Some custom commands' values are now saved like settings.</change>
-      <change>Made time and values shown by Additional Timers monospaced.</change>
-      <change>Made the Tick Count display also show the tick count for the current Session.</change>
-      <change>Removed Game Process List for automated game process acquisition logic.</change>
-      <change>Split Timing Method into separate options.</change>
-      <change>Fixed various bugs related to split tracking.</change>
-      <change>Massive internal code revisions and refactoring.</change>
-    </changelog>
-  </update>
-  <update version="3.3.1">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Added custom split points for Lost Coast.</change>
-      <change>Added support for Portal RTX, Entropy Zero 2, Dark Evening, Episode 3: The Closure, AJB Trajectory trilogy, Forest Train</change>
-      <change>Removed support for Portal 2, Portal Stories: Mel, and Aperature Tag as they were out of date and obsoleted by newer tools.</change>
-      <change>Fixed some issues related to Custom Commands.</change>
-      <change>Internal code revisions and cleanup.</change>
-    </changelog>
-  </update>
-  <update version="3.3.2">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Added support for Evacuation, Minerva: METASTASIS</change>
-      <change>Added Auto-Start support for 75FOV Portal 3420 vault save</change>
-      <change>Corrected vault save timing for Portal games/mods</change>
-      <change>Internal code revisions and cleanup.</change>
-    </changelog>
-  </update>
-  <update version="3.3.3">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Added support for Amalgam, Avenue Odessa, City 17 Is Far Away, Dark 17, Jolly's Hardcore Mod, Sebastian, Nightmare House 1 &amp; 2, NEOTOKYO° Kshatriya, Uzvara, Abberation, Awakening, Call-In, Combine Destiny, Daylight, Expectation, Depot, Riot Act, Siren, Mountain Caves, Missile strike imminent, Overawe, Penetration, Person of Interest, Ravenholm: The Lost Chapter, Research and Development, The Road to Abyss, Spherical Nightmares, Station 51, The Lighthouse, Tr1p, Whoopservatory, Bear Party Adventure, Causality Effect, Last Zombie, Snopdrop Escape, Human Error, Thunder's Leaves.</change>
-      <change>Added support for (hopefully) all RTSL and Map Labs mapping competition compilations.</change>
-      <change>Added a new Help window which shows detailed explanations of the options in the Settings.</change>
-      <change>Added text to show the currently detected game/mod under the Abouts page</change>
-      <change>Fixed Evacuation's Auto-End not always working.</change>
-      <change>Fixed Half-Life 2: Deeper Down's Auto-Start being 1.2 seconds late.</change>
-      <change>Added checks and routines to prevent retrieving a bogus game directory path if it originally contained Unicode characters.</change>
-      <change>Made the Settings window bigger when opened through LiveSplit's right click drop down menu.</change>
-      <change>Corrected Auto-Start time offset for Portal's portal open auto-start.</change>
-      <change>Added some debugging features.</change>
-      <change>Internal code minimizing, revisions, and cleanup.</change>
-    </changelog>
-  </update>
-  <update version="3.3.3.1">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Fixed process hang when LiveSplit is closed while a game with locked settings is running.</change>
-    </changelog>
-  </update>
-  <update version="3.3.3.2">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Added safeguards against hanging caused by cross-thread operations.</change>
-      <change>Added highlighting to the setting which is currently being described by the Help window.</change>
-      <change>Cleaned up some of the help strings.</change>
-      <change>Improved Portal's elevator splitting.</change>
-      <change>Internal code changes and revisions.</change>
-    </changelog>
-  </update>
-  <update version="3.3.3.3">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Refined UI setting handling to prevent cross-thread invocation errors.</change>
-      <change>Fixed some issues with currently-playing demo text.</change>
-    </changelog>
-  </update>
-  <update version="3.3.3.4">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Changed Evacuation's Auto-Start to comply with rule changes.</change>
-    </changelog>
-  </update>
-  <update version="3.3.4">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Added support for Half-Life 2: Mirrored</change>
-      <change>Added extra checks to prevent UI thread exceptions</change>
-      <change>Added Elevator Split whitelisting for Portal.</change>
-      <change>Added extra checks for determining VAC status of a game.</change>
-      <change>Forced LiveSplit's Timing Method to Game Time upon launch, and an option to disable this.</change>
-      <change>Forced logging to file.</change>
-      <change>Fixed Death Split for Portal not working.</change>
-      <change>Forced 0th tick for Black Mesa to comply with rule changes.</change>
-    </changelog>
-  </update>
-  <update version="3.3.4.1">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Fix potential SourceSplit crash when trying to reactivate it.</change>
-    </changelog>
-  </update>
-  <update version="3.3.4.2">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Fix a crash which prevents the component from being used on newer versions.</change>
-    </changelog>
-  </update>
-  <update version="3.3.4.3">
-    <files>
-      <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
-    </files>
-    <changelog>
-      <change>Hotfix fox 3.3.4.2. Sorry for having you update so much, I don't have a test team, besides Portal speedrunners.</change>
-    </changelog>
-  </update>
+    <update version="3.1">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Redesigned Map Transition Auto-Splitting evaluation to being one-way</change>
+            <change>Made Undo Split also affecting Auto-Splitting evaluation</change>
+            <change>Added Higher-Precision Time and Tick Count</change>
+            <change>Fixed a bug where leaving the Auto-Start map field empty resets the run upon game exit.</change>
+            <change>Fixed a bug where changing tickrates affects the existing time on the timer.</change>
+        </changelog>
+    </update>
+    <update version="3.1.1">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Added an option to start on portal open in Portal</change>
+            <change>Renovated Custom Commands</change>
+            <change>Modified Auto-End for Hell's Mines</change>
+        </changelog>
+    </update>
+    <update version="3.1.2">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Overhauled Custom Commands</change>
+            <change>Function to split on elevator starts and split on Death% ending in Portal (limited)</change>
+        </changelog>
+    </update>
+    <update version="3.1.3">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Minor fixes and changes to settings UI</change>
+        </changelog>
+    </update>
+    <update version="3.2.0">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Overhaul to timing methods to increase timing accuracies and fix issues related to pause spamming</change>
+            <change>Fixed double splitting in HL2 Survivor</change>
+            <change>Added an option to disable pausing timer when starting from game pause</change>
+            <change>Code cleanups and refactoring</change>
+        </changelog>
+    </update>
+    <update version="3.2.0.1">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Added some checks to prevent extra ticks being accounted into time</change>
+        </changelog>
+    </update>
+    <update version="3.2.1">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Added support for Southernmost Combine.</change>
+            <change>Fixed a problem with storing current / old player states upon map load leading to potential premature Auto-starts.</change>
+            <change>Allowed variable precision on the Higher Precision Timer.</change>
+            <change>Fixed Game Process List Default button not working.</change>
+            <change>Added a description field for the various Timing Method options.</change>
+            <change>Modified the Custom Command handler to use binary exports for console printing functions.</change>
+            <change>Changed Death% split in Portal to only happen on the first map.</change>
+            <change>Fixed the default value for TSP's No Space Ending Custom Command.</change>
+        </changelog>
+    </update>
+    <update version="3.2.2">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Added support for Very Hard Mod</change>
+            <change>Added an option to split upon intitial map loads</change>
+            <change>Fixed a bug where the splitter stops working if Livesplit crashes or closed unexpectedly when the game is running</change>
+            <change>Fixed a bug where typing into the Start Map textbox may cause an Exception to be tripped</change>
+            <change>Fixed a bug related to start time offset being added twice</change>
+            <change>Changed Black Mesa's xensplit in accordance with game rules</change>
+            <change>Modified Auto-End for Upmine Struggle</change>
+            <change>Unhandled or unexpected Exceptions will now be reported through a Warning popup</change>
+        </changelog>
+    </update>
+    <update version="3.2.2.1">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Added an option to have Real Time be affected by built-in Auto-start time offset</change>
+            <change>Added an option to disable splitting on special events.</change>
+            <change>Fixed some UI element sizing.</change>
+        </changelog>
+    </update>
+    <update version="3.2.2.2">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Fixed Save Deleting splitting when Splitting on Generic Map Split is enabled.</change>
+        </changelog>
+    </update>
+    <update version="3.2.3">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Added an option to count server initialization ticks</change>
+            <change>Added an option to add extra ticks per game load</change>
+            <change>Added an option to Auto-Split instead of Auto-Resetting the timer</change>
+            <change>Redesigned timer monitoring to no longer rely on memory injection</change>
+            <change>Fixed some issues with time keeping, particularly with decimal precision</change>
+            <change>Split Auto Start / Stop / Reset into 3 separate settings</change>
+            <change>Cleaned up Setting-handling code</change>
+            <change>Minor adjustments to settings UI</change>
+        </changelog>
+    </update>
+    <update version="3.2.3.1">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Made Auto-Reset reset split-related states, even if it is disabled.</change>
+        </changelog>
+    </update>
+    <update version="3.2.3.2">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Fixed Splitter sometimes missing splits.</change>
+        </changelog>
+    </update>
+    <update version="3.2.3.3">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Fixed Dangerous World's Auto-Start firing on loading a save anywhere on the first map.</change>
+        </changelog>
+    </update>
+    <update version="3.3.0">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Added Demo Recording interoperability for timing, so run time can more closely match demo time.</change>
+            <change>Added a feature to print the information of the latest Demo to the Console.</change>
+            <change>Added a feature to display the current Demo's name and tick count on the layout.</change>
+            <change>Added an option to open SourceSplit's settings under the Control drowdown in LiveSplit.</change>
+            <change>Added an option to add RTA to IGT when the game is not running.</change>
+            <change>Added an extra condition for Auto-Starting when transitioning to a map or loading a save with a particular name.</change>
+            <change>Added an option to disable Auto-Resetting when starting a New Game on the first map.</change>
+            <change>Added support for Local Motive, Portal: Crumbs of Truth.</change>
+            <change>Added extra split points for The Beginner's Guide.</change>
+            <change>Redesigned map whitelist/blacklisting to allow/disallow specific transitions.</change>
+            <change>Redesigned Map Times window.</change>            
+            <change>Redesigned settings and added an About page.</change>            
+            <change>Changed the timing for all Portal games/mods to abide by new rules.</change>
+            <change>Changed the method for detecting Auto-Start in Portal to use file hash.</change>
+            <change>Made Auto-Splitting history roll back when undoing splits.</change>
+            <change>Some custom commands' values are now saved like settings.</change>
+            <change>Made time and values shown by Additional Timers monospaced.</change>
+            <change>Made the Tick Count display also show the tick count for the current Session.</change>
+            <change>Removed Game Process List for automated game process acquisition logic.</change>
+            <change>Split Timing Method into separate options.</change>
+            <change>Fixed various bugs related to split tracking.</change>
+            <change>Massive internal code revisions and refactoring.</change>
+        </changelog>
+    </update>
+    <update version="3.3.1">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Added custom split points for Lost Coast.</change>
+            <change>Added support for Portal RTX, Entropy Zero 2, Dark Evening, Episode 3: The Closure, AJB Trajectory trilogy, Forest Train</change>
+            <change>Removed support for Portal 2, Portal Stories: Mel, and Aperature Tag as they were out of date and obsoleted by newer tools.</change>
+            <change>Fixed some issues related to Custom Commands.</change>
+            <change>Internal code revisions and cleanup.</change>
+        </changelog>
+    </update>
+    <update version="3.3.2">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Added support for Evacuation, Minerva: METASTASIS</change>
+            <change>Added Auto-Start support for 75FOV Portal 3420 vault save</change>
+            <change>Corrected vault save timing for Portal games/mods</change>
+            <change>Internal code revisions and cleanup.</change>
+        </changelog>
+    </update>
+    <update version="3.3.3">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Added support for Amalgam, Avenue Odessa, City 17 Is Far Away, Dark 17, Jolly's Hardcore Mod, Sebastian, Nightmare House 1 &amp; 2, NEOTOKYO° Kshatriya, Uzvara, Abberation, Awakening, Call-In, Combine Destiny, Daylight, Expectation, Depot, Riot Act, Siren, Mountain Caves, Missile strike imminent, Overawe, Penetration, Person of Interest, Ravenholm: The Lost Chapter, Research and Development, The Road to Abyss, Spherical Nightmares, Station 51, The Lighthouse, Tr1p, Whoopservatory, Bear Party Adventure, Causality Effect, Last Zombie, Snopdrop Escape, Human Error, Thunder's Leaves.</change>
+            <change>Added support for (hopefully) all RTSL and Map Labs mapping competition compilations.</change>
+            <change>Added a new Help window which shows detailed explanations of the options in the Settings.</change>
+            <change>Added text to show the currently detected game/mod under the Abouts page</change>
+            <change>Fixed Evacuation's Auto-End not always working.</change>
+            <change>Fixed Half-Life 2: Deeper Down's Auto-Start being 1.2 seconds late.</change>
+            <change>Added checks and routines to prevent retrieving a bogus game directory path if it originally contained Unicode characters.</change>
+            <change>Made the Settings window bigger when opened through LiveSplit's right click drop down menu.</change>
+            <change>Corrected Auto-Start time offset for Portal's portal open auto-start.</change>
+            <change>Added some debugging features.</change>
+            <change>Internal code minimizing, revisions, and cleanup.</change>
+        </changelog>
+    </update>
+    <update version="3.3.3.1">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Fixed process hang when LiveSplit is closed while a game with locked settings is running.</change>
+        </changelog>
+    </update>
+    <update version="3.3.3.2">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Added safeguards against hanging caused by cross-thread operations.</change>
+            <change>Added highlighting to the setting which is currently being described by the Help window.</change>
+            <change>Cleaned up some of the help strings.</change>
+            <change>Improved Portal's elevator splitting.</change>
+            <change>Internal code changes and revisions.</change>
+        </changelog>
+    </update>
+    <update version="3.3.3.3">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Refined UI setting handling to prevent cross-thread invocation errors.</change>
+            <change>Fixed some issues with currently-playing demo text.</change>
+        </changelog>
+    </update>
+    <update version="3.3.3.4">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Changed Evacuation's Auto-Start to comply with rule changes.</change>
+        </changelog>
+    </update>
+    <update version="3.3.4">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Added support for Half-Life 2: Mirrored</change>
+            <change>Added extra checks to prevent UI thread exceptions</change>
+            <change>Added Elevator Split whitelisting for Portal.</change>
+            <change>Added extra checks for determining VAC status of a game.</change>
+            <change>Forced LiveSplit's Timing Method to Game Time upon launch, and an option to disable this.</change>
+            <change>Forced logging to file.</change>
+            <change>Fixed Death Split for Portal not working.</change>
+            <change>Forced 0th tick for Black Mesa to comply with rule changes.</change>
+        </changelog>
+    </update>
+    <update version="3.3.4.1">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Fix potential SourceSplit crash when trying to reactivate it.</change>
+        </changelog>
+    </update>
+    <update version="3.3.4.2">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Fix a crash which prevents the component from being used on newer versions.</change>
+        </changelog>
+    </update>
+    <update version="3.3.4.3">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Hotfix fox 3.3.4.2. Sorry for having you update so much, I don't have a test team, besides Portal speedrunners.</change>
+        </changelog>
+    </update>
+    <update version="3.3.4.4">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Fixed HLS support.</change>
+            <change>Fixed a potential error while searching for processes.</change>
+            <change>Changed logging to output to a separate folder in CSV format and segment by days.</change>
+        </changelog>
+    </update>
 </updates>
