@@ -14,6 +14,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using LiveSplit.SourceSplit.GameSpecific;
 
 namespace LiveSplit.SourceSplit.Utilities
 {
@@ -23,11 +24,15 @@ namespace LiveSplit.SourceSplit.Utilities
         
         public static bool IsVACProtectedProcess(Process p)
         {
-            var mainProcPath = p.MainModule.FileName;
+            var mainProcPath = p.MainModule?.FileName;
+            if (mainProcPath == null)
+            {
+                return false;
+            }
 
             try
             {
-                if (IsVACProtectedProcessName(p.ProcessName) || IsVACProtectedGame(Path.GetDirectoryName(mainProcPath)))
+                if (IsVACProtectedProcessName(p.ProcessName) || IsVACProtectedGameDir(Path.GetDirectoryName(mainProcPath)))
                     return true;
             }
             catch (Exception e)
@@ -62,7 +67,7 @@ namespace LiveSplit.SourceSplit.Utilities
             return badExes.Contains(p.ToLower());
         }
 
-        public static bool IsVACProtectedGame(string path)
+        public static bool IsVACProtectedGameDir(string path)
         {
             string[] badMods = { "cstrike", "dods", "hl2mp", "insurgency", "tf", "zps" };
             string[] badRootDirs = { "Dark Messiah of Might and Magic Multi-Player" };
@@ -91,6 +96,7 @@ namespace LiveSplit.SourceSplit.Utilities
             { 218, false },
             { 219, false },
             { 220, false },
+            { 240, false }, // hls is exempt
             { 280, false },
             { 340, false },
             { 380, false },
@@ -120,7 +126,7 @@ namespace LiveSplit.SourceSplit.Utilities
             { 1583720, false },
             { 5438926, false },
 
-            { 240, true },
+            //{ 240, true }, hls identifies as this for some reason...
             { 320, true },
             { 360, true },
             { 440, true },
@@ -144,51 +150,62 @@ namespace LiveSplit.SourceSplit.Utilities
             bool result = false;
 
             CancellationTokenSource cts = new CancellationTokenSource();
-            var task = Task.Run(() =>
-            {
-                // find if game has an appid associated with it
-                int id = int.Parse(File.ReadAllText(Path.Combine(path, "steam_appid.txt").Trim(' ', '\t', '\r', '\n')));
-                // check if we have this already
-                if (_appIDVACStatuses.TryGetValue(id, out var cached))
+            var task = Task.Run
+            (
+                () =>
                 {
-                    result = cached;
-                    return;
-                }
+                    var appIdFile = Path.Combine(path, "steam_appid.txt").Trim(' ', '\t', '\r', '\n');
+                    // we're most likely running some old distribution of a source game, not running on steam,
+                    // or not a source game at all, both do not fall within vac purview 
+                    if (!File.Exists(appIdFile))
+                        return;
 
-                // if found, query for its information from the steam store api
-                var req = HttpWebRequest.Create($"https://store.steampowered.com/api/appdetails?appids=" + id);
+                    // find if game has an appid associated with it
+                    int id = int.Parse(File.ReadAllText(appIdFile));
+                    // check if we have this already
+                    if (_appIDVACStatuses.TryGetValue(id, out var cached))
+                    {
+                        result = cached;
+                        return;
+                    }
 
-                // get a response, read to end. it should be in json format
-                var response = Task.Run(() => req.GetResponseAsync(), cts.Token).Result;
-                var responseStream = new StreamReader(response.GetResponseStream());
-                var responseContent = Task.Run(() => responseStream.ReadToEndAsync(), cts.Token).Result;
+                    // if found, query for its information from the steam store api
+                    var req = HttpWebRequest.Create($"https://store.steampowered.com/api/appdetails?appids=" + id);
 
-                // this indicates if the api request has failed, maybe because the game doesn't exist or has been delisted
-                if (responseContent.Contains(@"{""success"":false}")) throw new Exception("API request failed.");
+                    // get a response, read to end. it should be in json format
+                    var response = Task.Run(() => req.GetResponseAsync(), cts.Token).Result;
+                    var responseStream = new StreamReader(response.GetResponseStream());
+                    var responseContent = Task.Run(() => responseStream.ReadToEndAsync(), cts.Token).Result;
 
-                // remove double escaped backslashes to remove edge cases in regex detection
-                responseContent = responseContent.Replace("\\\\", "//");
-                // ideally, we'd wanna parse the json, but that'd require extra work or a dependancy
-                // so let's just regex search for the right node.
-                // find the category array
-                var category = Regex.Match(responseContent, @"""categories"":\[(\\]|[^\]])+\]");
-                if (!category.Success) throw new Exception("Couldn't find category information");
+                    // this indicates if the api request has failed, maybe because the game doesn't exist or has been delisted
+                    if (responseContent.Contains(@"{""success"":false}")) throw new Exception("API request failed.");
 
-                // vac being supported has a category of 8
-                result = category.Value.Contains(@"{""id"":8");
-                _appIDVACStatuses[id] = result;
-            }, cts.Token);
+                    // remove double escaped backslashes to remove edge cases in regex detection
+                    responseContent = responseContent.Replace("\\\\", "//");
+                    // ideally, we'd wanna parse the json, but that'd require extra work or a dependancy
+                    // so let's just regex search for the right node.
+                    // find the category array
+                    var category = Regex.Match(responseContent, @"""categories"":\[(\\]|[^\]])+\]");
+                    if (!category.Success) throw new Exception("Couldn't find category information");
+
+                    // vac being supported has a category of 8
+                    result = category.Value.Contains(@"{""id"":8");
+                    _appIDVACStatuses[id] = result;
+                }, 
+                cts.Token
+            );
             cts.CancelAfter(2000); // don't wait for more than 2s
             task.Wait();
 
             if (task.Status == TaskStatus.Faulted) throw task.Exception;
-
             return result;
         }
     }
 
     public static class Logging
     {
+        public static string LogFilePath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SourceSplit", "logs", _logFileName);
+
         private struct Message
         {
             public string Content;
@@ -205,6 +222,8 @@ namespace LiveSplit.SourceSplit.Utilities
         private static ConcurrentQueue<Message> _messages = new ConcurrentQueue<Message>();
         private static CancellationTokenSource _cts;
         private static Thread _writeThread = null;
+
+        private static string _logFileName = DateTime.Now.ToString(@"yyyy-MM-dd") + ".csv";
 
         public static int TickCount
         {
@@ -239,17 +258,17 @@ namespace LiveSplit.SourceSplit.Utilities
             {
                 while (true)
                 {
+                    SpinWait.SpinUntil(() => _cts.Token.IsCancellationRequested || _messages.Count > 0);
                     if (_cts.IsCancellationRequested) return;
 
-                    while (_messages.Count > 0 && _messages.TryDequeue(out Message msg))
+                    while (_messages.TryDequeue(out Message msg))
                     {
                         if (_cts.IsCancellationRequested) return;
                         WriteToFile(msg);
                     }
-
-                    Thread.Sleep(10);
                 }
             });
+            _writeThread.IsBackground = true;
             _writeThread.Start();
 
             WriteLine("Logging started");
@@ -265,47 +284,50 @@ namespace LiveSplit.SourceSplit.Utilities
 
         private static void WriteToFile(Message msg)
         {
-            Debug.WriteLine
-            (
-                $"SourceSplit " +
-                $"{SourceSplitUtils.ActiveTime.Elapsed} | " +
-                $"{UpdateCount} | " +
-                $"{TickCount} : " +
-                $"{msg.Content}"
-            );
+            Debug.WriteLine($"SourceSplit @ {SourceSplitUtils.ActiveTime.Elapsed}, {UpdateCount}, {TickCount} : {msg.Content}");
 
-            if (!_enabled) return;
+            if (!_enabled)
+            {
+                return;
+            }
 
-            var str =
-                $"[ " +
-                $"{msg.TimeOfCreation:yyyy/MM/dd @ HH:mm:ss.ffffff} | " +
-                $"{msg.ActiveTime} | " +
-                $"{UpdateCount} | " +
-                $"{TickCount} " +
-                $"] " +
-                $"{msg.Content}";
+            var line = new List<string>()
+            {
+                msg.TimeOfCreation.ToString(@"yyyy/MM/dd"),
+                msg.TimeOfCreation.ToString(@"HH:mm:ss.ffffff"),
+                msg.ActiveTime.ToString(),
+                UpdateCount.ToString(),
+                TickCount.ToString(),
+                msg.Content
+            };
+            string written = string.Join(",", line.Select(x => "\"" + x.Replace("\"", "\"\"") + "\""));
 
             List<Exception> errors = new List<Exception>();
             for (int tries = 10; tries > 0; tries--)
             {
                 try
                 {
-                    File.AppendAllText("sourcesplit_log.txt", str + Environment.NewLine);
+                    var saveFolder = Path.GetDirectoryName(LogFilePath);
+                    if (!Directory.Exists(saveFolder)) Directory.CreateDirectory(saveFolder);
+                    File.AppendAllText(LogFilePath, written + Environment.NewLine);
                     return;
                 }
                 catch (Exception e)
                 {
                     Debug.WriteLine($"SourceSplit Logging: Fatal exception while trying to log: {e.Message} ({tries} tries left)");
-
                     errors.Add(e);
-                    if (!(e is IOException)) break;
-                    continue;
+                    if (e is IOException)
+                    {
+                        Thread.Sleep(500);
+                        continue;
+                    }
+                    break;
                 }
             }
 
             new ErrorDialog
             (
-                "Encountered one or more problems while writing to log file. Logging will be disabled for this session of SourceSplit!",
+                "Encountered one or more problems while writing to log file. Logging will be disabled for this session of SourceSplit.",
                 false,
                 errors.GroupBy(x => x.Message).Select(x => x.First()).ToArray()
             );
@@ -315,12 +337,12 @@ namespace LiveSplit.SourceSplit.Utilities
         {
             _messages.Enqueue(new Message(msg));
         }
-        public static void WriteLine(object obj = null) => WriteLine(obj?.ToString() ?? "");
+        public static void WriteLine(object obj = null) => WriteLine(obj?.ToString() ?? "<null>");
 
         public static void WriteLineIf(bool cond, string msg)
         {
             if (cond) WriteLine(msg);
         }
-        public static void WriteLineIf(bool cond, object obj) => WriteLineIf(cond, obj?.ToString() ?? "");
+        public static void WriteLineIf(bool cond, object obj) => WriteLineIf(cond, obj?.ToString() ?? "<null>");
     }
 }

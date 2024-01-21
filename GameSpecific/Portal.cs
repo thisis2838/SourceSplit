@@ -407,17 +407,17 @@ For example:
                         actions.Start(-57045);
                     }
                 }
-                if (isInside && state.PlayerViewEntityIndex.ChangedTo(1))
+                if (state.PlayerViewEntityIndex.ChangedTo(1))
                 {
                     OnceFlag = true;
-                    Logging.WriteLine("portal bed start");
+                    Logging.WriteLine($"portal bed start (player @ {state.PlayerPosition.Current}, {isInside})");
                     actions.Start(); 
                     return;
                 }
             }
             else if (IsLastMap)
             {
-                _splitTime.Current = state.GameEngine.GetOutputFireTime("cable_detach_04");
+                _splitTime.Current = state.GameEngine.GetOutputFireTime("cable_detach_04", int.MaxValue);
                 if (_splitTime.ChangedFrom(0))
                 {
                     Logging.WriteLine("portal delayed end");

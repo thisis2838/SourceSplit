@@ -335,11 +335,11 @@ namespace LiveSplit.SourceSplit.GameHandling
             {
                 Logging.WriteLine($"Considering process: {p.ProcessName}");
 
-                if (p == null || p.HasExited)
+                if (p == null || p.HasExited || p.MainModule == null)
                     return false;
 
                 if (SourceSplitUtils.IsVACProtectedProcess(p))
-                    return error($"VAC protected process!");
+                    return error($"VAC protected process");
 
                 ProcessModuleWow64Safe engine = p.ModulesWow64SafeNoCache().FirstOrDefault(x => x.ModuleName.ToLower() == "engine.dll");
                 if (engine == null) return error("Engine hasn't loaded");

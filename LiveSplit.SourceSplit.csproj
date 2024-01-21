@@ -73,32 +73,32 @@
     <Compile Include="ComponentHandling\SessionsForm.Designer.cs">
       <DependentUpon>SessionsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ComponentHandling\SourceSplitComponent__GameMemoryResponses.cs" />
-    <Compile Include="ComponentHandling\SourceSplitComponent__Graphics.cs" />
-    <Compile Include="ComponentHandling\SourceSplitComponent__SplitOperations.cs" />
-    <Compile Include="ComponentHandling\SourceSplitComponent__TimerResponses.cs" />
+    <Compile Include="ComponentHandling\SourceSplitComponent.GameMemoryResponses.cs" />
+    <Compile Include="ComponentHandling\SourceSplitComponent.Graphics.cs" />
+    <Compile Include="ComponentHandling\SourceSplitComponent.SplitOperations.cs" />
+    <Compile Include="ComponentHandling\SourceSplitComponent.TimerResponses.cs" />
     <Compile Include="ComponentHandling\SourceSplitSettingsHelp.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="ComponentHandling\SourceSplitSettingsHelp.Designer.cs">
       <DependentUpon>SourceSplitSettingsHelp.cs</DependentUpon>
     </Compile>
-    <Compile Include="ComponentHandling\SourceSplitSettings__SettingsDescs.cs">
+    <Compile Include="ComponentHandling\SourceSplitSettings.SettingsDescs.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ComponentHandling\SourceSplitSettings__Settings.cs">
+    <Compile Include="ComponentHandling\SourceSplitSettings.Settings.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="DemoHandling\DemoFile.cs" />
     <Compile Include="DemoHandling\DemoMonitor.cs" />
     <Compile Include="GameHandling\GameEngine.cs" />
-    <Compile Include="GameHandling\GameEngine__Interactions.cs" />
-    <Compile Include="GameHandling\GameEngine__Signatures.cs" />
-    <Compile Include="GameHandling\GameMemory__UIEvents.cs" />
-    <Compile Include="GameHandling\GameMemory__Update.cs" />
-    <Compile Include="GameHandling\GameSupport__AutoStartStopTemplates.cs" />
-    <Compile Include="GameHandling\GameSupport__Functions.cs" />
-    <Compile Include="GameHandling\GameSupport__Cases.cs" />
+    <Compile Include="GameHandling\GameEngine.Interactions.cs" />
+    <Compile Include="GameHandling\GameEngine.Signatures.cs" />
+    <Compile Include="GameHandling\GameMemory.UIEvents.cs" />
+    <Compile Include="GameHandling\GameMemory.Update.cs" />
+    <Compile Include="GameHandling\GameSupport.AutoStartStopTemplates.cs" />
+    <Compile Include="GameHandling\GameSupport.Functions.cs" />
+    <Compile Include="GameHandling\GameSupport.Cases.cs" />
     <Compile Include="ComponentHandling\Session.cs" />
     <Compile Include="GameSpecific\HL2Mods\ThundersLeaves.cs" />
     <Compile Include="GameSpecific\HL2Mods\HumanError.cs" />
@@ -165,8 +165,8 @@
     <Compile Include="GameSpecific\HL2Mods\EntropyZero2.cs" />
     <Compile Include="GameSpecific\HL2Mods\Localmotive.cs" />
     <Compile Include="GameSpecific\PortalMods\CrumbsOfTruth.cs" />
-    <Compile Include="GameSpecific\TheBeginnersGuide__SplitPoints.cs" />
-    <Compile Include="GameSpecific\TheBeginnersGuide__Models.cs" />
+    <Compile Include="GameSpecific\TheBeginnersGuide.SplitPoints.cs" />
+    <Compile Include="GameSpecific\TheBeginnersGuide.Models.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
