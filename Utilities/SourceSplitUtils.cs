@@ -92,8 +92,8 @@ namespace LiveSplit.SourceSplit.Utilities
             { 218, false },
             { 219, false },
             { 220, false },
-			{ 240, false }, // hls is exempt
-			{ 280, false },
+            { 240, false }, // hls is exempt
+            { 280, false },
             { 340, false },
             { 380, false },
             { 400, false },
@@ -151,13 +151,13 @@ namespace LiveSplit.SourceSplit.Utilities
                 () =>
                 {
                     var appIdFile = Path.Combine(path, "steam_appid.txt").Trim(' ', '\t', '\r', '\n');
-					// we're most likely running some old distribution of a source game, not running on steam,
-					// or not a source game at all, both do not fall within vac purview 
-					if (!File.Exists(appIdFile))
+                    // we're most likely running some old distribution of a source game, not running on steam,
+                    // or not a source game at all, both do not fall within vac purview 
+                    if (!File.Exists(appIdFile))
                         return;
 
-					// find if game has an appid associated with it
-					int id = int.Parse(File.ReadAllText(appIdFile));
+                    // find if game has an appid associated with it
+                    int id = int.Parse(File.ReadAllText(appIdFile));
                     // check if we have this already
                     if (_appIDVACStatuses.TryGetValue(id, out var cached))
                     {
@@ -200,6 +200,8 @@ namespace LiveSplit.SourceSplit.Utilities
 
     public static class Logging
     {
+        public static string LogFilePath => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SourceSplit", "logs", _logFileName);
+
         private struct Message
         {
             public string Content;
@@ -282,28 +284,28 @@ namespace LiveSplit.SourceSplit.Utilities
 
             if (!_enabled)
             {
-				return;
-			}
+                return;
+            }
 
             var line = new List<string>()
             {
                 msg.TimeOfCreation.ToString(@"yyyy/MM/dd"),
                 msg.TimeOfCreation.ToString(@"HH:mm:ss.ffffff"),
-				msg.ActiveTime.ToString(),
+                msg.ActiveTime.ToString(),
                 UpdateCount.ToString(),
                 TickCount.ToString(),
                 msg.Content
-			};
+            };
             string written = string.Join(",", line.Select(x => "\"" + x.Replace("\"", "\"\"") + "\""));
 
-			List<Exception> errors = new List<Exception>();
+            List<Exception> errors = new List<Exception>();
             for (int tries = 10; tries > 0; tries--)
             {
                 try
                 {
-                    var saveFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SourceSplit", "logs");
+                    var saveFolder = Path.GetDirectoryName(LogFilePath);
                     if (!Directory.Exists(saveFolder)) Directory.CreateDirectory(saveFolder);
-                    File.AppendAllText(Path.Combine(saveFolder, _logFileName), written + Environment.NewLine);
+                    File.AppendAllText(LogFilePath, written + Environment.NewLine);
                     return;
                 }
                 catch (Exception e)
@@ -312,9 +314,9 @@ namespace LiveSplit.SourceSplit.Utilities
                     errors.Add(e);
                     if (e is IOException)
                     {
-						Thread.Sleep(500);
-						continue;
-					}
+                        Thread.Sleep(500);
+                        continue;
+                    }
                     break;
                 }
             }

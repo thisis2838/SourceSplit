@@ -319,12 +319,11 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
         public void butOpenDebug_Click(object sender, EventArgs e)
         {
-            if (File.Exists("sourcesplit_log.txt"))
+            if (File.Exists(Logging.LogFilePath))
             {
                 try
                 {
-                    var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sourcesplit_log.txt");
-                    Process.Start("explorer.exe", $"/select, \"{path}\"");
+                    Process.Start("explorer.exe", $"/select, \"{Logging.LogFilePath}\"");
                 }
                 catch (Exception ex)
                 {
