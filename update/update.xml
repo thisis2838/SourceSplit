@@ -301,4 +301,12 @@
             <change>Changed logging to output to a separate folder in CSV format and segment by days.</change>
         </changelog>
     </update>
+    <update version="3.3.4.5">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Enforced 0th tick for Half-Life 2 to comply with rule change.</change>
+        </changelog>
+    </update>
 </updates>
