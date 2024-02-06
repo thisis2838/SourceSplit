@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using LiveSplit.ComponentUtil;
+using LiveSplit.SourceSplit.ComponentHandling;
 using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
 
@@ -25,6 +26,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 new HL2Mods.ExperimentalFuel(),
                 new HL2Mods.NightmareHouse()
             };
+            SourceSplitComponent.Settings.SLPenalty.Lock(1);
         }
 
         protected override void OnSessionStartInternal(GameState state, TimerActions actions)
