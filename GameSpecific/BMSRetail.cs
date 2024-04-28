@@ -3,6 +3,8 @@ using System;
 using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
 using LiveSplit.SourceSplit.ComponentHandling;
+using System.Collections.Generic;
+using System.IO;
 
 namespace LiveSplit.SourceSplit.GameSpecific
 {
@@ -51,6 +53,12 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private int _xenCamIndex;
         private IntPtr _getGlobalNameFuncPtr = IntPtr.Zero;
         private const float _xenStartMS = 38953.125f; // 38.953125s
+
+        private List<string> _startSaves =
+        [
+            "6c536d2af38c38eadd9649bc451807ab", // MOD
+            "72ae5d4cb2fc818b329774c16d4158be" // 0.9
+        ];
 
         private MemoryWatcher<int> _susNextThink = null;
 
@@ -190,6 +198,21 @@ namespace LiveSplit.SourceSplit.GameSpecific
             }
 
             return;
+        }
+
+        protected override void OnSaveLoadedInternal(GameState state, TimerActions actions, string saveName)
+        {
+            string path = Path.Combine(state.AbsoluteGameDir, "save", saveName + ".sav");
+            string md5 = FileUtils.GetMD5(path);
+
+            if (_startSaves.Contains(md5))
+            {
+                // add 1 tick to timer to account for the skipped 1st tick saveload
+                actions.Start(-(state.IntervalPerTick * 1000));
+                OnceFlag = true;
+                Logging.WriteLine($"black mesa premade save start");
+                return;
+            }
         }
     }
 }
