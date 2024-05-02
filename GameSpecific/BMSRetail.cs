@@ -57,7 +57,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private List<string> _startSaves =
         [
             "6c536d2af38c38eadd9649bc451807ab", // MOD
-            "72ae5d4cb2fc818b329774c16d4158be" // 0.9
+            "72ae5d4cb2fc818b329774c16d4158be", // 0.9
+            "3266bd4697b848d7b27633348492bf47" // DE 2021
         ];
 
         private MemoryWatcher<int> _susNextThink = null;
