@@ -24,6 +24,9 @@ namespace LiveSplit.SourceSplit.GameSpecific
                 new HL2Mods.TheLostCity(),
                 new HL2Mods.Tinje(),
                 new HL2Mods.ExperimentalFuel(),
+                new HL2Mods.SimpleEtape(),
+                new HL2Mods.LeonHL2(),
+                new HL2Mods.Antracide(),
                 new HL2Mods.NightmareHouse()
             };
             SourceSplitComponent.Settings.SLPenalty.Lock(1);

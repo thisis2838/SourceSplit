@@ -36,6 +36,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 case "portal_rtx":
                 case "portalelevators":
                 case "cssmovement":
+                case "pdhl1":
                     return new Portal();
                 case "portal_tfv":
                     return new TheFlashVersion();
@@ -257,6 +258,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new HumanError();
                 case "thundersleaves":
                     return new ThundersLeaves();
+                case "twhltower":
+                    return new TWHLTS();
             }
 
             var rtsl = IsRTSLMapPack(state);
