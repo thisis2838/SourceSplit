@@ -215,7 +215,11 @@ namespace LiveSplit.SourceSplit.GameHandling
                     state.MainSupport?.OnSessionStart(state, TimerActions);
                 }
 
-                if (state.TickCount.Current > 0 || Settings.ServerInitialTicks.Value)
+                if (state.TickCount.Current > 0 
+                    // the game can be paused the moment the server's loaded
+                    // todo: if we're ignoring current == 0 in general, does that mean this has to be deferred?
+                    || (state.TickCount.Current == 0 && state.ServerState.Current == ServerState.Paused)
+                    || Settings.ServerInitialTicks.Value)
                     sendTime();
 
                 if (state.ServerState.ChangedTo(ServerState.Paused)) this.SendMiscTimeEvent(0, MiscTimeType.StartPause);
