@@ -1,10 +1,11 @@
-﻿using LiveSplit.SourceSplit.Utilities;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using LiveSplit.SourceSplit.Utilities;
 using LiveSplit.SourceSplit.GameSpecific;
 using LiveSplit.SourceSplit.GameSpecific.HL2Mods;
 using LiveSplit.SourceSplit.GameSpecific.PortalMods;
-using System.IO;
+using LiveSplit.SourceSplit.GameSpecific.BMSMods;
 
 namespace LiveSplit.SourceSplit.GameHandling
 {
@@ -44,6 +45,8 @@ namespace LiveSplit.SourceSplit.GameHandling
                     return new TheFlashVersion();
                 case "bms":
                     return new BMSRetail();
+                case "bshift":
+                    return new BlackMesaBlueShift();
                 case "lostcoast":
                     return new LostCoast();
                 case "estrangedact1":
