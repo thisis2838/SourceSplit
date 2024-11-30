@@ -18,6 +18,8 @@ namespace LiveSplit.SourceSplit.GameHandling
         {
             switch (state.GameDir.ToLower().Trim())
             {
+                case "hl2_complete":
+                    return new HL2Anniversary();
                 case "hl2oe":
                 case "hl2":
                 case "hl2_mirrored":
