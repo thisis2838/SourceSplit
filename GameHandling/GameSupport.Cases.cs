@@ -30,6 +30,7 @@ namespace LiveSplit.SourceSplit.GameHandling
                 case "ghostingmod3":
                 case "ghostingmod4":
                 case "cutsceneless":
+                case "hl2dp":
                     return new HL2();
                 case "episodic":
                     return new HL2Ep1();
