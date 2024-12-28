@@ -324,8 +324,9 @@ copy "$(TargetPath)" "$(ProjectDir)update\Components\$(TargetFileName)"</PostBui
   <PropertyGroup>
     <PreBuildEvent>@echo off
 if not exist "$(ProjectDir)\Resources" md "$(ProjectDir)\Resources"
-@for /f "skip=1" %25%25x in ('wmic os get localdatetime') do if not defined t set t=%25%25x
-echo %25t:~0,4%25-%25t:~4,2%25-%25t:~6,2%25 %25t:~8,2%25:%25t:~10,2%25:%25t:~12,2%25 &gt; "$(ProjectDir)\Resources\date_time.txt"
+for /f "delims=" %25%25# in ('powershell get-date -format "{yyyy-MM-dd HH:mm:ss}"') do @set date=%25%25#
+echo Build time is %25date%25
+echo %25date%25 &gt; "$(ProjectDir)\Resources\date_time.txt"
 </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
