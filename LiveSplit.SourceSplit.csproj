@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LiveSplit.SourceSplit</RootNamespace>
     <AssemblyName>LiveSplit.SourceSplit</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -40,12 +40,10 @@
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LiveSplit.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="LiveSplit.Core">
       <HintPath>..\..\..\..\Speedrunning\Tools\LiveSplit\LiveSplit.Core.dll</HintPath>
     </Reference>
-    <Reference Include="LiveSplit.View, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="LiveSplit.View">
       <HintPath>..\..\..\..\Speedrunning\Tools\LiveSplit\LiveSplit.View.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -170,6 +168,7 @@
     <Compile Include="GameSpecific\HL2Mods\DarkEvening.cs" />
     <Compile Include="GameSpecific\HL2Mods\EntropyZero2.cs" />
     <Compile Include="GameSpecific\HL2Mods\Localmotive.cs" />
+    <Compile Include="GameSpecific\PortalMods\AperatureNarbacular.cs" />
     <Compile Include="GameSpecific\PortalMods\CrumbsOfTruth.cs" />
     <Compile Include="GameSpecific\TheBeginnersGuide.SplitPoints.cs" />
     <Compile Include="GameSpecific\TheBeginnersGuide.Models.cs" />

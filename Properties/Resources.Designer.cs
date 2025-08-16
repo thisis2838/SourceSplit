@@ -61,7 +61,7 @@ namespace LiveSplit.SourceSplit.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 2022-08-22 17:20:26 
+        ///   Looks up a localized string similar to 2025-07-29 00:21:30 
         ///.
         /// </summary>
         internal static string BuildDate {
