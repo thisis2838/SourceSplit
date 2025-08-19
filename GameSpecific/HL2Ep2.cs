@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using LiveSplit.ComponentUtil;
+using LiveSplit.SourceSplit.ComponentHandling;
 using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
 
@@ -17,6 +18,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
 
         public HL2Ep2()
         {
+            SourceSplitComponent.Settings.SLPenalty.Lock(1);
+
             this.AddFirstMap("ep2_outland_01");
             this.AddLastMap("ep2_outland_12a");
             AdditionalGameSupport = new List<GameSupport>()
