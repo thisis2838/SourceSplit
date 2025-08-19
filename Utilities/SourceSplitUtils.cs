@@ -69,7 +69,8 @@ namespace LiveSplit.SourceSplit.Utilities
 
         public static bool IsVACProtectedGameDir(string path)
         {
-            string[] badMods = { "cstrike", "dods", "hl2mp", "insurgency", "tf", "zps" };
+            // since anniversary update hl2mp has been bundled in next to hl2 and the episodes...
+            string[] badMods = { "cstrike", "dods", /*"hl2mp",*/ "insurgency", "tf", "zps" };
             string[] badRootDirs = { "Dark Messiah of Might and Magic Multi-Player" };
             // hl2 survivor has a game folder of "hl2mp", but isn't covered by vac.
             string[] hl2SurvivorDirs = { "hl2mp_japanese", "hl2_japanese" };

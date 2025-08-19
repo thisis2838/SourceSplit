@@ -1,5 +1,6 @@
 ﻿using System;
 using LiveSplit.ComponentUtil;
+using LiveSplit.SourceSplit.ComponentHandling;
 using LiveSplit.SourceSplit.GameHandling;
 using LiveSplit.SourceSplit.Utilities;
 
@@ -16,7 +17,8 @@ namespace LiveSplit.SourceSplit.GameSpecific
         private Vector3f _trainStartPos = new Vector3f(11957.6f, 8368.25f, -731.75f);
 
         public HL2Ep1()
-        {   
+        {
+            SourceSplitComponent.Settings.SLPenalty.Lock(1);
             this.AddFirstMap("ep1_citadel_00");
             this.AddLastMap("ep1_c17_06");
         }

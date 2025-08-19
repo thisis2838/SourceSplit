@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LiveSplit.SourceSplit</RootNamespace>
     <AssemblyName>LiveSplit.SourceSplit</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -40,12 +40,10 @@
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="LiveSplit.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="LiveSplit.Core">
       <HintPath>..\..\..\..\Speedrunning\Tools\LiveSplit\LiveSplit.Core.dll</HintPath>
     </Reference>
-    <Reference Include="LiveSplit.View, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="LiveSplit.View">
       <HintPath>..\..\..\..\Speedrunning\Tools\LiveSplit\LiveSplit.View.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -100,12 +98,18 @@
     <Compile Include="GameHandling\GameSupport.Functions.cs" />
     <Compile Include="GameHandling\GameSupport.Cases.cs" />
     <Compile Include="ComponentHandling\Session.cs" />
+    <Compile Include="GameSpecific\BMSMods\BlackMesaBlueShift.cs" />
+    <Compile Include="GameSpecific\HL2Anniversary.cs" />
+    <Compile Include="GameSpecific\HL2Mods\Antracide.cs" />
+    <Compile Include="GameSpecific\HL2Mods\LeonHL2.cs" />
+    <Compile Include="GameSpecific\HL2Mods\SimpleEtape.cs" />
     <Compile Include="GameSpecific\HL2Mods\ThundersLeaves.cs" />
     <Compile Include="GameSpecific\HL2Mods\HumanError.cs" />
     <Compile Include="GameSpecific\HL2Mods\SnowdropEscape.cs" />
     <Compile Include="GameSpecific\HL2Mods\LastZombie.cs" />
     <Compile Include="GameSpecific\HL2Mods\CausalityEffect.cs" />
     <Compile Include="GameSpecific\HL2Mods\BearPartyAdventure.cs" />
+    <Compile Include="GameSpecific\HL2Mods\TWHLTowerSource.cs" />
     <Compile Include="GameSpecific\HL2Mods\Whoopservatory.cs" />
     <Compile Include="GameSpecific\HL2Mods\Tr1p.cs" />
     <Compile Include="GameSpecific\HL2Mods\TheLighthouse.cs" />
@@ -164,6 +168,7 @@
     <Compile Include="GameSpecific\HL2Mods\DarkEvening.cs" />
     <Compile Include="GameSpecific\HL2Mods\EntropyZero2.cs" />
     <Compile Include="GameSpecific\HL2Mods\Localmotive.cs" />
+    <Compile Include="GameSpecific\PortalMods\AperatureNarbacular.cs" />
     <Compile Include="GameSpecific\PortalMods\CrumbsOfTruth.cs" />
     <Compile Include="GameSpecific\TheBeginnersGuide.SplitPoints.cs" />
     <Compile Include="GameSpecific\TheBeginnersGuide.Models.cs" />
@@ -318,8 +323,9 @@ copy "$(TargetPath)" "$(ProjectDir)update\Components\$(TargetFileName)"</PostBui
   <PropertyGroup>
     <PreBuildEvent>@echo off
 if not exist "$(ProjectDir)\Resources" md "$(ProjectDir)\Resources"
-@for /f "skip=1" %25%25x in ('wmic os get localdatetime') do if not defined t set t=%25%25x
-echo %25t:~0,4%25-%25t:~4,2%25-%25t:~6,2%25 %25t:~8,2%25:%25t:~10,2%25:%25t:~12,2%25 &gt; "$(ProjectDir)\Resources\date_time.txt"
+for /f "delims=" %25%25# in ('powershell get-date -format "{yyyy-MM-dd HH:mm:ss}"') do @set date=%25%25#
+echo Build time is %25date%25
+echo %25date%25 &gt; "$(ProjectDir)\Resources\date_time.txt"
 </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

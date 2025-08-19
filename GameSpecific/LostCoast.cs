@@ -38,7 +38,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
         public LostCoast()
         {
             this.AddFirstMap("hdrtest"); //beta%
-            this.AddLastMap("d2_lostcoast");
+            this.AddFirstMap("d2_lostcoast");
 
             CommandHandler.Commands.Add(_extraSplits);
         }
@@ -58,7 +58,7 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _rpgPtr = IntPtr.Zero;
             _rpgFireCount.Current = 0;
 
-            if (state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
+            if (IsFirstMap && state.PlayerEntInfo.EntityPtr != IntPtr.Zero)
             {
                 _splitTime.Current = state.GameEngine.GetOutputFireTime("blackout", "Kill", "");
                 _splitTime2.Current = state.GameEngine.GetOutputFireTime("csystem_sound_start", "PlaySound", "");
@@ -93,9 +93,11 @@ namespace LiveSplit.SourceSplit.GameSpecific
             _onceVelocity = _onceRpgFire = false;
         }
 
-
         protected override void OnUpdateInternal(GameState state, TimerActions actions)
         {
+            if (!IsFirstMap)
+                return;
+
             if (_activeWeaponOffset != -1 && _weaponAmmoTypeOffset != -1)
             {
                 _activeWeaponIndex?.Update(state.GameProcess);

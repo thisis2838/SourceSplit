@@ -309,4 +309,19 @@
             <change>Enforced 0th tick for Half-Life 2 to comply with rule change.</change>
         </changelog>
     </update>
+    <update version="3.3.4.6">
+        <files>
+            <file path="Components/LiveSplit.SourceSplit.dll" status="changed" />
+        </files>
+        <changelog>
+            <change>Added support for PDHLS, TWHL Tower, Antracide, LeonHL2, and SimpleEtape (thanks @penperson)</change>
+            <change>Added support for Aperture Narbacular</change>
+            <change>Added auto-start support for Black Mesa start saves (thanks @thekovic)</change>
+            <change>Added preliminary suport for Black Mesa: Blue Shift (thanks @thekovic)</change>
+            <change>Made Half-Life 2 Episodes use 0th tick timing</change>
+            <change>Fixed support for Half-Life 2 games post Anniversary Update</change>
+            <change>Fixed timer not counting up when server tick count is 0</change>
+            <change>Fixed exception when undoing a split before any splits are made</change>
+        </changelog>
+    </update>
 </updates>

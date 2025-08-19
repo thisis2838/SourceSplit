@@ -57,7 +57,8 @@ namespace LiveSplit.SourceSplit.ComponentHandling
 
             public void UndoLast()
             {
-                SplitEvents.RemoveAt(SplitEvents.Count() - 1);
+                if (SplitEvents.Any()) 
+                    SplitEvents.RemoveAt(SplitEvents.Count() - 1);
             }
 
             public void Clear()

@@ -103,6 +103,7 @@ For example:
             this.AddLastMap("escape_02");        
              
             this.AdditionalGameSupport.Add(new PortalMods.TheFlashVersion());
+            this.AdditionalGameSupport.Add(new PortalMods.ApertureNarbacular());
             CommandHandler.Commands.AddRange
             (
                 _newStart, 
